@@ -1,0 +1,15 @@
+{
+    "cSpell.language": "en-GB",
+    "cSpell.words": [
+        "ESNEXT",
+        "downlevel",
+        "linebreak",
+        "sourcemap",
+        "tslib",
+        "typechecking",
+        "vars"
+    ],
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    }
+}
