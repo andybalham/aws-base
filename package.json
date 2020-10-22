@@ -10,6 +10,7 @@
     "@types/node": "^14.0.22",
     "@typescript-eslint/eslint-plugin": "^2.27.0",
     "@typescript-eslint/parser": "^2.27.0",
+    "aws-sdk": "^2.777.0",
     "chai": "^4.2.0",
     "eslint": "^6.8.0",
     "eslint-config-standard": "^14.1.1",
@@ -27,12 +28,18 @@
     "build": "npm run lint-and-fix && tsc",
     "test": "mocha --require ts-node/register test/**/*.ts",
     "package": "npm run build && copy .\\package.json .\\dist",
-    "sam-build": "npm run package && sam build",
-    "delete-stack": "aws cloudformation delete-stack --stack-name lambda-base --region eu-west-2"
+    "local-build": "npm run package && cd dist && npm i --only=prod",
+    "deploy-lambda": "npm run local-build && @powershell -NoProfile -ExecutionPolicy Unrestricted -Command ./deploy-lambda.ps1 -StackName aws-base -AppPrefix awsbase",
+    "upload-appsync": "@powershell -NoProfile -ExecutionPolicy Unrestricted -Command ./upload-appsync.ps1 -StackName aws-base -ApiVersion 200929-1930",
+    "deploy-stack": "aws cloudformation deploy --template-file template.yaml --stack-name aws-base --capabilities CAPABILITY_IAM --region eu-west-2 --parameter-overrides StackName=aws-base AppPrefix=awsbase EnableSQS=true ApiVersion=200929-1930",
+    "disable-stack": "aws cloudformation deploy --template-file template.yaml --stack-name aws-base --capabilities CAPABILITY_IAM --region eu-west-2 --parameter-overrides StackName=aws-base AppPrefix=awsbase EnableSQS=false ApiVersion=200929-1930",
+    "deploy-appsync": "npm run upload-appsync && npm run deploy-stack",
+    "deploy-all": "npm run deploy-lambda && npm run deploy-appsync",
+    "delete-stack": "aws cloudformation delete-stack --stack-name aws-base --region eu-west-2"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/andybalham/LambdaBase.git"
+    "url": "git+https://github.com/andybalham/AwsBase.git"
   },
   "keywords": [
     "Lambda"
