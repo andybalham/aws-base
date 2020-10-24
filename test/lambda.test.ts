@@ -1,14 +1,14 @@
-import { handle } from '../src/lambda';
+import * as BasicFunction from '../src/functions/basicFunction';
 import { expect } from 'chai';
 
 describe('Test lambda', () => {
 
     it('handles something', async () => {
 
-        const event = 'Hello Lambda!';
+        const event = { input: 'Hello' };
 
-        const result = await handle(event);
+        const result = await BasicFunction.handle(event);
 
-        expect(result).to.equal(event);
+        expect(result).to.deep.equal({ output: 'Hello' });
     });
 });

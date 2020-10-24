@@ -30,17 +30,17 @@ Globals:
       Key: !Sub ${StackName}/lambda.zip
   
 Resources:
-  HelloWorldFunction:
+  BasicFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub ${AppPrefix}-HelloWorldFunction
-      Handler: lambda.handle
+      FunctionName: !Sub ${AppPrefix}-BasicFunction
+      Handler: index.handleBasicFunction
       # Environment:
       #   Variables:
       # Policies:
       # Events:
 
 Outputs:
-  HelloWorldFunctionARN:
-    Description: "Hello World Lambda Function ARN"
-    Value: !GetAtt HelloWorldFunction.Arn
+  BasicFunctionARN:
+    Description: "Basic Lambda Function ARN"
+    Value: !GetAtt BasicFunction.Arn
