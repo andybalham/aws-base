@@ -1,17 +1,16 @@
 import middy from '@middy/core';
-import * as BasicFunction from './functions/basicFunction';
+import httpErrorHandler from '@middy/http-error-handler';
+import jsonBodyParser from '@middy/http-json-body-parser';
+import validator from '@middy/validator';
 
-export const handleBasicFunction = middy(async (event: any): Promise<any> => {
-    return BasicFunction.handle(event);
-});
+import HttpValidatorOptions from './common/HttpValidatorOptions';
 
-// export const handleBasicFunction = middy((event: any): any => {
-//     return uuidv4();
-//     // return BasicFunction.handle(event);
-// });
+import * as affordabilityApi from './functions/affordabilityApi';
 
-/*
-  .use(jsonBodyParser()) // parses the request body when it's a JSON and converts it to an object
-  .use(validator({inputSchema})) // validates the input
-  .use(httpErrorHandler()) // handles common http errors and returns proper responses
-*/
+export const handleAffordabilityApiFunction = 
+  middy(async (event: any): Promise<any> => {
+      return affordabilityApi.handle(event);
+  })
+      .use(jsonBodyParser()) // parses the request body when it's a JSON and converts it to an object
+      .use(validator(new HttpValidatorOptions(affordabilityApi.requestSchema))) // validates the input
+      .use(httpErrorHandler()); // handles common http errors and returns proper responses

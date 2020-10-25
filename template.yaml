@@ -30,17 +30,17 @@ Globals:
       Key: !Sub ${StackName}/lambda.zip
   
 Resources:
-  BasicFunction:
+  AffordabilityApiFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub ${AppPrefix}-BasicFunction
-      Handler: index.handleBasicFunction
+      FunctionName: !Sub ${AppPrefix}-AffordabilityApiFunction
+      Handler: index.handleAffordabilityApiFunction
       # Environment:
       #   Variables:
       # Policies:
       # Events:
 
 Outputs:
-  BasicFunctionARN:
-    Description: "Basic Lambda Function ARN"
-    Value: !GetAtt BasicFunction.Arn
+  AffordabilityApiFunctionARN:
+    Description: "Affordability API Function ARN"
+    Value: !GetAtt AffordabilityApiFunction.Arn
