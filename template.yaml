@@ -73,7 +73,7 @@ Outputs:
 
   AffordabilityApi:
     Description: "Affordability API URL"
-    Value: !Sub "https://${AffordabilityApi}.execute-api.${AWS::Region}.amazonaws.com/${ApiStageName}/"
+    Value: !Sub "https://${AffordabilityApi}.execute-api.${AWS::Region}.amazonaws.com/${ApiStageName}/affordability"
 
   AffordabilityApiFunctionARN:
     Description: "Affordability API Function ARN"
