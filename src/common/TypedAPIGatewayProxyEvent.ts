@@ -1,4 +1,4 @@
-export default class ParsedAPIGatewayProxyEvent<T> {
+export default class TypedAPIGatewayProxyEvent<T> {
 
     constructor(public body: T) {
     }

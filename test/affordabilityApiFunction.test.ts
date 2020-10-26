@@ -1,4 +1,4 @@
-import ParsedAPIGatewayProxyEvent from '../src/common/ParsedAPIGatewayProxyEvent';
+import TypedAPIGatewayProxyEvent from '../src/common/TypedAPIGatewayProxyEvent';
 import * as affordabilityApiFunction from '../src/functions/affordabilityApi/affordabilityApiFunction';
 
 describe('Test lambda', () => {
@@ -14,9 +14,10 @@ describe('Test lambda', () => {
             amount: 616.00
         };
 
-        const response = await affordabilityApiFunction.handle(new ParsedAPIGatewayProxyEvent(request));
+        const response = await affordabilityApiFunction.handle(new TypedAPIGatewayProxyEvent(request));
 
         console.log(`request: ${JSON.stringify(request)}`);
+        console.log(`request stringfied: ${JSON.stringify(JSON.stringify(request))}`);
         
         console.log(`response: ${JSON.stringify(response)}`);
     });

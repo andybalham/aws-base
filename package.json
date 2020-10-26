@@ -44,6 +44,7 @@
     "disable-stack": "aws cloudformation deploy --template-file template.yaml --stack-name aws-base --capabilities CAPABILITY_IAM --region eu-west-2 --parameter-overrides StackName=aws-base AppPrefix=awsbase EnableSQS=false ApiVersion=200929-1930",
     "deploy-appsync": "npm run upload-appsync && npm run deploy-stack",
     "deploy-all": "npm run deploy-lambda && npm run deploy-appsync",
+    "describe-stack": "aws cloudformation describe-stacks --stack-name aws-base --region eu-west-2 --query \"Stacks[0].Outputs\"",
     "delete-stack": "aws cloudformation delete-stack --stack-name aws-base --region eu-west-2"
   },
   "repository": {

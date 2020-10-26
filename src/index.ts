@@ -8,9 +8,9 @@ import HttpValidatorOptions from './common/HttpValidatorOptions';
 import * as affordabilityApi from './functions/affordabilityApi';
 
 export const handleAffordabilityApiFunction = 
-  middy(async (event: any): Promise<any> => {
-      return affordabilityApi.handle(event);
-  })
-      .use(jsonBodyParser()) // parses the request body when it's a JSON and converts it to an object
-      .use(validator(new HttpValidatorOptions(affordabilityApi.requestSchema))) // validates the input
-      .use(httpErrorHandler()); // handles common http errors and returns proper responses
+    middy(async (event: any): Promise<any> => {
+        return affordabilityApi.handle(event);
+    })
+        .use(jsonBodyParser()) // parses the request body when it's a JSON and converts it to an object
+        .use(validator(new HttpValidatorOptions(affordabilityApi.requestSchema))) // validates the input
+        .use(httpErrorHandler()); // handles common http errors and returns proper responses

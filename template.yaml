@@ -6,6 +6,7 @@ Description: >
   Example SAM Template for aws-base projects
   
 Parameters:
+
   StackName:
     Type: String
   AppPrefix:
@@ -19,9 +20,13 @@ Parameters:
   SourceBucket:
     Type: String
     Default: agb-app-source
+  ApiStageName:
+    Type: String
+    Default: dev
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
+
   Function:
     Runtime: nodejs12.x
     Timeout: 3
@@ -30,6 +35,24 @@ Globals:
       Key: !Sub ${StackName}/lambda.zip
   
 Resources:
+
+  AffordabilityApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref ApiStageName
+      Name: !Sub ${AppPrefix}-AffordabilityApi
+      EndpointConfiguration: REGIONAL
+      Auth:
+        ApiKeyRequired: true # sets for all methods
+        UsagePlan:
+          CreateUsagePlan: PER_API
+          # Quota:
+          #   Limit: 500
+          #   Period: MONTH
+          # Throttle:
+          #   BurstLimit: 100
+          #   RateLimit: 50
+
   AffordabilityApiFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -38,9 +61,22 @@ Resources:
       # Environment:
       #   Variables:
       # Policies:
-      # Events:
+      Events:
+        AddTwoNumbersByBodyEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref AffordabilityApi
+            Method: POST
+            Path: /affordability
 
 Outputs:
+
+  AffordabilityApi:
+    Description: "Affordability API URL"
+    Value: !Sub "https://${AffordabilityApi}.execute-api.${AWS::Region}.amazonaws.com/${ApiStageName}/"
+
   AffordabilityApiFunctionARN:
     Description: "Affordability API Function ARN"
     Value: !GetAtt AffordabilityApiFunction.Arn
+    
+
