@@ -1,5 +1,5 @@
 {
-    "body": {"creditCardNumber":"012345678912","expiryMonth":12,"expiryYear":2020,"cvc":"123","nameOnCard":"Gordon Meatpie","amount":616},
+    "body": {"input":{"incomes":[{"incomeType":"Primary","annualAmount":616}]}},
     "resource": "/{proxy+}",
     "path": "/path/to/resource",
     "httpMethod": "POST",
