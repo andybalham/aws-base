@@ -1,3 +1,14 @@
+import { Outputs } from '../../domain/output';
+
 export class AffordabilityApiResponse {
-    requestJson: string
+
+    static schema = {
+        type: 'object',
+        properties: {
+            outputs: Outputs.schema
+        },
+        required: ['outputs']
+    };
+
+    outputs: Outputs;
 }

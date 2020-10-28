@@ -1,5 +1,5 @@
 import TypedAPIGatewayProxyEvent from '../src/common/TypedAPIGatewayProxyEvent';
-import { IncomeType } from '../src/domain';
+import { IncomeType } from '../src/domain/input';
 import * as AffordabilityApi from '../src/functions/affordabilityApi/index';
 
 describe('Test lambda', () => {
@@ -9,7 +9,7 @@ describe('Test lambda', () => {
         console.log(`AffordabilityApi.Request.schema: ${JSON.stringify(AffordabilityApi.Request.schema)}`);
 
         const request: AffordabilityApi.Request = {
-            input: {
+            inputs: {
                 incomes: [
                     { incomeType: IncomeType.Primary, annualAmount: 616.00 }
                 ]

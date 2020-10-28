@@ -1,22 +1,37 @@
 export default class HttpValidatorOptions {
 
-    constructor(bodySchema: any) {
-        this.inputSchema = new HttpSchema(bodySchema);
+    constructor(inputSchema?: any, outputSchema?: any) {
+        this.inputSchema = inputSchema ? new HttpRequestSchema(inputSchema) : undefined;
+        this.outputSchema = outputSchema ? new HttpResponseSchema(outputSchema) : undefined;
     }
     
     inputSchema?: any;
+    outputSchema?: any;
 }
 
-class HttpSchema {
+class HttpRequestSchema {
 
     constructor(bodySchema: any) {
         this.properties = { body: bodySchema };
     }
     
-    type = 'object'
-    properties: HttpSchemaProperties
+    type = 'object';
+    properties: any;
+    required: ['body'];
 }
 
-class HttpSchemaProperties {
-    body: any
+class HttpResponseSchema {
+
+    constructor(bodySchema: any) {
+        this.properties = { 
+            body: bodySchema,
+            statusCode: {
+                type: 'number'
+            }
+        };
+    }
+    
+    type = 'object';
+    properties: any;
+    required: ['body', 'statusCode'];
 }

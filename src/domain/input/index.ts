@@ -1,9 +1,9 @@
-import { AffordabilityInput } from './AffordabilityInput';
+import { Inputs } from './Inputs';
 import { Income } from './Income';
 import { IncomeType } from './IncomeType';
 
 export {
-    AffordabilityInput,
+    Inputs,
     Income,
     IncomeType,
 };

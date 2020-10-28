@@ -1,6 +1,6 @@
 import { Income } from './Income';
 
-export class AffordabilityInput {
+export class Inputs {
 
     static schema = {
         type: 'object',

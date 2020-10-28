@@ -1,15 +1,15 @@
-import { AffordabilityInput } from '../../domain';
+import { Inputs } from '../../domain/input';
 
 export class AffordabilityApiRequest {
 
     static schema = {
         type: 'object',
         properties: {
-            input: AffordabilityInput.schema
+            inputs: Inputs.schema
         },
-        required: ['input']
+        required: ['inputs']
     };
 
-    input: AffordabilityInput;
+    inputs: Inputs;
 }
 

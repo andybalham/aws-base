@@ -4,7 +4,7 @@ export default class TypedAPIGatewayProxyResult<T> {
         this.body = JSON.stringify(response);
     }
 
-    body: string;
+    body: any;
 }
 
 export enum HttpStatusCode {
@@ -16,4 +16,5 @@ export enum HttpStatusCode {
     Unauthorised = 401,
     Forbidden = 403,
     NotFound = 404,
+    InternalServerError = 500,
 }
