@@ -4,11 +4,14 @@
   "description": "Base folder structure for Lambda projects",
   "main": "lambda.js",
   "dependencies": {
+    "@dazn/lambda-powertools-logger": "^1.24.1",
+    "@dazn/lambda-powertools-middleware-correlation-ids": "^1.27.0",
     "@middy/core": "^1.4.0",
     "@middy/http-error-handler": "^1.4.0",
     "@middy/http-json-body-parser": "^1.4.0",
     "@middy/http-response-serializer": "^1.4.0",
     "@middy/validator": "^1.4.0",
+    "http-errors": "^1.8.0",
     "uuid": "^8.3.1"
   },
   "devDependencies": {
