@@ -1,5 +1,5 @@
 {
-    "body": {"inputs":{"incomes":[{"incomeType":"Primary","annualAmount":616}]}},
+    "body": "{\"inputs\":{\"stage\":\"PROD\",\"incomes\":[{\"incomeType\":\"Primary\",\"annualAmount\":616}]}}",
     "resource": "/{proxy+}",
     "path": "/path/to/resource",
     "httpMethod": "POST",

@@ -1,20 +1,19 @@
+import { Context } from 'aws-lambda/handler';
+
 import middy from '@middy/core';
 import httpErrorHandler from '@middy/http-error-handler';
-import jsonBodyParser from '@middy/http-json-body-parser';
-import validator from '@middy/validator';
 import correlationIds from '@dazn/lambda-powertools-middleware-correlation-ids';
 
-import HttpValidatorOptions from './common/HttpValidatorOptions';
+import { ConfigurationClient } from './domain/configuration';
+import { AffordabilityApiLambda } from './functions/affordabilityApi/AffordabilityApiLambda';
 
-import * as affordabilityApi from './functions/affordabilityApi';
-import { Context } from 'aws-lambda/handler';
+const configurationClient = new ConfigurationClient();
+const affordabilityApiLambda = new AffordabilityApiLambda(configurationClient);
 
 export const handleAffordabilityApiFunction = 
     middy(async (event: any, context: Context): Promise<any> => {
-        return affordabilityApi.handle(event);
+        return affordabilityApiLambda.handle(event, context);
     })
-        .use(correlationIds({ sampleDebugLogRate: 1 }))
-        .use(jsonBodyParser()) // parses the request body when it's a JSON and converts it to an object
-        .use(validator(new HttpValidatorOptions(affordabilityApi.Request.schema))) // validates the input and output
+        .use(correlationIds({ sampleDebugLogRate: 0.01 }))
         .use(httpErrorHandler()) // handles common http errors and returns proper responses
         ;
