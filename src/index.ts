@@ -7,9 +7,10 @@ import correlationIds from '@dazn/lambda-powertools-middleware-correlation-ids';
 import HttpValidatorOptions from './common/HttpValidatorOptions';
 
 import * as affordabilityApi from './functions/affordabilityApi';
+import { Context } from 'aws-lambda/handler';
 
 export const handleAffordabilityApiFunction = 
-    middy(async (event: any): Promise<any> => {
+    middy(async (event: any, context: Context): Promise<any> => {
         return affordabilityApi.handle(event);
     })
         .use(correlationIds({ sampleDebugLogRate: 1 }))

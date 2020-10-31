@@ -1,8 +1,6 @@
 export default class TypedAPIGatewayProxyEvent<T> {
 
-    constructor(public body: T) {
-    }
-
+    body: T;
     headers: { [name: string]: string };
     multiValueHeaders: { [name: string]: string[] };
     httpMethod: string;

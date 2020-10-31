@@ -5,10 +5,14 @@ export class AffordabilityApiResponse {
     static schema = {
         type: 'object',
         properties: {
+            correlationId: {type: 'string'},
+            requestId: {type: 'string'},
             outputs: Outputs.schema
         },
-        required: ['outputs']
+        required: ['correlationId', 'requestId', 'outputs']
     };
 
+    correlationId: string;
+    requestId: string;
     outputs: Outputs;
 }
