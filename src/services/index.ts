@@ -1,7 +1,9 @@
-import Services from './CalculationEngineClient';
-import ConfigurationClient from './ConfigurationClient';
+import CalculationEngine from './CalculationEngine';
+import ConfigurationRepositoryClient from './ConfigurationRepositoryClient';
+import ProductRepositoryClient from './ProductRepositoryClient';
 
 export {
-    Services as CalculationEngineClient,
-    ConfigurationClient
+    ConfigurationRepositoryClient,
+    CalculationEngine,
+    ProductRepositoryClient
 };

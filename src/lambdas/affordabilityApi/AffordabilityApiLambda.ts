@@ -2,30 +2,31 @@ import { ApiGatewayLambda } from '../../common/ApiGatewayLambda';
 
 import { Request, Response } from '.';
 import { HttpStatusCode } from '../../common/HttpStatusCode';
-import { ConfigurationClient, CalculationEngineClient } from '../../services';
+import { ConfigurationRepositoryClient, CalculationEngine, ProductRepositoryClient } from '../../services';
 
 export class AffordabilityApiLambda extends ApiGatewayLambda<Request, Response> {
 
     constructor(
-        private configurationClient: ConfigurationClient,
-        private calculationEngineClient: CalculationEngineClient
+        private configurationRepository: ConfigurationRepositoryClient,
+        private productRepository: ProductRepositoryClient,
     ) {
         super();
     }
 
     async handleRequest(request: Request): Promise<{statusCode: HttpStatusCode; content: Response}> {
 
-        const affordabilityInputs = request.inputs;
-
-        if (affordabilityInputs.incomes.length === 0) {
-            throw new Error('No incomes supplied!');
-        }
-
         const configuration = 
-            await this.configurationClient.getConfiguration(affordabilityInputs.stage);
+            await this.configurationRepository.getConfiguration(request.stage);
+
+        const calculationEngine = new CalculationEngine();
 
         const calculationResults =
-            this.calculationEngineClient.evaluate(request.inputs, configuration);
+            calculationEngine.evaluate(request.inputs, configuration);
+
+        const product = await this.productRepository.getProduct(`PID-${request.stage}`);
+
+        // TODO 01Nov20: Add product engine
+        const maximumLoanAmount = calculationResults.applicableIncome * product.incomeMultiplier;
 
         const response: Response = {
             correlationId: this.correlationId,
@@ -33,9 +34,9 @@ export class AffordabilityApiLambda extends ApiGatewayLambda<Request, Response> 
             outputs: {
                 productSummaries: [
                     { 
-                        productIdentifier: 'PID',
-                        productDescription: 'My Product',
-                        maximumLoanAmount: calculationResults.maximumLoanAmount
+                        productIdentifier: product.productIdentifier,
+                        productDescription: product.productDescription,
+                        maximumLoanAmount: maximumLoanAmount
                     }
                 ]
             }

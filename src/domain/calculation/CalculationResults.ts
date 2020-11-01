@@ -1,3 +1,5 @@
 export default class CalculationResults {
-    constructor(public maximumLoanAmount: number) {}
+    constructor(
+        public applicableIncome: number
+    ) {}
 }

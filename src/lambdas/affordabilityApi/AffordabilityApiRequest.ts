@@ -5,11 +5,13 @@ export class AffordabilityApiRequest {
     static schema = {
         type: 'object',
         properties: {
+            stage: {type: 'string'},
             inputs: Inputs.schema
         },
-        required: ['inputs']
+        required: ['stage', 'inputs']
     };
 
+    stage: string;
     inputs: Inputs;
 }
 
