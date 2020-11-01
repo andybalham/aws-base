@@ -1,7 +1,7 @@
 import { ApiGatewayLambda } from '../../common/ApiGatewayLambda';
+import { HttpStatusCode } from '../../common/HttpStatusCode';
 
 import { Request, Response } from '.';
-import { HttpStatusCode } from '../../common/HttpStatusCode';
 import { ConfigurationRepositoryClient, CalculationEngine, ProductRepositoryClient } from '../../services';
 
 export class AffordabilityApiLambda extends ApiGatewayLambda<Request, Response> {
@@ -23,22 +23,26 @@ export class AffordabilityApiLambda extends ApiGatewayLambda<Request, Response> 
         const calculationResults =
             calculationEngine.evaluate(request.inputs, configuration);
 
-        const product = await this.productRepository.getProduct(`PID-${request.stage}`);
+        const products = await this.productRepository.getProducts();
 
-        // TODO 01Nov20: Add product engine
-        const maximumLoanAmount = calculationResults.applicableIncome * product.incomeMultiplier;
+        const productSummaries = 
+            products.map(product => {
+                
+                const maximumLoanAmount = 
+                    calculationResults.applicableIncome * product.incomeMultiplier;
+
+                return { 
+                    productIdentifier: product.productIdentifier,
+                    productDescription: product.productDescription,
+                    maximumLoanAmount: maximumLoanAmount
+                };
+            });
 
         const response: Response = {
             correlationId: this.correlationId,
             requestId: this.requestId,
             outputs: {
-                productSummaries: [
-                    { 
-                        productIdentifier: product.productIdentifier,
-                        productDescription: product.productDescription,
-                        maximumLoanAmount: maximumLoanAmount
-                    }
-                ]
+                productSummaries: productSummaries
             }
         };
 

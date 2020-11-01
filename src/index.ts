@@ -16,5 +16,5 @@ export const handleAffordabilityApiFunction =
         return affordabilityApiLambda.handle(event, context);
     })
         .use(correlationIds({ sampleDebugLogRate: 0.01 }))
-        .use(httpErrorHandler()) // handles common http errors and returns proper responses
-        ;
+        .use(httpErrorHandler()); // handles common http errors and returns proper responses
+

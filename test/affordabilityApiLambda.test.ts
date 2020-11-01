@@ -33,7 +33,7 @@ describe('Test lambda', () => {
 
         const testProduct = new Product('TEST', 'Test description', 2);
 
-        productRepositoryMock.mock('getProduct', testProduct);
+        productRepositoryMock.mock('getProducts', [testProduct]);
 
         const sutLambda = 
             new AffordabilityApi.Lambda(
