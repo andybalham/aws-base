@@ -1,3 +1,3 @@
 export default class Configuration {
-    version: string;
+    constructor(public stage: string) {}
 }

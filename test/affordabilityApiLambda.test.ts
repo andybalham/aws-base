@@ -1,21 +1,22 @@
 import { ImportMock, MockManager } from 'ts-mock-imports';
-import * as configurationModule from '../src/domain/configuration';
+import * as Services from '../src/services';
 import { Configuration } from '../src/domain/configuration';
 import { IncomeType } from '../src/domain/input';
-import * as AffordabilityApi from '../src/functions/affordabilityApi/index';
+import * as AffordabilityApi from '../src/lambdas/affordabilityApi/index';
+import { CalculationResults } from '../src/domain/calculation';
 
 describe('Test lambda', () => {
 
-    let configurationClientMock: MockManager<configurationModule.ConfigurationClient>;
-    let configurationClient = new configurationModule.ConfigurationClient();
+    let configurationClientMock: MockManager<Services.ConfigurationClient>;
+    let calculationEngineClientMock: MockManager<Services.CalculationEngineClient>;
 
     beforeEach('mock out dependencies', function () {
-        configurationClientMock = ImportMock.mockClass(configurationModule, 'ConfigurationClient');
-        configurationClient = new configurationModule.ConfigurationClient();
+        configurationClientMock = ImportMock.mockClass<Services.ConfigurationClient>(Services, 'ConfigurationClient');
+        calculationEngineClientMock = ImportMock.mockClass<Services.CalculationEngineClient>(Services, 'CalculationEngineClient');
     });
     
     afterEach('restore dependencies', function () {
-        configurationClientMock.restore();
+        ImportMock.restore();
     });
       
     it('handles something', async () => {
@@ -33,9 +34,12 @@ describe('Test lambda', () => {
 
         console.log(`request: ${JSON.stringify(JSON.stringify(request))}`);
 
-        configurationClientMock.mock('getConfiguration', new Configuration());
+        configurationClientMock.mock('getConfiguration', new Configuration('MOCK'));
+        calculationEngineClientMock.mock('evaluate', new CalculationResults(616));
 
-        const sutLambda = new AffordabilityApi.Lambda(configurationClient);
+        const sutLambda = 
+            new AffordabilityApi.Lambda(
+                new Services.ConfigurationClient(), new Services.CalculationEngineClient());
 
         const response = await sutLambda.handleRequest(request);
 

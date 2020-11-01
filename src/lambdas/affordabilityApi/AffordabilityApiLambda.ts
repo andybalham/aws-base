@@ -2,11 +2,14 @@ import { ApiGatewayLambda } from '../../common/ApiGatewayLambda';
 
 import { Request, Response } from '.';
 import { HttpStatusCode } from '../../common/HttpStatusCode';
-import { ConfigurationClient } from '../../domain/configuration';
+import { ConfigurationClient, CalculationEngineClient } from '../../services';
 
 export class AffordabilityApiLambda extends ApiGatewayLambda<Request, Response> {
 
-    constructor(public configurationClient: ConfigurationClient) {
+    constructor(
+        private configurationClient: ConfigurationClient,
+        private calculationEngineClient: CalculationEngineClient
+    ) {
         super();
     }
 
@@ -19,15 +22,10 @@ export class AffordabilityApiLambda extends ApiGatewayLambda<Request, Response> 
         }
 
         const configuration = 
-            this.configurationClient.getConfiguration(affordabilityInputs.stage);
+            await this.configurationClient.getConfiguration(affordabilityInputs.stage);
 
-        console.log(`configuration: ${JSON.stringify(configuration)}`);
-
-        const maximumLoanAmount =
-            affordabilityInputs.incomes
-                .map(income => income.annualAmount)
-                .reduce((total, annualAmount) => total + annualAmount, 0)
-                * 3.5;
+        const calculationResults =
+            this.calculationEngineClient.evaluate(request.inputs, configuration);
 
         const response: Response = {
             correlationId: this.correlationId,
@@ -37,7 +35,7 @@ export class AffordabilityApiLambda extends ApiGatewayLambda<Request, Response> 
                     { 
                         productIdentifier: 'PID',
                         productDescription: 'My Product',
-                        maximumLoanAmount: maximumLoanAmount
+                        maximumLoanAmount: calculationResults.maximumLoanAmount
                     }
                 ]
             }

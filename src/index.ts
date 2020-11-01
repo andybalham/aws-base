@@ -4,11 +4,12 @@ import middy from '@middy/core';
 import httpErrorHandler from '@middy/http-error-handler';
 import correlationIds from '@dazn/lambda-powertools-middleware-correlation-ids';
 
-import { ConfigurationClient } from './domain/configuration';
-import { AffordabilityApiLambda } from './functions/affordabilityApi/AffordabilityApiLambda';
+import { CalculationEngineClient, ConfigurationClient } from './services';
+import { AffordabilityApiLambda } from './lambdas/affordabilityApi/AffordabilityApiLambda';
 
 const configurationClient = new ConfigurationClient();
-const affordabilityApiLambda = new AffordabilityApiLambda(configurationClient);
+const calculationEngineClient = new CalculationEngineClient();
+const affordabilityApiLambda = new AffordabilityApiLambda(configurationClient, calculationEngineClient);
 
 export const handleAffordabilityApiFunction = 
     middy(async (event: any, context: Context): Promise<any> => {
