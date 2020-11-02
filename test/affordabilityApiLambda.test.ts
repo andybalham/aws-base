@@ -24,14 +24,16 @@ describe('Test lambda', () => {
     it('handles something', async () => {
 
         const testConfiguration = 
-            new Configuration(new Map([
-                [IncomeType.Primary, 100],
-                [IncomeType.Other, 50],
-            ]));
+            new Configuration([
+                {incomeType: IncomeType.Primary, weighting: 100},
+                {incomeType: IncomeType.Other, weighting: 50},
+            ]);
 
         configurationRepositoryMock.mock('getConfiguration', testConfiguration);
 
         const testProduct = new Product('TEST', 'Test description', 2);
+
+        console.log(`testProduct: ${JSON.stringify(testProduct)}`);
 
         productRepositoryMock.mock('getProducts', [testProduct]);
 

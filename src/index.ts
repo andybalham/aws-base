@@ -1,3 +1,4 @@
+import S3 from 'aws-sdk/clients/s3';
 import { Context } from 'aws-lambda/handler';
 
 import middy from '@middy/core';
@@ -7,8 +8,11 @@ import correlationIds from '@dazn/lambda-powertools-middleware-correlation-ids';
 import { AffordabilityApiLambda } from './lambdas/affordabilityApi/AffordabilityApiLambda';
 import { ConfigurationRepositoryClient, ProductRepositoryClient } from './services';
 
-const configurationRepository = new ConfigurationRepositoryClient();
-const productRepository = new ProductRepositoryClient();
+const s3Client = new S3();
+
+const configurationRepository = new ConfigurationRepositoryClient(s3Client, process.env.FILE_BUCKET);
+const productRepository = new ProductRepositoryClient(s3Client, process.env.FILE_BUCKET);
+
 const affordabilityApiLambda = new AffordabilityApiLambda(configurationRepository, productRepository);
 
 export const handleAffordabilityApiFunction = 

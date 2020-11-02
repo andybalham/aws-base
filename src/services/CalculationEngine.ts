@@ -8,7 +8,8 @@ export default class CalculationEngine {
         const applicableIncome =
             inputs.incomes
                 .map(income => { 
-                    const incomeWeighting = configuration.incomeWeightings.get(income.incomeType) ?? 0;
+                    const incomeWeighting = 
+                        configuration.incomeWeightings.find(iw => iw.incomeType === income.incomeType)?.weighting ?? 0;
                     return (income.annualAmount * incomeWeighting) / 100;
                 })
                 .reduce((total, annualAmount) => total + annualAmount, 0);

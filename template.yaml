@@ -36,6 +36,15 @@ Globals:
   
 Resources:
 
+  FileBucket:
+    Type: AWS::S3::Bucket
+    Properties: 
+      BucketName: !Sub ${AppPrefix}-file-bucket
+      # NotificationConfiguration:
+      #   QueueConfigurations:
+      #   - Event: 's3:ObjectCreated:*'
+      #     Queue: !GetAtt UnprocessedFileQueue.Arn
+
   AffordabilityApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -61,7 +70,10 @@ Resources:
       Environment:
         Variables:
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
-      # Policies:
+          FILE_BUCKET: !Ref FileBucket
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Ref FileBucket
       Events:
         AddTwoNumbersByBodyEvent:
           Type: Api

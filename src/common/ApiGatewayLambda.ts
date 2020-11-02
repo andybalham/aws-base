@@ -16,6 +16,8 @@ export abstract class ApiGatewayLambda<TReq, TRes> {
 
     async handle(event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult>  {
             
+        Log.debug('APIGatewayProxyEvent', {event});
+
         this.event = event;
         this.context = context;
 
