@@ -2,6 +2,10 @@ import { Outputs } from '../../domain/output';
 
 export class AffordabilityApiResponse {
 
+    correlationId: string;
+    requestId: string;
+    outputs: Outputs;
+
     static schema = {
         type: 'object',
         properties: {
@@ -11,8 +15,4 @@ export class AffordabilityApiResponse {
         },
         required: ['correlationId', 'requestId', 'outputs']
     };
-
-    correlationId: string;
-    requestId: string;
-    outputs: Outputs;
 }

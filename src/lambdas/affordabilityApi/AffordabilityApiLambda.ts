@@ -2,13 +2,12 @@ import { ApiGatewayLambda } from '../../common/ApiGatewayLambda';
 import { HttpStatusCode } from '../../common/HttpStatusCode';
 
 import { Request, Response } from '.';
-import { ConfigurationRepositoryClient, CalculationEngine, ProductRepositoryClient } from '../../services';
+import { ConfigurationRepositoryClient, CalculationEngine } from '../../services';
 
 export class AffordabilityApiLambda extends ApiGatewayLambda<Request, Response> {
 
     constructor(
         private configurationRepository: ConfigurationRepositoryClient,
-        private productRepository: ProductRepositoryClient,
     ) {
         super();
     }
@@ -16,24 +15,21 @@ export class AffordabilityApiLambda extends ApiGatewayLambda<Request, Response> 
     async handleRequest(request: Request): Promise<{statusCode: HttpStatusCode; content: Response}> {
 
         const configuration = 
-            await this.configurationRepository.getConfiguration(request.stage);
+            await this.configurationRepository.getConfiguration();
 
         const calculationEngine = new CalculationEngine();
 
         const calculationResults =
             calculationEngine.evaluate(request.inputs, configuration);
 
-        const products = await this.productRepository.getProducts();
-
         const productSummaries = 
-            products.map(product => {
+            request.products.map(product => {
                 
                 const maximumLoanAmount = 
                     calculationResults.applicableIncome * product.incomeMultiplier;
 
                 return { 
-                    productIdentifier: product.productIdentifier,
-                    productDescription: product.productDescription,
+                    product,
                     maximumLoanAmount: maximumLoanAmount
                 };
             });

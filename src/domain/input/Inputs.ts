@@ -2,6 +2,8 @@ import { Income } from './Income';
 
 export class Inputs {
 
+    incomes: Income[];
+
     static schema = {
         type: 'object',
         properties: {
@@ -12,6 +14,4 @@ export class Inputs {
         },
         required: ['incomes']
     };
-
-    incomes: Income[];
 }

@@ -6,14 +6,13 @@ import httpErrorHandler from '@middy/http-error-handler';
 import correlationIds from '@dazn/lambda-powertools-middleware-correlation-ids';
 
 import { AffordabilityApiLambda } from './lambdas/affordabilityApi/AffordabilityApiLambda';
-import { ConfigurationRepositoryClient, ProductRepositoryClient } from './services';
+import { ConfigurationRepositoryClient } from './services';
 
 const s3Client = new S3();
 
 const configurationRepository = new ConfigurationRepositoryClient(s3Client, process.env.FILE_BUCKET);
-const productRepository = new ProductRepositoryClient(s3Client, process.env.FILE_BUCKET);
 
-const affordabilityApiLambda = new AffordabilityApiLambda(configurationRepository, productRepository);
+const affordabilityApiLambda = new AffordabilityApiLambda(configurationRepository);
 
 export const handleAffordabilityApiFunction = 
     middy(async (event: any, context: Context): Promise<any> => {

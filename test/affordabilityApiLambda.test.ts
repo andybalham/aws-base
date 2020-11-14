@@ -3,18 +3,14 @@ import * as Services from '../src/services';
 import { Configuration } from '../src/domain/configuration';
 import { IncomeType } from '../src/domain/input';
 import * as AffordabilityApi from '../src/lambdas/affordabilityApi/index';
-import { Product } from '../src/domain/product';
 
 describe('Test lambda', () => {
 
     let configurationRepositoryMock: MockManager<Services.ConfigurationRepositoryClient>;
-    let productRepositoryMock: MockManager<Services.ProductRepositoryClient>;
 
     beforeEach('mock out dependencies', function () {
         configurationRepositoryMock = 
             ImportMock.mockClass<Services.ConfigurationRepositoryClient>(Services, 'ConfigurationRepositoryClient');
-        productRepositoryMock = 
-            ImportMock.mockClass<Services.ProductRepositoryClient>(Services, 'ProductRepositoryClient');
     });
     
     afterEach('restore dependencies', function () {
@@ -31,28 +27,34 @@ describe('Test lambda', () => {
 
         configurationRepositoryMock.mock('getConfiguration', testConfiguration);
 
-        const testProduct = new Product('TEST', 'Test description', 2);
-
-        console.log(`testProduct: ${JSON.stringify(testProduct)}`);
-
-        productRepositoryMock.mock('getProducts', [testProduct]);
-
         const sutLambda = 
             new AffordabilityApi.Lambda(
                 new Services.ConfigurationRepositoryClient(),
-                new Services.ProductRepositoryClient()
             );
 
         const request: AffordabilityApi.Request = {
-            stage: 'PROD',
             inputs: {
                 incomes: [
                     { incomeType: IncomeType.Primary, annualAmount: 61600.00 }
                 ]
-            }
+            },
+            products: [
+                {
+                    productIdentifier: 'HIGH',
+                    productDescription: 'High rate product',
+                    interestRate: 6,
+                    incomeMultiplier: 3.5,
+                },
+                {
+                    productIdentifier: 'LOW',
+                    productDescription: 'Low rate product',
+                    interestRate: 3,
+                    incomeMultiplier: 2,
+                },
+            ]
         };
     
-        console.log(`request: ${JSON.stringify(JSON.stringify(request))}`);
+        console.log(`request: ${JSON.stringify(request)}`);
     
         const response = await sutLambda.handleRequest(request);
 

@@ -1,16 +1,16 @@
+import { Product } from '../product';
+
 export class ProductSummary {
+    
+    product: Product;
+    maximumLoanAmount: number;
 
     static schema = {
         type: 'object',
         properties: {
-            productIdentifier: { type: 'string' },
-            productDescription: { type: 'string' },
+            product: Product.schema,
             maximumLoanAmount: { type: 'number'},
         },
-        required: ['productIdentifier', 'productDescription', 'maximumLoanAmount']
+        required: ['product', 'maximumLoanAmount']
     };
-    
-    productIdentifier: string;
-    productDescription: string;
-    maximumLoanAmount: number;
 }

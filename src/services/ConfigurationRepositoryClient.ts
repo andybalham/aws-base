@@ -6,12 +6,12 @@ export default class ConfigurationRepositoryClient {
     
     constructor(private s3Client?: S3, private fileBucket?: string) {}
 
-    async getConfiguration(stage: string): Promise<Configuration> {
+    async getConfiguration(): Promise<Configuration> {
 
         if (this.s3Client === undefined) throw new Error('this.s3Client === undefined');
         if (this.fileBucket === undefined) throw new Error('this.fileBucket === undefined');
 
-        const fileKey = `configuration/${stage}-configuration.json`;
+        const fileKey = 'configuration_client.json';
 
         const getConfigurationParams: GetObjectRequest = {
             Bucket: this.fileBucket,

@@ -1,7 +1,11 @@
 export default class Product {
-    constructor(
-        public productIdentifier: string,
-        public productDescription: string,
-        public incomeMultiplier: number
-    ) {}
+
+    productIdentifier: string;
+    productDescription: string;
+    interestRate: number;
+    incomeMultiplier: number;
+
+    static schema = {
+        // TODO 14Nov20: Product schema
+    }
 }
