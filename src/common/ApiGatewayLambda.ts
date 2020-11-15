@@ -38,9 +38,9 @@ export abstract class ApiGatewayLambda<TReq, TRes> {
             // TODO 31Oct20: Allow for output schema validation
 
             return {
-                // TODO 31Oct20: Allow for other status codes
+                // TODO 15Nov20: What about non-JSON content?
                 statusCode: response.statusCode,
-                body: JSON.stringify(response.content)
+                body: (typeof response.content === 'object') ? JSON.stringify(response.content) : JSON.stringify({}),
             };
 
         } catch (error) {

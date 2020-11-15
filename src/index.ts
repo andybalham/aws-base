@@ -7,6 +7,7 @@ import correlationIds from '@dazn/lambda-powertools-middleware-correlation-ids';
 
 import { AffordabilityApiLambda } from './lambdas/affordabilityApi/AffordabilityApiLambda';
 import { ConfigurationRepositoryClient } from './services';
+import UpdateConfigurationApiLambda from './lambdas/configurationApi/UpdateConfigurationApiLambda';
 
 const s3Client = new S3();
 
@@ -14,10 +15,20 @@ const configurationRepository = new ConfigurationRepositoryClient(s3Client, proc
 
 const affordabilityApiLambda = new AffordabilityApiLambda(configurationRepository);
 
-export const handleAffordabilityApiFunction = 
+export const handleAffordabilityApiRequest = 
     middy(async (event: any, context: Context): Promise<any> => {
         return affordabilityApiLambda.handle(event, context);
     })
         .use(correlationIds({ sampleDebugLogRate: 0.01 }))
         .use(httpErrorHandler()); // handles common http errors and returns proper responses
 
+const updateConfigurationApiLambda = new UpdateConfigurationApiLambda(/*configurationRepository*/);
+
+export const handleUpdateConfigurationApiRequest = 
+    middy(async (event: any, context: Context): Promise<any> => {
+        return updateConfigurationApiLambda.handle(event, context);
+    })
+        .use(correlationIds({ sampleDebugLogRate: 0.01 }))
+        .use(httpErrorHandler()); // handles common http errors and returns proper responses
+        
+        
