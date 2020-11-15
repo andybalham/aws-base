@@ -14,13 +14,13 @@ export class AffordabilityApiLambda extends ApiGatewayLambda<Request, Response> 
 
     async handleRequest(request: Request): Promise<{statusCode: HttpStatusCode; content: Response}> {
 
-        const configuration = 
-            await this.configurationRepository.getConfiguration();
+        const clientConfiguration = 
+            await this.configurationRepository.getClientConfiguration();
 
         const calculationEngine = new CalculationEngine();
 
         const calculationResults =
-            calculationEngine.evaluate(request.inputs, configuration);
+            calculationEngine.evaluate(request.application, clientConfiguration);
 
         const productSummaries = 
             request.products.map(product => {

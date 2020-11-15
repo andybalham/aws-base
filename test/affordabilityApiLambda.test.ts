@@ -1,7 +1,6 @@
 import { ImportMock, MockManager } from 'ts-mock-imports';
 import * as Services from '../src/services';
-import { Configuration } from '../src/domain/configuration';
-import { IncomeType } from '../src/domain/input';
+import { ClientConfiguration } from '../src/domain/configuration';
 import * as AffordabilityApi from '../src/lambdas/affordabilityApi/index';
 
 describe('Test lambda', () => {
@@ -19,13 +18,12 @@ describe('Test lambda', () => {
       
     it('handles something', async () => {
 
-        const testConfiguration = 
-            new Configuration([
-                {incomeType: IncomeType.Primary, weighting: 100},
-                {incomeType: IncomeType.Other, weighting: 50},
-            ]);
+        const testConfiguration: ClientConfiguration = {
+            basicSalaryUsed: 1.0,
+            overtimeUsed: 0.5,
+        };
 
-        configurationRepositoryMock.mock('getConfiguration', testConfiguration);
+        configurationRepositoryMock.mock('getClientConfiguration', testConfiguration);
 
         const sutLambda = 
             new AffordabilityApi.Lambda(
@@ -33,9 +31,19 @@ describe('Test lambda', () => {
             );
 
         const request: AffordabilityApi.Request = {
-            inputs: {
-                incomes: [
-                    { incomeType: IncomeType.Primary, annualAmount: 61600.00 }
+            application: {
+                applicants: [
+                    {
+                        primaryEmployedAmounts: {
+                            basicSalary: 30000,
+                            overtime: 10000,
+                        },
+                    },
+                    {
+                        primaryEmployedAmounts: {
+                            basicSalary: 20000,
+                        },
+                    },
                 ]
             },
             products: [

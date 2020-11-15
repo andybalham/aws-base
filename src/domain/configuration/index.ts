@@ -1,5 +1,5 @@
-import Configuration from './Configuration';
+import ClientConfiguration from './ClientConfiguration';
 
 export {
-    Configuration
+    ClientConfiguration
 };

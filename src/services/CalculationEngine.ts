@@ -1,18 +1,30 @@
 import { CalculationResults } from '../domain/calculation';
-import { Configuration } from '../domain/configuration';
-import { Inputs } from '../domain/input';
+import { ClientConfiguration } from '../domain/configuration';
+import { Application } from '../domain/input';
 
 export default class CalculationEngine {
-    evaluate(inputs: Inputs, configuration: Configuration): CalculationResults {
+    evaluate(application: Application, clientConfiguration: ClientConfiguration): CalculationResults {
 
         const applicableIncome =
-            inputs.incomes
-                .map(income => { 
-                    const incomeWeighting = 
-                        configuration.incomeWeightings.find(iw => iw.incomeType === income.incomeType)?.weighting ?? 0;
-                    return (income.annualAmount * incomeWeighting) / 100;
+            application.applicants
+                .map(applicant => {
+                    return [
+                        applicant.primaryEmployedAmounts,
+                        applicant.secondaryEmployedAmounts,
+                    ].map(employedAmounts => {
+                        if (employedAmounts) {
+                            let amountUsed = 
+                                employedAmounts.basicSalary * clientConfiguration.basicSalaryUsed;
+                            if (employedAmounts.overtime) {
+                                amountUsed += 
+                                    employedAmounts.overtime * clientConfiguration.overtimeUsed;
+                            }
+                            return amountUsed;
+                        }
+                        return 0;
+                    }).reduce((total, amount) => total + amount, 0);
                 })
-                .reduce((total, annualAmount) => total + annualAmount, 0);
+                .reduce((total, amount) => total + amount, 0);
 
         return { applicableIncome: applicableIncome };
     }

@@ -1,31 +1,31 @@
 import S3, { GetObjectRequest } from 'aws-sdk/clients/s3';
 
-import { Configuration } from '../domain/configuration';
+import { ClientConfiguration } from '../domain/configuration';
 
 export default class ConfigurationRepositoryClient {
     
     constructor(private s3Client?: S3, private fileBucket?: string) {}
 
-    async getConfiguration(): Promise<Configuration> {
+    async getClientConfiguration(): Promise<ClientConfiguration> {
 
         if (this.s3Client === undefined) throw new Error('this.s3Client === undefined');
         if (this.fileBucket === undefined) throw new Error('this.fileBucket === undefined');
 
-        const fileKey = 'configuration_client.json';
+        const fileKey = 'configuration/ClientConfiguration.json';
 
-        const getConfigurationParams: GetObjectRequest = {
+        const getObjectRequest: GetObjectRequest = {
             Bucket: this.fileBucket,
             Key: fileKey,
         };
     
-        const getConfigurationResult = await this.s3Client.getObject(getConfigurationParams).promise();
+        const getObjectOutput = await this.s3Client.getObject(getObjectRequest).promise();
 
-        if (getConfigurationResult.Body !== undefined) {
+        if (getObjectOutput.Body !== undefined) {
             
-            const configuration = JSON.parse(getConfigurationResult.Body.toString('utf-8'));
-            return configuration;
+            const clientConfiguration = JSON.parse(getObjectOutput.Body.toString('utf-8'));
+            return clientConfiguration;
         }
 
-        throw new Error(`Could not load configuration for: ${JSON.stringify(getConfigurationParams)}`);
+        throw new Error(`Could not load configuration for: ${JSON.stringify(getObjectRequest)}`);
     }
 }

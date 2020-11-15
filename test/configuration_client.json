@@ -1,6 +1,0 @@
-{
-  "incomeWeightings": [
-    { "incomeType": "Primary", "weighting": 100 },
-    { "incomeType": "Other", "weighting": 25 }
-  ]
-}

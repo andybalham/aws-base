@@ -1,9 +1,9 @@
-import { Inputs } from './Inputs';
-import { Income } from './Income';
-import { IncomeType } from './IncomeType';
+import { Applicant } from './Applicant';
+import { Application } from './Application';
+import { EmployedAmounts } from './EmployedAmounts';
 
 export {
-    Inputs,
-    Income,
-    IncomeType,
+    Application,
+    Applicant,
+    EmployedAmounts,
 };
