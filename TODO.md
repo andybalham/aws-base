@@ -20,12 +20,14 @@ See: https://github.com/ai/nanoid/
 
 How could we structure the documents?
 
+Do we have a DocumentRepository?
+
 ```
 {
     metadata: {
-        type: "Product",
-        name: "3.5x salary special",
-        description: "A very special product that allows you to borrow 3.5 times your salary"
+        id: "Client",
+        type: "Configuration",
+        description: "The client-specific configuration"
     },
     content: {
 

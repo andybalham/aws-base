@@ -1,0 +1,39 @@
+import S3, { GetObjectRequest } from 'aws-sdk/clients/s3';
+
+export default class S3Client {
+
+    constructor(private s3?: S3, private bucket?: string) {}
+
+    async getParsedObject<T>(key: string): Promise<T> {
+
+        if (this.s3 === undefined) throw new Error('this.s3 === undefined');
+        if (this.bucket === undefined) throw new Error('this.bucket === undefined');
+
+        const getObjectRequest: GetObjectRequest = {
+            Bucket: this.bucket,
+            Key: key,
+        };
+
+        try {
+            const getObjectOutput = await this.s3.getObject(getObjectRequest).promise();
+
+            if (getObjectOutput.Body === undefined) {
+                throw new Error(`GetObjectOutput.Body is undefined: ${JSON.stringify(getObjectRequest)}`);
+            }
+    
+            const obj = JSON.parse(getObjectOutput.Body.toString('utf-8'));
+            return obj;
+
+        } catch (error) {
+            if (error instanceof Error) {
+                if (error.name === 'NoSuchKey') {
+                    const newError = new Error(`The specified key does not exist: ${key}, bucket: ${this.bucket}`);
+                    newError.name = error.name;
+                    throw newError;
+                }
+            }
+            throw error;
+        }
+    }
+}
+
