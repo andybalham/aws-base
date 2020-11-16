@@ -87,13 +87,13 @@ Resources:
     Properties:
       FunctionName: !Sub ${AppPrefix}-UpdateConfigurationApiFunction
       Handler: index.handleUpdateConfigurationApiRequest
-      # Environment:
-      #   Variables:
-      #     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
-      #     FILE_BUCKET: !Ref FileBucket
-      # Policies:
-      #   - S3ReadPolicy:
-      #       BucketName: !Ref FileBucket
+      Environment:
+        Variables:
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+          FILE_BUCKET: !Ref FileBucket
+      Policies:
+        - S3WritePolicy:
+            BucketName: !Ref FileBucket
       Events:
         HttpEvent:
           Type: Api

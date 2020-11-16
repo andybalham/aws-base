@@ -1,7 +1,9 @@
 import CalculationEngine from './CalculationEngine';
-import ConfigurationRepositoryClient from './ConfigurationRepositoryClient';
+import { DocumentType, DocumentMetadata, DocumentRepository } from './DocumentRepository';
 
 export {
-    ConfigurationRepositoryClient,
     CalculationEngine,
+    DocumentType,
+    DocumentMetadata,
+    DocumentRepository,
 };

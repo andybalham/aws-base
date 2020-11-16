@@ -6,14 +6,13 @@ import httpErrorHandler from '@middy/http-error-handler';
 import correlationIds from '@dazn/lambda-powertools-middleware-correlation-ids';
 
 import { AffordabilityApiLambda } from './lambdas/affordabilityApi/AffordabilityApiLambda';
-import { ConfigurationRepositoryClient } from './services';
+import { DocumentRepository } from './services';
 import UpdateConfigurationApiLambda from './lambdas/configurationApi/UpdateConfigurationApiLambda';
 
-const s3Client = new S3();
+const s3 = new S3(); // TODO 16Nov20: Configure to reuse connections
+const documentRepository = new DocumentRepository(s3, process.env.FILE_BUCKET);
 
-const configurationRepository = new ConfigurationRepositoryClient(s3Client, process.env.FILE_BUCKET);
-
-const affordabilityApiLambda = new AffordabilityApiLambda(configurationRepository);
+const affordabilityApiLambda = new AffordabilityApiLambda(documentRepository);
 
 export const handleAffordabilityApiRequest = 
     middy(async (event: any, context: Context): Promise<any> => {
@@ -22,7 +21,7 @@ export const handleAffordabilityApiRequest =
         .use(correlationIds({ sampleDebugLogRate: 0.01 }))
         .use(httpErrorHandler()); // handles common http errors and returns proper responses
 
-const updateConfigurationApiLambda = new UpdateConfigurationApiLambda(/*configurationRepository*/);
+const updateConfigurationApiLambda = new UpdateConfigurationApiLambda(documentRepository);
 
 export const handleUpdateConfigurationApiRequest = 
     middy(async (event: any, context: Context): Promise<any> => {

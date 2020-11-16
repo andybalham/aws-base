@@ -1,21 +1,22 @@
-import { ApiGatewayLambda } from '../../common/ApiGatewayLambda';
+import { ApiGatewayLambda, ApiGatewayLambdaResponse } from '../../common/ApiGatewayLambda';
 import { HttpStatusCode } from '../../common/HttpStatusCode';
 
 import { Request, Response } from '.';
-import { ConfigurationRepositoryClient, CalculationEngine } from '../../services';
+import { DocumentType, DocumentRepository, CalculationEngine } from '../../services';
+import { ClientConfiguration } from '../../domain/configuration';
 
 export class AffordabilityApiLambda extends ApiGatewayLambda<Request, Response> {
 
     constructor(
-        private configurationRepository: ConfigurationRepositoryClient,
+        private documentRepository: DocumentRepository,
     ) {
         super();
     }
 
-    async handleRequest(request: Request): Promise<{statusCode: HttpStatusCode; content: Response}> {
+    async handleRequest(request: Request): Promise<ApiGatewayLambdaResponse<Response>> {
 
         const clientConfiguration = 
-            await this.configurationRepository.getClientConfiguration();
+            await this.documentRepository.get<ClientConfiguration>('client', DocumentType.configuration);
 
         const calculationEngine = new CalculationEngine();
 
@@ -30,7 +31,7 @@ export class AffordabilityApiLambda extends ApiGatewayLambda<Request, Response> 
 
                 return { 
                     product,
-                    maximumLoanAmount: maximumLoanAmount
+                    maximumLoanAmount
                 };
             });
 
@@ -38,7 +39,7 @@ export class AffordabilityApiLambda extends ApiGatewayLambda<Request, Response> 
             correlationId: this.correlationId,
             requestId: this.requestId,
             outputs: {
-                productSummaries: productSummaries
+                productSummaries
             }
         };
 

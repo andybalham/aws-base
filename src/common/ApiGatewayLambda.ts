@@ -7,6 +7,11 @@ import CorrelationIds from '@dazn/lambda-powertools-correlation-ids';
 
 import { HttpStatusCode } from './HttpStatusCode';
 
+export class ApiGatewayLambdaResponse<T> {
+    statusCode: HttpStatusCode; 
+    content: T;    
+}
+
 export abstract class ApiGatewayLambda<TReq, TRes> {
 
     event: APIGatewayProxyEvent;
@@ -55,6 +60,6 @@ export abstract class ApiGatewayLambda<TReq, TRes> {
         }
     }
 
-    abstract handleRequest(request: TReq): Promise<{statusCode: HttpStatusCode; content: TRes}>;
+    abstract handleRequest(request: TReq): Promise<ApiGatewayLambdaResponse<TRes>>;
 }
 

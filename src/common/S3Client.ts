@@ -1,10 +1,10 @@
-import S3, { GetObjectRequest } from 'aws-sdk/clients/s3';
+import S3, { GetObjectRequest, PutObjectRequest } from 'aws-sdk/clients/s3';
 
 export default class S3Client {
 
     constructor(private s3?: S3, private bucket?: string) {}
 
-    async getParsedObject<T>(key: string): Promise<T> {
+    async getJsonObject<T>(key: string): Promise<T> {
 
         if (this.s3 === undefined) throw new Error('this.s3 === undefined');
         if (this.bucket === undefined) throw new Error('this.bucket === undefined');
@@ -34,6 +34,21 @@ export default class S3Client {
             }
             throw error;
         }
+    }
+
+    async putJsonObject(key: string, obj: any): Promise<void> {
+
+        if (this.s3 === undefined) throw new Error('this.s3 === undefined');
+        if (this.bucket === undefined) throw new Error('this.bucket === undefined');
+
+        const putObjectRequest: PutObjectRequest = {
+            Bucket: this.bucket,
+            Key: key,
+            Body: JSON.stringify(obj),
+            ContentType: 'application/json; charset=utf-8',
+        };
+
+        await this.s3.putObject(putObjectRequest).promise();
     }
 }
 
