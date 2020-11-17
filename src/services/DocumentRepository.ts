@@ -1,24 +1,7 @@
 import S3 from 'aws-sdk/clients/s3';
 import S3Client from '../common/S3Client';
 
-export enum DocumentType {
-    configuration = 'configuration',
-    request = 'request',
-    response = 'response',
-}
-
-export class DocumentMetadata {
-    id: string;
-    type: DocumentType;
-    description?: string
-}
-
-class Document {
-    metadata: DocumentMetadata;
-    content: any;
-}
-
-export class DocumentRepository {
+export default class DocumentRepository {
 
     private readonly s3Client: S3Client;
 
@@ -29,7 +12,7 @@ export class DocumentRepository {
         this.s3Client = new S3Client(s3, documentBucket);
     }
 
-    async put(metadata: DocumentMetadata, content: any): Promise<void> {
+    async putObject(metadata: DocumentMetadata, obj: any): Promise<void> {
 
         let documentKey: string;
 
@@ -45,7 +28,7 @@ export class DocumentRepository {
 
         const document: Document = {
             metadata,
-            content,
+            content: obj,
         };
 
         await this.s3Client.putJsonObject(documentKey, document);
@@ -53,7 +36,7 @@ export class DocumentRepository {
         // TODO 16Nov20: Raise event and index the document in DynamoDB
     }
 
-    async get<T>(id: string, type: DocumentType): Promise<T> {
+    async getObject(id: string, type: DocumentType): Promise<any> {
 
         // TODO 16Nov20: Load the key from the DynamoDB index
 
@@ -74,3 +57,19 @@ export class DocumentRepository {
     }
 }
 
+export enum DocumentType {
+    configuration = 'configuration',
+    request = 'request',
+    response = 'response',
+}
+
+export class DocumentMetadata {
+    id: string;
+    type: DocumentType;
+    description?: string
+}
+
+export class Document {
+    metadata: DocumentMetadata;
+    content: any;
+}

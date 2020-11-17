@@ -1,8 +1,9 @@
 import CalculationEngine from './CalculationEngine';
-import { DocumentType, DocumentMetadata, DocumentRepository } from './DocumentRepository';
+import DocumentRepository, { Document, DocumentType, DocumentMetadata } from './DocumentRepository';
 
 export {
     CalculationEngine,
+    Document,
     DocumentType,
     DocumentMetadata,
     DocumentRepository,

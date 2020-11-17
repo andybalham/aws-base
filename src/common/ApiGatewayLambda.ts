@@ -18,6 +18,7 @@ export abstract class ApiGatewayLambda<TReq, TRes> {
     context: Context;
     requestId: string;
     correlationId: string;
+    responseStatusCode: HttpStatusCode;
 
     async handle(event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult>  {
             
@@ -40,13 +41,20 @@ export abstract class ApiGatewayLambda<TReq, TRes> {
 
             const response = await this.handleRequest(request);
 
+            // TODO 17Nov20: How could we suppress this behaviour?
+            if (response !== undefined) {
+                (response as any).correlationId = this.correlationId;
+                (response as any).requestId = this.requestId;
+            }
+
+            const result = {
+                statusCode: this.responseStatusCode,
+                body: (typeof response !== 'undefined') ? JSON.stringify(response) : JSON.stringify({}),
+            };
+
             // TODO 31Oct20: Allow for output schema validation
 
-            return {
-                // TODO 15Nov20: What about non-JSON content?
-                statusCode: response.statusCode,
-                body: (typeof response.content === 'object') ? JSON.stringify(response.content) : JSON.stringify({}),
-            };
+            return result;
 
         } catch (error) {
 
@@ -60,6 +68,6 @@ export abstract class ApiGatewayLambda<TReq, TRes> {
         }
     }
 
-    abstract handleRequest(request: TReq): Promise<ApiGatewayLambdaResponse<TRes>>;
+    abstract handleRequest(request: TReq): Promise<TRes>;
 }
 

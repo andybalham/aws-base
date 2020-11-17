@@ -1,5 +1,4 @@
-import { ApiGatewayLambda, ApiGatewayLambdaResponse } from '../../common/ApiGatewayLambda';
-import { HttpStatusCode } from '../../common/HttpStatusCode';
+import { ApiGatewayLambda } from '../../common/ApiGatewayLambda';
 
 import { Request, Response } from '.';
 import { DocumentType, DocumentRepository, CalculationEngine } from '../../services';
@@ -13,10 +12,10 @@ export class AffordabilityApiLambda extends ApiGatewayLambda<Request, Response> 
         super();
     }
 
-    async handleRequest(request: Request): Promise<ApiGatewayLambdaResponse<Response>> {
+    async handleRequest(request: Request): Promise<Response> {
 
-        const clientConfiguration = 
-            await this.documentRepository.get<ClientConfiguration>('client', DocumentType.configuration);
+        const clientConfiguration: ClientConfiguration = 
+            await this.documentRepository.getObject('client', DocumentType.configuration);
 
         const calculationEngine = new CalculationEngine();
 
@@ -36,13 +35,11 @@ export class AffordabilityApiLambda extends ApiGatewayLambda<Request, Response> 
             });
 
         const response: Response = {
-            correlationId: this.correlationId,
-            requestId: this.requestId,
             outputs: {
                 productSummaries
             }
         };
 
-        return {statusCode: HttpStatusCode.OK, content: response};
+        return response;
     }
 }

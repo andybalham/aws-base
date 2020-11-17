@@ -1,5 +1,4 @@
-import { ApiGatewayLambda, ApiGatewayLambdaResponse } from '../../common/ApiGatewayLambda';
-import { HttpStatusCode } from '../../common/HttpStatusCode';
+import { ApiGatewayLambda } from '../../common/ApiGatewayLambda';
 import { UpdateRequest, UpdateResponse } from '.';
 import { DocumentType, DocumentMetadata, DocumentRepository } from '../../services';
 
@@ -11,7 +10,7 @@ export default class UpdateConfigurationApiLambda extends ApiGatewayLambda<Updat
         super();
     }
 
-    async handleRequest(request: UpdateRequest): Promise<ApiGatewayLambdaResponse<UpdateResponse>> {
+    async handleRequest(request: UpdateRequest): Promise<UpdateResponse> {
         
         const configurationMetadata: DocumentMetadata = {
             id: request.configurationType,
@@ -19,14 +18,8 @@ export default class UpdateConfigurationApiLambda extends ApiGatewayLambda<Updat
             description: 'The client configuration'
         };
 
-        await this.documentRepository.put(configurationMetadata, request.configuration);
+        await this.documentRepository.putObject(configurationMetadata, request.configuration);
 
-        return {
-            statusCode: HttpStatusCode.OK,
-            content: {
-                correlationId: this.correlationId,
-                requestId: this.requestId
-            }
-        };
+        return {};
     }
 }

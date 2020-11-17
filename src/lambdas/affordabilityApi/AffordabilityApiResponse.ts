@@ -2,8 +2,8 @@ import { Outputs } from '../../domain/output';
 
 export class AffordabilityApiResponse {
 
-    correlationId: string;
-    requestId: string;
+    correlationId?: string;
+    requestId?: string;
     outputs: Outputs;
 
     static schema = {

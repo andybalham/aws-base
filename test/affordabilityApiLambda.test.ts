@@ -5,11 +5,11 @@ import * as AffordabilityApi from '../src/lambdas/affordabilityApi/index';
 
 describe('Test lambda', () => {
 
-    let configurationRepositoryMock: MockManager<Services.ConfigurationRepositoryClient>;
+    let documentRepositoryMock: MockManager<Services.DocumentRepository>;
 
     beforeEach('mock out dependencies', function () {
-        configurationRepositoryMock = 
-            ImportMock.mockClass<Services.ConfigurationRepositoryClient>(Services, 'ConfigurationRepositoryClient');
+        documentRepositoryMock = 
+            ImportMock.mockClass<Services.DocumentRepository>(Services, 'DocumentRepository');
     });
     
     afterEach('restore dependencies', function () {
@@ -18,16 +18,16 @@ describe('Test lambda', () => {
       
     it('handles something', async () => {
 
-        const testConfiguration: ClientConfiguration = {
+        const testDocument: ClientConfiguration = {
             basicSalaryUsed: 1.0,
             overtimeUsed: 0.5,
         };
 
-        configurationRepositoryMock.mock('getClientConfiguration', testConfiguration);
+        documentRepositoryMock.mock('getObject', testDocument);
 
         const sutLambda = 
             new AffordabilityApi.Lambda(
-                new Services.ConfigurationRepositoryClient(),
+                new Services.DocumentRepository(),
             );
 
         const request: AffordabilityApi.Request = {
