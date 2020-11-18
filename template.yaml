@@ -36,14 +36,54 @@ Globals:
   
 Resources:
 
+  FileUpdateEventTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName:
+        Fn::Sub: ${AppPrefix}-file-update-event-topic
+
+  FileUpdateEventPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties: 
+      Topics: 
+        - !Ref FileUpdateEventTopic
+      PolicyDocument: 
+        Statement: 
+          - 
+            Action: 
+              - SNS:Publish
+            Effect: Allow
+            Resource: !Ref FileUpdateEventTopic
+            Principal:  
+              # This policy is required to allow S3 to publish to the topic, otherwise we get circular dependencies
+              Service: s3.amazonaws.com
+
   FileBucket:
     Type: AWS::S3::Bucket
     Properties: 
       BucketName: !Sub ${AppPrefix}-file-bucket
-      # NotificationConfiguration:
-      #   QueueConfigurations:
-      #   - Event: 's3:ObjectCreated:*'
-      #     Queue: !GetAtt UnprocessedFileQueue.Arn
+      NotificationConfiguration:
+        TopicConfigurations:
+          - Event: 's3:ObjectCreated:*'
+            Topic: !Ref FileUpdateEventTopic
+
+  FileUpdateEventFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AppPrefix}-file-update-event-function
+      Handler: index.handleFileUpdateEvent
+      # Environment:
+      #   Variables:
+      #     RESPONSE_SUBSCRIPTION_ID: !Sub ${ApplicationName}-TestFunction
+      #     TARGET_FUNCTION_REQUEST_QUEUE_URL: !Ref TargetFunctionRequestQueue
+      # Policies:
+      #   - SQSSendMessagePolicy:
+      #       QueueName: !GetAtt TargetFunctionRequestQueue.QueueName
+      Events:
+        FileUpdateEvent:
+          Type: SNS
+          Properties:
+            Topic: !Ref FileUpdateEventTopic
 
   AffordabilityApi:
     Type: AWS::Serverless::Api
@@ -65,7 +105,7 @@ Resources:
   AffordabilityApiFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub ${AppPrefix}-AffordabilityApiFunction
+      FunctionName: !Sub ${AppPrefix}-affordability-api-function
       Handler: index.handleAffordabilityApiRequest
       Environment:
         Variables:
@@ -85,7 +125,7 @@ Resources:
   UpdateConfigurationApiFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub ${AppPrefix}-UpdateConfigurationApiFunction
+      FunctionName: !Sub ${AppPrefix}-update-configuration-api-function
       Handler: index.handleUpdateConfigurationApiRequest
       Environment:
         Variables:

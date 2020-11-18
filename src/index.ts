@@ -31,5 +31,11 @@ export const handleUpdateConfigurationApiRequest =
     })
         .use(correlationIds({ sampleDebugLogRate: 0.01 }))
         .use(httpErrorHandler()); // handles common http errors and returns proper responses
-        
-        
+
+
+export const handleFileUpdateEvent = 
+    middy(async (event: any, context: Context): Promise<any> => {
+        console.log(`event: ${JSON.stringify(event)}`);
+    })
+        .use(correlationIds({ sampleDebugLogRate: 0.01 }));
+            
