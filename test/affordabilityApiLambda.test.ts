@@ -18,12 +18,12 @@ describe('Test lambda', () => {
       
     it('handles something', async () => {
 
-        const testDocument: ClientConfiguration = {
+        const testClientConfiguration: ClientConfiguration = {
             basicSalaryUsed: 1.0,
             overtimeUsed: 0.5,
         };
 
-        documentRepositoryMock.mock('getObject', testDocument);
+        documentRepositoryMock.mock('getContent', testClientConfiguration);
 
         const sutLambda = 
             new AffordabilityApi.Lambda(

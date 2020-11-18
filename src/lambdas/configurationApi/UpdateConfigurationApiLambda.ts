@@ -18,7 +18,7 @@ export default class UpdateConfigurationApiLambda extends ApiGatewayLambda<Updat
             description: 'The client configuration'
         };
 
-        await this.documentRepository.putObject(configurationMetadata, request.configuration);
+        await this.documentRepository.putContent(configurationMetadata, request.configuration);
 
         return {};
     }

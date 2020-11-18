@@ -12,7 +12,7 @@ export default class DocumentRepository {
         this.s3Client = new S3Client(s3, documentBucket);
     }
 
-    async putObject(metadata: DocumentMetadata, obj: any): Promise<void> {
+    async putContent(metadata: DocumentMetadata, content: any): Promise<void> {
 
         let documentKey: string;
 
@@ -28,7 +28,7 @@ export default class DocumentRepository {
 
         const document: Document = {
             metadata,
-            content: obj,
+            content: content,
         };
 
         await this.s3Client.putJsonObject(documentKey, document);
@@ -36,7 +36,7 @@ export default class DocumentRepository {
         // TODO 16Nov20: Raise event and index the document in DynamoDB
     }
 
-    async getObject(id: string, type: DocumentType): Promise<any> {
+    async getContent<T>(id: string, type: DocumentType): Promise<T> {
 
         // TODO 16Nov20: Load the key from the DynamoDB index
 

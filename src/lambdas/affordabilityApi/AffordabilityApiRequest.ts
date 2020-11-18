@@ -1,7 +1,7 @@
 import { Application } from '../../domain/input/Application';
 import { Product } from '../../domain/product';
 
-export class AffordabilityApiRequest {
+export default class AffordabilityApiRequest {
 
     application: Application;
     products: Product[];

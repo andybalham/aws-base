@@ -15,7 +15,7 @@ export default class AffordabilityApiLambda extends ApiGatewayLambda<Request, Re
     async handleRequest(request: Request): Promise<Response> {
 
         const clientConfiguration: ClientConfiguration = 
-            await this.documentRepository.getObject('client', DocumentType.configuration);
+            await this.documentRepository.getContent('client', DocumentType.configuration);
 
         const calculationEngine = new CalculationEngine();
 
