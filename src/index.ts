@@ -5,12 +5,13 @@ import middy from '@middy/core';
 import httpErrorHandler from '@middy/http-error-handler';
 import correlationIds from '@dazn/lambda-powertools-middleware-correlation-ids';
 
-import { AffordabilityApiLambda } from './lambdas/affordabilityApi/AffordabilityApiLambda';
 import { DocumentRepository } from './services';
+import AffordabilityApiLambda from './lambdas/affordabilityApi/AffordabilityApiLambda';
 import UpdateConfigurationApiLambda from './lambdas/configurationApi/UpdateConfigurationApiLambda';
 
-const s3 = new S3(); // TODO 16Nov20: Configure to reuse connections
+const s3 = new S3(); // TODO 16Nov20: Wrap to reuse connections?
 const documentRepository = new DocumentRepository(s3, process.env.FILE_BUCKET);
+
 
 const affordabilityApiLambda = new AffordabilityApiLambda(documentRepository);
 
@@ -20,6 +21,7 @@ export const handleAffordabilityApiRequest =
     })
         .use(correlationIds({ sampleDebugLogRate: 0.01 }))
         .use(httpErrorHandler()); // handles common http errors and returns proper responses
+
 
 const updateConfigurationApiLambda = new UpdateConfigurationApiLambda(documentRepository);
 

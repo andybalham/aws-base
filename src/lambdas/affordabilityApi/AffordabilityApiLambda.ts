@@ -4,7 +4,7 @@ import { Request, Response } from '.';
 import { DocumentType, DocumentRepository, CalculationEngine } from '../../services';
 import { ClientConfiguration } from '../../domain/configuration';
 
-export class AffordabilityApiLambda extends ApiGatewayLambda<Request, Response> {
+export default class AffordabilityApiLambda extends ApiGatewayLambda<Request, Response> {
 
     constructor(
         private documentRepository: DocumentRepository,
