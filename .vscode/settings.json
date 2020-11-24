@@ -11,6 +11,7 @@
         "redrive",
         "redrive policy",
         "sourcemap",
+        "tmes",
         "tslib",
         "typechecking",
         "vars"

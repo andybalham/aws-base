@@ -24,7 +24,6 @@ Parameters:
     Type: String
     Default: dev
 
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
 
   Function:
@@ -36,36 +35,47 @@ Globals:
   
 Resources:
 
-  FileUpdateEventTopic:
-    Type: AWS::SNS::Topic
+  FileUpdateEventQueue:
+    Type: AWS::SQS::Queue
     Properties:
-      TopicName:
-        Fn::Sub: ${AppPrefix}-file-update-event-topic
+      QueueName: !Sub ${AppPrefix}-file-update-event-queue
+      ReceiveMessageWaitTimeSeconds: 20
+      VisibilityTimeout: 18
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt FileUpdateEventDLQ.Arn
+        maxReceiveCount: 1
 
-  FileUpdateEventPolicy:
-    Type: AWS::SNS::TopicPolicy
+  FileUpdateEventDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub ${AppPrefix}-file-update-event-dlq
+      ReceiveMessageWaitTimeSeconds: 20
+      VisibilityTimeout: 18
+
+  FileUpdateEventQueuePolicy: # Required to allow S3 to send to the queue, otherwise we get circular dependencies
+    Type: AWS::SQS::QueuePolicy
     Properties: 
-      Topics: 
-        - !Ref FileUpdateEventTopic
+      Queues: 
+        - !Ref FileUpdateEventQueue
       PolicyDocument: 
         Statement: 
           - 
             Action: 
-              - SNS:Publish
+              - SQS:SendMessage
             Effect: Allow
-            Resource: !Ref FileUpdateEventTopic
+            Resource: !GetAtt FileUpdateEventQueue.Arn
             Principal:  
-              # This policy is required to allow S3 to publish to the topic, otherwise we get circular dependencies
               Service: s3.amazonaws.com
 
   FileBucket:
     Type: AWS::S3::Bucket
+    DependsOn: FileUpdateEventQueue
     Properties: 
       BucketName: !Sub ${AppPrefix}-file-bucket
       NotificationConfiguration:
-        TopicConfigurations:
-          - Event: 's3:ObjectCreated:*'
-            Topic: !Ref FileUpdateEventTopic
+        QueueConfigurations:
+        - Event: 's3:ObjectCreated:*'
+          Queue: !GetAtt FileUpdateEventQueue.Arn
 
   FileUpdateEventFunction:
     Type: AWS::Serverless::Function
@@ -74,16 +84,19 @@ Resources:
       Handler: index.handleFileUpdateEvent
       # Environment:
       #   Variables:
-      #     RESPONSE_SUBSCRIPTION_ID: !Sub ${ApplicationName}-TestFunction
-      #     TARGET_FUNCTION_REQUEST_QUEUE_URL: !Ref TargetFunctionRequestQueue
+      #     UNPROCESSED_UPDATE_QUEUE_URL: !Ref UnprocessedFileUpdateQueue
       # Policies:
       #   - SQSSendMessagePolicy:
-      #       QueueName: !GetAtt TargetFunctionRequestQueue.QueueName
+      #       QueueName: !GetAtt UnprocessedFileUpdateQueue.QueueName
+      #   - S3ReadPolicy:
+      #       BucketName: !Ref FileBucket
       Events:
-        FileUpdateEvent:
-          Type: SNS
+        FileUpdateEventQueue:
+          Type: SQS
           Properties:
-            Topic: !Ref FileUpdateEventTopic
+            Queue: !GetAtt FileUpdateEventQueue.Arn
+            BatchSize: 10
+            Enabled: !Ref EnableSQS
 
   AffordabilityApi:
     Type: AWS::Serverless::Api

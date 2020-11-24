@@ -8,6 +8,9 @@ import correlationIds from '@dazn/lambda-powertools-middleware-correlation-ids';
 import { DocumentRepository } from './services';
 import AffordabilityApiLambda from './lambdas/affordabilityApi/AffordabilityApiLambda';
 import UpdateConfigurationApiLambda from './lambdas/configurationApi/UpdateConfigurationApiLambda';
+import FileUpdateEventLambda from './lambdas/fileUpdateEvent/FileUpdateEventLambda';
+
+// TODO 24Nov20: How would we initialise components that require environment variables set by middleware?
 
 const s3 = new S3(); // TODO 16Nov20: Wrap to reuse connections?
 const documentRepository = new DocumentRepository(s3, process.env.FILE_BUCKET);
@@ -33,9 +36,11 @@ export const handleUpdateConfigurationApiRequest =
         .use(httpErrorHandler()); // handles common http errors and returns proper responses
 
 
+const fileUpdateEventLambda = new FileUpdateEventLambda();
+
 export const handleFileUpdateEvent = 
     middy(async (event: any, context: Context): Promise<any> => {
-        console.log(`event: ${JSON.stringify(event)}`);
+        fileUpdateEventLambda.handle(event, context);
     })
         .use(correlationIds({ sampleDebugLogRate: 0.01 }));
             
