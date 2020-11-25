@@ -4,13 +4,15 @@ export default class S3Client {
 
     constructor(private s3?: S3, private bucket?: string) {}
 
-    async getJsonObject<T>(key: string): Promise<T> {
+    async getJsonObject<T>(key: string, bucket?: string): Promise<T> {
+
+        bucket = bucket ?? this.bucket;
 
         if (this.s3 === undefined) throw new Error('this.s3 === undefined');
-        if (this.bucket === undefined) throw new Error('this.bucket === undefined');
+        if (bucket === undefined) throw new Error('bucket === undefined');
 
         const getObjectRequest: GetObjectRequest = {
-            Bucket: this.bucket,
+            Bucket: bucket,
             Key: key,
         };
 
@@ -27,7 +29,7 @@ export default class S3Client {
         } catch (error) {
             if (error instanceof Error) {
                 if (error.name === 'NoSuchKey') {
-                    const newError = new Error(`The specified key does not exist: ${key}, bucket: ${this.bucket}`);
+                    const newError = new Error(`The specified key does not exist: ${key}, bucket: ${bucket}`);
                     newError.name = error.name;
                     throw newError;
                 }
@@ -36,13 +38,15 @@ export default class S3Client {
         }
     }
 
-    async putJsonObject(key: string, obj: any): Promise<void> {
+    async putJsonObject(key: string, obj: any, bucket?: string): Promise<void> {
+
+        bucket = bucket ?? this.bucket;
 
         if (this.s3 === undefined) throw new Error('this.s3 === undefined');
-        if (this.bucket === undefined) throw new Error('this.bucket === undefined');
+        if (bucket === undefined) throw new Error('bucket === undefined');
 
         const putObjectRequest: PutObjectRequest = {
-            Bucket: this.bucket,
+            Bucket: bucket,
             Key: key,
             Body: JSON.stringify(obj),
             ContentType: 'application/json; charset=utf-8',

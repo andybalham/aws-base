@@ -36,7 +36,7 @@ export const handleUpdateConfigurationApiRequest =
         .use(httpErrorHandler()); // handles common http errors and returns proper responses
 
 
-const fileUpdateEventLambda = new FileUpdateEventLambda();
+const fileUpdateEventLambda = new FileUpdateEventLambda(s3);
 
 export const handleFileUpdateEvent = 
     middy(async (event: any, context: Context): Promise<any> => {

@@ -1,42 +1,38 @@
-import { SQSEvent } from 'aws-lambda/trigger/sqs';
-import { Context } from 'aws-lambda/handler';
-import Log from '@dazn/lambda-powertools-logger';
+import { S3Event, S3EventRecord } from 'aws-lambda/trigger/s3';
+import SQSLambda from '../../common/SQSLambda';
+import S3Lambda from '../../common/S3Lambda';
+import S3 from 'aws-sdk/clients/s3';
+import { Document } from '../../services';
+import S3Client from '../../common/S3Client';
 
-import { S3Event } from 'aws-lambda/trigger/s3';
+export default class FileUpdateEventLambda extends SQSLambda<S3Event> {
 
-abstract class SQSEventLambda<T> {
-    
-    event: SQSEvent;
-    context: Context;
+    private readonly s3Handler: S3Handler;
 
-    async handle(event: SQSEvent, context: Context): Promise<void> {
-            
-        Log.debug('SQSEvent', {event});
-
-        for (const eventRecord of event.Records) {
-        
-            Log.debug('eventRecord', {eventRecord});
-
-            this.event = event;
-            this.context = context;
-    
-            const message = JSON.parse(eventRecord.body);
-
-            if (message.Event?.endsWith(':TestEvent')) {
-                Log.info('Skipping test event', {messageEvent: message.Event});
-            }
-
-            await this.handleMessage(message);
-        }
+    constructor(s3: S3) {
+        super();
+        this.s3Handler = new S3Handler(s3);
     }
 
-    abstract handleMessage(message: T): Promise<void>;
+    async handleMessage(s3Event: S3Event): Promise<void> {
+        await this.s3Handler.handle(s3Event, this.context);
+    }
 }
 
-export default class FileUpdateEventLambda extends SQSEventLambda<S3Event> {
-    
-    async handleMessage(s3Event: S3Event): Promise<void> {
+class S3Handler extends S3Lambda {
 
-        Log.debug('s3Event', {s3Event});
+    private readonly s3Client: S3Client;
+
+    constructor(s3: S3) {
+        super();
+        this.s3Client = new S3Client(s3);
+    }
+    
+    async handleEventRecord(eventRecord: S3EventRecord): Promise<void> {
+
+        const document: Document = 
+            await this.s3Client.getJsonObject(eventRecord.s3.object.key, eventRecord.s3.bucket.name);
+
+        console.log(`document.metadata: ${JSON.stringify(document.metadata)}`);
     }
 }

@@ -2,7 +2,8 @@
 
 Thoughts on S3 structure:
 
-* configuration_client.json
+* /configuration
+    * configuration_{configurationId}.json
 * /request
     * /{requestId}
         * request_{requestId}.json
@@ -15,6 +16,11 @@ Thoughts on S3 structure:
         * /product_{productId}.json
     * /result
         * /result_{scenarioId}_{productId}.json
+
+What queries do we need to run against the files?
+
+* Get all scenarios
+* Get all products
 
 See: https://github.com/ai/nanoid/
 

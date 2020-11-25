@@ -32,8 +32,6 @@ export default class DocumentRepository {
         };
 
         await this.s3Client.putJsonObject(documentKey, document);
-
-        // TODO 16Nov20: Raise event and index the document in DynamoDB
     }
 
     async getContent<T>(id: string, type: DocumentType): Promise<T> {
@@ -61,11 +59,15 @@ export enum DocumentType {
     configuration = 'configuration',
     request = 'request',
     response = 'response',
+    audit = 'audit',
+    scenario = 'scenario',
+    product = 'product',
+    result = 'result',
 }
 
 export class DocumentMetadata {
-    id: string;
     type: DocumentType;
+    id: string;
     description?: string
 }
 

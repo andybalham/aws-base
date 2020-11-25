@@ -77,19 +77,47 @@ Resources:
         - Event: 's3:ObjectCreated:*'
           Queue: !GetAtt FileUpdateEventQueue.Arn
 
+  FileIndexTable:    
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      TableName: !Sub ${AppPrefix}-file-index-table
+      BillingMode: PAY_PER_REQUEST
+      # ProvisionedThroughput: 
+      #   ReadCapacityUnits: 5
+      #   WriteCapacityUnits: 5
+      StreamSpecification: 
+        StreamViewType: NEW_AND_OLD_IMAGES
+      AttributeDefinitions: 
+        - 
+          AttributeName: documentType
+          AttributeType: S
+        - 
+          AttributeName: documentId
+          AttributeType: S
+      KeySchema: 
+        - 
+          AttributeName: documentType
+          KeyType: HASH
+        - 
+          AttributeName: documentId
+          KeyType: RANGE
+
   FileUpdateEventFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub ${AppPrefix}-file-update-event-function
       Handler: index.handleFileUpdateEvent
-      # Environment:
-      #   Variables:
-      #     UNPROCESSED_UPDATE_QUEUE_URL: !Ref UnprocessedFileUpdateQueue
-      # Policies:
-      #   - SQSSendMessagePolicy:
-      #       QueueName: !GetAtt UnprocessedFileUpdateQueue.QueueName
-      #   - S3ReadPolicy:
-      #       BucketName: !Ref FileBucket
+      Environment:
+        Variables:
+          # UNPROCESSED_UPDATE_QUEUE_URL: !Ref UnprocessedFileUpdateQueue
+          FILE_INDEX_TABLE_NAME: !Ref FileIndexTable
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Ref FileBucket
+        - DynamoDBCrudPolicy:
+            TableName: !Ref FileIndexTable
+        # - SQSSendMessagePolicy:
+        #     QueueName: !GetAtt UnprocessedFileUpdateQueue.QueueName
       Events:
         FileUpdateEventQueue:
           Type: SQS
