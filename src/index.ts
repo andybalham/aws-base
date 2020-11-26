@@ -9,10 +9,14 @@ import { DocumentRepository } from './services';
 import AffordabilityApiLambda from './lambdas/affordabilityApi/AffordabilityApiLambda';
 import UpdateConfigurationApiLambda from './lambdas/configurationApi/UpdateConfigurationApiLambda';
 import FileUpdateEventLambda from './lambdas/fileUpdateEvent/FileUpdateEventLambda';
+import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 
 // TODO 24Nov20: How would we initialise components that require environment variables set by middleware?
 
-const s3 = new S3(); // TODO 16Nov20: Wrap to reuse connections?
+// TODO 16Nov20: Wrap to reuse connections?
+const s3 = new S3();
+const documentClient = new DocumentClient();
+
 const documentRepository = new DocumentRepository(s3, process.env.FILE_BUCKET);
 
 
@@ -36,7 +40,7 @@ export const handleUpdateConfigurationApiRequest =
         .use(httpErrorHandler()); // handles common http errors and returns proper responses
 
 
-const fileUpdateEventLambda = new FileUpdateEventLambda(s3);
+const fileUpdateEventLambda = new FileUpdateEventLambda(s3, documentClient, process.env.FILE_INDEX_TABLE_NAME);
 
 export const handleFileUpdateEvent = 
     middy(async (event: any, context: Context): Promise<any> => {
