@@ -6,10 +6,12 @@ import httpErrorHandler from '@middy/http-error-handler';
 import correlationIds from '@dazn/lambda-powertools-middleware-correlation-ids';
 
 import { DocumentRepository } from './services';
-import AffordabilityApiLambda from './lambdas/affordabilityApi/AffordabilityApiLambda';
-import UpdateConfigurationApiLambda from './lambdas/configurationApi/UpdateConfigurationApiLambda';
-import FileUpdateEventLambda from './lambdas/fileUpdateEvent/FileUpdateEventLambda';
+import AffordabilityApiLambda from './functions/affordabilityApi/AffordabilityApiLambda';
+import UpdateConfigurationApiLambda from './functions/configurationApi/UpdateConfigurationApiLambda';
+import DocumentUpdateFunction from './functions/documentUpdate/DocumentUpdateFunction';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
+import S3Client from './common/S3Client';
+import DynamoDbClient from './common/DynamoDbClient';
 
 // TODO 24Nov20: How would we initialise components that require environment variables set by middleware?
 
@@ -17,8 +19,9 @@ import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 const s3 = new S3();
 const documentClient = new DocumentClient();
 
+const s3Client = new S3Client(s3);
+const fileIndexDynamoDbClient = new DynamoDbClient(documentClient, process.env.FILE_INDEX_TABLE_NAME);
 const documentRepository = new DocumentRepository(s3, process.env.FILE_BUCKET);
-
 
 const affordabilityApiLambda = new AffordabilityApiLambda(documentRepository);
 
@@ -40,11 +43,11 @@ export const handleUpdateConfigurationApiRequest =
         .use(httpErrorHandler()); // handles common http errors and returns proper responses
 
 
-const fileUpdateEventLambda = new FileUpdateEventLambda(s3, documentClient, process.env.FILE_INDEX_TABLE_NAME);
+const documentUpdateFunction = new DocumentUpdateFunction(s3Client, fileIndexDynamoDbClient);
 
-export const handleFileUpdateEvent = 
+export const handleDocumentUpdate = 
     middy(async (event: any, context: Context): Promise<any> => {
-        fileUpdateEventLambda.handle(event, context);
+        documentUpdateFunction.handle(event, context);
     })
         .use(correlationIds({ sampleDebugLogRate: 0.01 }));
             

@@ -2,7 +2,7 @@ import { S3Event, S3EventRecord } from 'aws-lambda/trigger/s3';
 import { Context } from 'aws-lambda/handler';
 import Log from '@dazn/lambda-powertools-logger';
 
-export default abstract class S3Lambda {
+export default abstract class S3Function {
     
     event: S3Event;
     context: Context;

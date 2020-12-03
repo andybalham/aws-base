@@ -2,7 +2,7 @@ import { SQSEvent } from 'aws-lambda/trigger/sqs';
 import { Context } from 'aws-lambda/handler';
 import Log from '@dazn/lambda-powertools-logger';
 
-export default abstract class SQSLambda<T> {
+export default abstract class SQSFunction<T> {
     
     event: SQSEvent;
     context: Context;

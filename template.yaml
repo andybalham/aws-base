@@ -35,52 +35,42 @@ Globals:
   
 Resources:
 
-  FileUpdateEventQueue:
-    Type: AWS::SQS::Queue
+  DocumentUpdateTopic:
+    Type: AWS::SNS::Topic
     Properties:
-      QueueName: !Sub ${AppPrefix}-file-update-event-queue
-      ReceiveMessageWaitTimeSeconds: 20
-      VisibilityTimeout: 18
-      RedrivePolicy:
-        deadLetterTargetArn: !GetAtt FileUpdateEventDLQ.Arn
-        maxReceiveCount: 1
+      TopicName:
+        Fn::Sub: ${AppPrefix}-document-update-topic
 
-  FileUpdateEventDLQ:
-    Type: AWS::SQS::Queue
-    Properties:
-      QueueName: !Sub ${AppPrefix}-file-update-event-dlq
-      ReceiveMessageWaitTimeSeconds: 20
-      VisibilityTimeout: 18
-
-  FileUpdateEventQueuePolicy: # Required to allow S3 to send to the queue, otherwise we get circular dependencies
-    Type: AWS::SQS::QueuePolicy
+  DocumentUpdateTopicPolicy:
+    # This policy is required to allow S3 to publish to the topic, otherwise we get circular dependencies
+    Type: AWS::SNS::TopicPolicy
     Properties: 
-      Queues: 
-        - !Ref FileUpdateEventQueue
+      Topics: 
+        - !Ref DocumentUpdateTopic
       PolicyDocument: 
         Statement: 
           - 
             Action: 
-              - SQS:SendMessage
+              - SNS:Publish
             Effect: Allow
-            Resource: !GetAtt FileUpdateEventQueue.Arn
+            Resource: !Ref DocumentUpdateTopic
             Principal:  
               Service: s3.amazonaws.com
 
-  FileBucket:
+  DocumentBucket:
     Type: AWS::S3::Bucket
-    DependsOn: FileUpdateEventQueue
+    DependsOn: DocumentUpdateQueue
     Properties: 
-      BucketName: !Sub ${AppPrefix}-file-bucket
+      BucketName: !Sub ${AppPrefix}-document-bucket
       NotificationConfiguration:
-        QueueConfigurations:
-        - Event: 's3:ObjectCreated:*'
-          Queue: !GetAtt FileUpdateEventQueue.Arn
+        TopicConfigurations:
+          - Event: 's3:ObjectCreated:*'
+            Topic: !Ref DocumentUpdateTopic
 
-  FileIndexTable:    
+  DocumentIndexTable:    
     Type: AWS::DynamoDB::Table
     Properties: 
-      TableName: !Sub ${AppPrefix}-file-index-table
+      TableName: !Sub ${AppPrefix}-document-index-table
       BillingMode: PAY_PER_REQUEST
       # ProvisionedThroughput: 
       #   ReadCapacityUnits: 5
@@ -102,29 +92,27 @@ Resources:
           AttributeName: documentId
           KeyType: RANGE
 
-  FileUpdateEventFunction:
+  DocumentIndexFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${AppPrefix}-file-update-event-function
-      Handler: index.handleFileUpdateEvent
+      FunctionName: !Sub ${AppPrefix}-document-index-function
+      Handler: index.handleDocumentUpdate
       Environment:
         Variables:
           # UNPROCESSED_UPDATE_QUEUE_URL: !Ref UnprocessedFileUpdateQueue
-          FILE_INDEX_TABLE_NAME: !Ref FileIndexTable
+          DOCUMENT_INDEX_TABLE_NAME: !Ref DocumentIndexTable
       Policies:
         - S3ReadPolicy:
-            BucketName: !Ref FileBucket
+            BucketName: !Ref DocumentBucket
         - DynamoDBCrudPolicy:
-            TableName: !Ref FileIndexTable
+            TableName: !Ref DocumentIndexTable
         # - SQSSendMessagePolicy:
         #     QueueName: !GetAtt UnprocessedFileUpdateQueue.QueueName
       Events:
-        FileUpdateEventQueue:
-          Type: SQS
+        FileUpdateEvent:
+          Type: SNS
           Properties:
-            Queue: !GetAtt FileUpdateEventQueue.Arn
-            BatchSize: 10
-            Enabled: !Ref EnableSQS
+            Topic: !Ref DocumentUpdateTopic
 
   AffordabilityApi:
     Type: AWS::Serverless::Api
@@ -151,10 +139,10 @@ Resources:
       Environment:
         Variables:
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
-          FILE_BUCKET: !Ref FileBucket
+          FILE_BUCKET: !Ref DocumentBucket
       Policies:
         - S3ReadPolicy:
-            BucketName: !Ref FileBucket
+            BucketName: !Ref DocumentBucket
       Events:
         HttpEvent:
           Type: Api
@@ -171,10 +159,10 @@ Resources:
       Environment:
         Variables:
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
-          FILE_BUCKET: !Ref FileBucket
+          FILE_BUCKET: !Ref DocumentBucket
       Policies:
         - S3WritePolicy:
-            BucketName: !Ref FileBucket
+            BucketName: !Ref DocumentBucket
       Events:
         HttpEvent:
           Type: Api

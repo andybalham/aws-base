@@ -1,26 +1,18 @@
 import { S3Event, S3EventRecord } from 'aws-lambda/trigger/s3';
-import SQSLambda from '../../common/SQSLambda';
-import S3Lambda from '../../common/S3Lambda';
-import S3 from 'aws-sdk/clients/s3';
-import { DocumentClient } from 'aws-sdk/clients/dynamodb';
+import SQSFunction from '../../common/SQSFunction';
+import S3Function from '../../common/S3Function';
 import { Document } from '../../services';
 import S3Client from '../../common/S3Client';
 import DynamoDbClient from '../../common/DynamoDbClient';
 import { FileIndex } from '../../domain/fileIndex';
 
-export default class FileUpdateEventLambda extends SQSLambda<S3Event> {
+export default class DocumentUpdateFunction extends SQSFunction<S3Event> {
 
     private readonly s3Handler: S3Handler;
 
-    constructor(s3: S3, documentClient: DocumentClient, fileIndexTableName?: string) {
-        
+    constructor(s3Client: S3Client, fileIndexDynamoDbClient: DynamoDbClient) {        
         super();
-
-        this.s3Handler = 
-            new S3Handler(
-                new S3Client(s3), 
-                new DynamoDbClient(documentClient, fileIndexTableName)
-            );
+        this.s3Handler = new S3Handler(s3Client, fileIndexDynamoDbClient);
     }
 
     async handleMessage(s3Event: S3Event): Promise<void> {
@@ -28,9 +20,9 @@ export default class FileUpdateEventLambda extends SQSLambda<S3Event> {
     }
 }
 
-class S3Handler extends S3Lambda {
+class S3Handler extends S3Function {
 
-    constructor(private s3Client: S3Client, private dynamoDbClient: DynamoDbClient) {
+    constructor(private s3Client: S3Client, private fileIndexDynamoDbClient: DynamoDbClient) {
         super();
     }
     
@@ -44,7 +36,7 @@ class S3Handler extends S3Lambda {
             documentId: document.metadata.id
         };
 
-        const currentFileIndex = await this.dynamoDbClient.get<FileIndex>(fileIndexKey);
+        const currentFileIndex = await this.fileIndexDynamoDbClient.get<FileIndex>(fileIndexKey);
 
         if (eventRecord.s3.object.eTag !== currentFileIndex?.s3ETag) {
 
@@ -56,7 +48,7 @@ class S3Handler extends S3Lambda {
                 description: document.metadata.description
             };
 
-            await this.dynamoDbClient.put(newFileIndex);
+            await this.fileIndexDynamoDbClient.put(newFileIndex);
 
             console.log(`Updated fileIndexKey: ${JSON.stringify(fileIndexKey)}`);
         }

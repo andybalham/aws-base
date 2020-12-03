@@ -1,5 +1,45 @@
 # TODO
 
+Naming:
+
+* DocumentBucket
+* DocumentBucketUpdateTopic
+
+* IndexDocumentFunction
+* DocumentIndexTable
+
+* PublishDocumentChangeFunction
+* DocumentChangeTopic - Can 
+
+* TestRunQueue
+* TestRunStateMachine
+    * TestRunResolverFunction: to work out tests to run, based on what has changed
+    * TestRunFunction: to run a test and output the result
+
+Q. How do we upload the scenarios and products?
+Q. What queries do we need to run against the files?
+* Get all scenarios
+* Get all products
+
+* DocumentApi
+* DocumentApiFunction
+    * POST /document/{type}
+    * POST /document/{type}/{id}
+    * GET /document/{type}
+    * GET /document/{type}/{id}
+
+* TestResultTable
+
+Q. What will we be querying via the AppSync API?
+Q. What would we want instant feedback on?
+* Results, but how would we the results?
+* We would want a subscription to a set of test results
+* We would need to have a mutation to change the results
+* Should be results be in DynamoDB?
+
+* AffordabilityApi
+* AffordabilityApiFunction
+
 Thoughts on S3 structure:
 
 * /configuration
@@ -14,13 +54,6 @@ Thoughts on S3 structure:
         * /scenario_{scenarioId}.json
     * /product
         * /product_{productId}.json
-    * /result
-        * /result_{scenarioId}_{productId}.json
-
-What queries do we need to run against the files?
-
-* Get all scenarios
-* Get all products
 
 See: https://github.com/ai/nanoid/
 
