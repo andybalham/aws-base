@@ -1,16 +1,8 @@
-import S3 from 'aws-sdk/clients/s3';
-import S3Client from '../common/S3Client';
+import { S3Client } from '../common';
 
 export default class DocumentRepository {
 
-    private readonly s3Client: S3Client;
-
-    constructor(
-        s3?: S3,
-        documentBucket?: string,
-    ) {
-        this.s3Client = new S3Client(s3, documentBucket);
-    }
+    constructor(private s3Client: S3Client) {}
 
     async putContent(metadata: DocumentMetadata, content: any): Promise<void> {
 

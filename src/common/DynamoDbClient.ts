@@ -1,13 +1,26 @@
 import { DocumentClient, PutItemInput } from 'aws-sdk/clients/dynamodb';
+import https from 'https';
 
-export default class DynamoDbClient {
+const agent = new https.Agent({
+    keepAlive: true
+});
 
-    constructor(private documentClient?: DocumentClient, private tableName?: string) {
+const documentClient = new DocumentClient({
+    httpOptions: {
+        agent
+    }
+});
+
+export default class DynamoDBClient {
+
+    private documentClient: DocumentClient;
+
+    constructor(private tableName?: string, documentClientOverride?: DocumentClient) {
+        this.documentClient = documentClientOverride ?? documentClient;
     }
 
     async get<T>(key: any): Promise<T | undefined> {
 
-        if (this.documentClient === undefined) throw new Error('this.documentClient === undefined');
         if (this.tableName === undefined) throw new Error('this.tableName === undefined');
 
         const itemOutput = 
@@ -20,7 +33,6 @@ export default class DynamoDbClient {
 
     async put(item: any): Promise<void> {
 
-        if (this.documentClient === undefined) throw new Error('this.documentClient === undefined');
         if (this.tableName === undefined) throw new Error('this.tableName === undefined');
 
         const putItem: PutItemInput = 

@@ -1,10 +1,9 @@
-import { ApiGatewayLambda } from '../../common/ApiGatewayLambda';
-
 import { Request, Response } from '.';
 import { DocumentType, DocumentRepository, CalculationEngine } from '../../services';
 import { ClientConfiguration } from '../../domain/configuration';
+import { ApiGatewayFunction } from '../../common';
 
-export default class AffordabilityApiLambda extends ApiGatewayLambda<Request, Response> {
+export default class AffordabilityApiFunction extends ApiGatewayFunction<Request, Response> {
 
     constructor(
         private documentRepository: DocumentRepository,

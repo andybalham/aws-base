@@ -1,8 +1,8 @@
-import { ApiGatewayLambda } from '../../common/ApiGatewayLambda';
+import { ApiGatewayFunction } from '../../common/ApiGatewayFunction';
 import { UpdateRequest, UpdateResponse } from '.';
 import { DocumentType, DocumentMetadata, DocumentRepository } from '../../services';
 
-export default class UpdateConfigurationApiLambda extends ApiGatewayLambda<UpdateRequest, UpdateResponse> {
+export default class UpdateConfigurationApiLambda extends ApiGatewayFunction<UpdateRequest, UpdateResponse> {
 
     constructor(
         private documentRepository: DocumentRepository,

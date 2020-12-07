@@ -5,10 +5,10 @@ Naming:
 * DocumentBucket
 * DocumentBucketUpdateTopic
 
-* IndexDocumentFunction
+* DocumentIndexerFunction
 * DocumentIndexTable
 
-* PublishDocumentChangeFunction
+* DocumentEventPublisherFunction
 * DocumentChangeTopic - Can 
 
 * TestRunQueue

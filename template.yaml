@@ -92,10 +92,10 @@ Resources:
           AttributeName: documentId
           KeyType: RANGE
 
-  DocumentIndexFunction:
+  DocumentIndexerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${AppPrefix}-document-index-function
+      FunctionName: !Sub ${AppPrefix}-document-indexer-function
       Handler: index.handleDocumentUpdate
       Environment:
         Variables:

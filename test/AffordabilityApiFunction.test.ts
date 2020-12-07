@@ -1,33 +1,43 @@
 import { ImportMock, MockManager } from 'ts-mock-imports';
 import * as Services from '../src/services';
 import { ClientConfiguration } from '../src/domain/configuration';
-import * as AffordabilityApi from '../src/lambdas/affordabilityApi/index';
+import * as AffordabilityApi from '../src/functions/affordabilityApi/index';
+import * as Common from '../src/common';
+import { Document, DocumentType } from '../src/services/DocumentRepository';
+import { expect } from 'chai';
 
-describe('Test lambda', () => {
+describe('Test AffordabilityApiFunction', () => {
 
-    let documentRepositoryMock: MockManager<Services.DocumentRepository>;
+    let s3ClientMock: MockManager<Common.S3Client>;
 
     beforeEach('mock out dependencies', function () {
-        documentRepositoryMock = 
-            ImportMock.mockClass<Services.DocumentRepository>(Services, 'DocumentRepository');
+        s3ClientMock = ImportMock.mockClass<Common.S3Client>(Common, 'S3Client');
     });
     
     afterEach('restore dependencies', function () {
         ImportMock.restore();
     });
       
-    it('handles something', async () => {
+    it('handles request', async () => {
 
         const testClientConfiguration: ClientConfiguration = {
             basicSalaryUsed: 1.0,
             overtimeUsed: 0.5,
         };
 
-        documentRepositoryMock.mock('getContent', testClientConfiguration);
+        const testClientConfigurationDocument: Document = {
+            metadata: {
+                id: 'id',
+                type: DocumentType.configuration
+            },
+            content: testClientConfiguration
+        };
 
-        const sutLambda = 
-            new AffordabilityApi.Lambda(
-                new Services.DocumentRepository(),
+        s3ClientMock.mock('getJsonObject', testClientConfigurationDocument);
+
+        const sutAffordabilityApiFunction = 
+            new AffordabilityApi.Function(
+                new Services.DocumentRepository(new Common.S3Client()),
             );
 
         const request: AffordabilityApi.Request = {
@@ -37,11 +47,6 @@ describe('Test lambda', () => {
                         primaryEmployedAmounts: {
                             basicSalary: 30000,
                             overtime: 10000,
-                        },
-                    },
-                    {
-                        primaryEmployedAmounts: {
-                            basicSalary: 20000,
                         },
                     },
                 ]
@@ -64,9 +69,8 @@ describe('Test lambda', () => {
     
         console.log(`request: ${JSON.stringify(request)}`);
     
-        const response = await sutLambda.handleRequest(request);
+        const response = await sutAffordabilityApiFunction.handleRequest(request);
 
-        // TODO 01Nov20: Think about what we should really be asserting here
-        console.log(`response: ${JSON.stringify(response)}`);
+        expect(response.outputs.productSummaries).to.have.length(2);
     });
 });

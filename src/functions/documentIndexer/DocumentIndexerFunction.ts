@@ -1,16 +1,16 @@
 import { S3Event, S3EventRecord } from 'aws-lambda/trigger/s3';
-import SQSFunction from '../../common/SQSFunction';
+import SNSFunction from '../../common/SNSFunction';
 import S3Function from '../../common/S3Function';
 import { Document } from '../../services';
 import S3Client from '../../common/S3Client';
-import DynamoDbClient from '../../common/DynamoDbClient';
+import DynamoDBClient from '../../common/DynamoDBClient';
 import { FileIndex } from '../../domain/fileIndex';
 
-export default class DocumentUpdateFunction extends SQSFunction<S3Event> {
+export default class DocumentIndexerFunction extends SNSFunction<S3Event> {
 
     private readonly s3Handler: S3Handler;
 
-    constructor(s3Client: S3Client, fileIndexDynamoDbClient: DynamoDbClient) {        
+    constructor(s3Client: S3Client, fileIndexDynamoDbClient: DynamoDBClient) {        
         super();
         this.s3Handler = new S3Handler(s3Client, fileIndexDynamoDbClient);
     }
@@ -22,7 +22,7 @@ export default class DocumentUpdateFunction extends SQSFunction<S3Event> {
 
 class S3Handler extends S3Function {
 
-    constructor(private s3Client: S3Client, private fileIndexDynamoDbClient: DynamoDbClient) {
+    constructor(private s3Client: S3Client, private fileIndexDynamoDbClient: DynamoDBClient) {
         super();
     }
     
@@ -35,6 +35,8 @@ class S3Handler extends S3Function {
             documentType: document.metadata.type,
             documentId: document.metadata.id
         };
+
+        // TODO 07Dec20: Do we need to load and check the eTag? Can we just compare before and after from the DynamoDB stream?
 
         const currentFileIndex = await this.fileIndexDynamoDbClient.get<FileIndex>(fileIndexKey);
 

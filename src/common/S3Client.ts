@@ -1,14 +1,28 @@
 import S3, { GetObjectRequest, PutObjectRequest } from 'aws-sdk/clients/s3';
+import https from 'https';
+
+const agent = new https.Agent({
+    keepAlive: true
+});
+
+const s3 = new S3({
+    httpOptions: {
+        agent
+    }
+});
 
 export default class S3Client {
 
-    constructor(private s3?: S3, private bucket?: string) {}
+    private s3: S3;
+
+    constructor(private bucket?: string, s3Override?: S3) {
+        this.s3 = s3Override ?? s3;
+    }
 
     async getJsonObject<T>(key: string, bucket?: string): Promise<T> {
 
         bucket = bucket ?? this.bucket;
 
-        if (this.s3 === undefined) throw new Error('this.s3 === undefined');
         if (bucket === undefined) throw new Error('bucket === undefined');
 
         const getObjectRequest: GetObjectRequest = {
@@ -42,7 +56,6 @@ export default class S3Client {
 
         bucket = bucket ?? this.bucket;
 
-        if (this.s3 === undefined) throw new Error('this.s3 === undefined');
         if (bucket === undefined) throw new Error('bucket === undefined');
 
         const putObjectRequest: PutObjectRequest = {

@@ -1,9 +1,9 @@
-import AffordabilityApiLambda from './AffordabilityApiLambda';
+import AffordabilityApiFunction from './AffordabilityApiFunction';
 import AffordabilityApiRequest from './AffordabilityApiRequest';
 import AffordabilityApiResponse from './AffordabilityApiResponse';
 
 export { 
     AffordabilityApiRequest as Request, 
     AffordabilityApiResponse as Response, 
-    AffordabilityApiLambda as Lambda
+    AffordabilityApiFunction as Function
 };

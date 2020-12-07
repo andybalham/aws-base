@@ -7,12 +7,12 @@ import CorrelationIds from '@dazn/lambda-powertools-correlation-ids';
 
 import { HttpStatusCode } from './HttpStatusCode';
 
-export class ApiGatewayLambdaResponse<T> {
+export class ApiGatewayFunctionResponse<T> {
     statusCode: HttpStatusCode; 
     content: T;    
 }
 
-export abstract class ApiGatewayLambda<TReq, TRes> {
+export abstract class ApiGatewayFunction<TReq, TRes> {
 
     event: APIGatewayProxyEvent;
     context: Context;
