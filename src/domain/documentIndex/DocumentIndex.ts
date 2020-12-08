@@ -1,4 +1,4 @@
-export default class FileIndex {
+export default class DocumentIndex {
     documentType: string;
     documentId: string;
     description?: string;

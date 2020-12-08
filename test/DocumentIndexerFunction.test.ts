@@ -3,6 +3,9 @@ import * as Common from '../src/common';
 import { S3Event } from 'aws-lambda/trigger/s3';
 import { ImportMock, MockManager } from 'ts-mock-imports';
 import { Document, DocumentType } from '../src/services/DocumentRepository';
+import { expect } from 'chai';
+import { SinonStub } from 'sinon';
+import { DocumentIndex } from '../src/domain/documentIndex';
 
 describe('Test AffordabilityApiFunction', () => {
     
@@ -19,14 +22,8 @@ describe('Test AffordabilityApiFunction', () => {
     });
 
     it('handles request', async () => {
-        
-        const s3Event = {
-            Records: [
-                {
-                    s3: { object: { key: 'objectKey' }, bucket: { name: 'bucketName', eTag: 'eTag' }}
-                }
-            ]
-        };
+
+        // Arrange
 
         const testDocument: Document = {
             metadata: {
@@ -37,14 +34,41 @@ describe('Test AffordabilityApiFunction', () => {
             content: {}
         };
 
-        s3ClientMock.mock('getJsonObject', testDocument);
+        const documentGetStub = s3ClientMock.mock('getJsonObject', testDocument);
 
-        // TODO 07Dec20: Mock the DynamoDB client and add expectations
-        
+        const documentIndexPutStub: SinonStub = dynamoDBClientMock.mock('put');
+
         const sutDocumentIndexerFunction = 
             new DocumentIndexer.Function(new Common.S3Client(), new Common.DynamoDBClient());
 
-        sutDocumentIndexerFunction.handleMessage(s3Event as unknown as S3Event);
+        // Act
+
+        const s3Event = {
+            Records: [
+                {
+                    s3: { object: { key: 'objectKey', eTag: 'eTag' }, bucket: { name: 'bucketName' }}
+                }
+            ]
+        };
+
+        await sutDocumentIndexerFunction.handleMessage(s3Event as unknown as S3Event);
+
+        // Assert
+
+        expect(documentGetStub.called).is.true;
+        expect(documentGetStub.lastCall.args[0]).equals(s3Event.Records[0].s3.object.key);
+        expect(documentGetStub.lastCall.args[1]).equals(s3Event.Records[0].s3.bucket.name);
+
+        expect(documentIndexPutStub.called).is.true;
+        const expectedDocumentIndex: DocumentIndex = {
+            documentId: testDocument.metadata.id,
+            documentType: testDocument.metadata.type,
+            s3BucketName: s3Event.Records[0].s3.bucket.name,
+            s3Key: s3Event.Records[0].s3.object.key,
+            s3ETag: s3Event.Records[0].s3.object.eTag,
+            description: testDocument.metadata.description,
+        };
+        expect(documentIndexPutStub.lastCall.args[0]).to.deep.equal(expectedDocumentIndex);
     });
     
 });

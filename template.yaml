@@ -59,7 +59,7 @@ Resources:
 
   DocumentBucket:
     Type: AWS::S3::Bucket
-    DependsOn: DocumentUpdateQueue
+    DependsOn: DocumentUpdateTopic
     Properties: 
       BucketName: !Sub ${AppPrefix}-document-bucket
       NotificationConfiguration:

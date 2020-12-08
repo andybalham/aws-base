@@ -4,15 +4,16 @@ import S3Function from '../../common/S3Function';
 import { Document } from '../../services';
 import S3Client from '../../common/S3Client';
 import DynamoDBClient from '../../common/DynamoDBClient';
-import { FileIndex } from '../../domain/fileIndex';
+import { DocumentIndex } from '../../domain/documentIndex';
+import Log from '@dazn/lambda-powertools-logger';
 
 export default class DocumentIndexerFunction extends SNSFunction<S3Event> {
 
     private readonly s3Handler: S3Handler;
 
-    constructor(s3Client: S3Client, fileIndexDynamoDbClient: DynamoDBClient) {        
+    constructor(s3Client: S3Client, documentIndexDynamoDbClient: DynamoDBClient) {        
         super();
-        this.s3Handler = new S3Handler(s3Client, fileIndexDynamoDbClient);
+        this.s3Handler = new S3Handler(s3Client, documentIndexDynamoDbClient);
     }
 
     async handleMessage(s3Event: S3Event): Promise<void> {
@@ -22,7 +23,7 @@ export default class DocumentIndexerFunction extends SNSFunction<S3Event> {
 
 class S3Handler extends S3Function {
 
-    constructor(private s3Client: S3Client, private fileIndexDynamoDbClient: DynamoDBClient) {
+    constructor(private s3Client: S3Client, private documentIndexDynamoDbClient: DynamoDBClient) {
         super();
     }
     
@@ -31,28 +32,21 @@ class S3Handler extends S3Function {
         const document: Document = 
             await this.s3Client.getJsonObject(eventRecord.s3.object.key, eventRecord.s3.bucket.name);
 
-        const fileIndexKey = {
+        const documentIndexKey = {
             documentType: document.metadata.type,
             documentId: document.metadata.id
         };
 
-        // TODO 07Dec20: Do we need to load and check the eTag? Can we just compare before and after from the DynamoDB stream?
+        const newDocumentIndex: DocumentIndex = {
+            ...documentIndexKey,
+            s3BucketName: eventRecord.s3.bucket.name,
+            s3Key: eventRecord.s3.object.key,
+            s3ETag: eventRecord.s3.object.eTag,
+            description: document.metadata.description
+        };
 
-        const currentFileIndex = await this.fileIndexDynamoDbClient.get<FileIndex>(fileIndexKey);
+        await this.documentIndexDynamoDbClient.put(newDocumentIndex);
 
-        if (eventRecord.s3.object.eTag !== currentFileIndex?.s3ETag) {
-
-            const newFileIndex: FileIndex = {
-                ...fileIndexKey,
-                s3BucketName: eventRecord.s3.bucket.name,
-                s3Key: eventRecord.s3.object.key,
-                s3ETag: eventRecord.s3.object.eTag,
-                description: document.metadata.description
-            };
-
-            await this.fileIndexDynamoDbClient.put(newFileIndex);
-
-            console.log(`Updated fileIndexKey: ${JSON.stringify(fileIndexKey)}`);
-        }
+        Log.info('Update document index', {documentIndexKey});
     }
 }
