@@ -14,8 +14,8 @@ import DynamoDBClient from './common/DynamoDBClient';
 // TODO 24Nov20: How would we initialise components that require environment variables set by middleware?
 
 const s3Client = new S3Client();
-const documentRepository = new DocumentRepository(new S3Client(process.env.FILE_BUCKET));
 const documentIndexDynamoDbClient = new DynamoDBClient(process.env.DOCUMENT_INDEX_TABLE_NAME);
+const documentRepository = new DocumentRepository(new S3Client(process.env.FILE_BUCKET), documentIndexDynamoDbClient);
 
 const affordabilityApiFunction = new AffordabilityApiFunction(documentRepository);
 

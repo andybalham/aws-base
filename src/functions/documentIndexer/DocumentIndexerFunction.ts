@@ -32,21 +32,17 @@ class S3Handler extends S3Function {
         const document: Document = 
             await this.s3Client.getJsonObject(eventRecord.s3.object.key, eventRecord.s3.bucket.name);
 
-        const documentIndexKey = {
-            documentType: document.metadata.type,
-            documentId: document.metadata.id
-        };
-
         const newDocumentIndex: DocumentIndex = {
-            ...documentIndexKey,
+            documentType: document.metadata.type,
+            documentId: document.metadata.id,
+            description: document.metadata.description,
             s3BucketName: eventRecord.s3.bucket.name,
             s3Key: eventRecord.s3.object.key,
             s3ETag: eventRecord.s3.object.eTag,
-            description: document.metadata.description
         };
 
         await this.documentIndexDynamoDbClient.put(newDocumentIndex);
 
-        Log.info('Update document index', {documentIndexKey});
+        Log.info('Put document index', {newDocumentIndex});
     }
 }

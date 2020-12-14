@@ -138,11 +138,13 @@ Resources:
       Handler: index.handleAffordabilityApiRequest
       Environment:
         Variables:
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
           FILE_BUCKET: !Ref DocumentBucket
+          DOCUMENT_INDEX_TABLE_NAME: !Ref DocumentIndexTable
       Policies:
         - S3ReadPolicy:
             BucketName: !Ref DocumentBucket
+        - DynamoDBReadPolicy:
+            TableName: !Ref DocumentIndexTable
       Events:
         HttpEvent:
           Type: Api
@@ -158,7 +160,6 @@ Resources:
       Handler: index.handleUpdateConfigurationApiRequest
       Environment:
         Variables:
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
           FILE_BUCKET: !Ref DocumentBucket
       Policies:
         - S3WritePolicy:

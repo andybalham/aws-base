@@ -19,7 +19,7 @@ export default class DynamoDBClient {
         this.documentClient = documentClientOverride ?? documentClient;
     }
 
-    async get<T>(key: any): Promise<T | undefined> {
+    async get<T>(key: {[key: string]: any}): Promise<T | undefined> {
 
         if (this.tableName === undefined) throw new Error('this.tableName === undefined');
 

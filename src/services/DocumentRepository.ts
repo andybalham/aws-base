@@ -1,48 +1,35 @@
-import { S3Client } from '../common';
+import { DynamoDBClient, S3Client } from '../common';
+import { DocumentIndex } from '../domain/documentIndex';
 
 export default class DocumentRepository {
 
-    constructor(private s3Client: S3Client) {}
+    constructor(private contentClient: S3Client, private indexClient: DynamoDBClient) {}
 
     async putContent(metadata: DocumentMetadata, content: any): Promise<void> {
 
-        let documentKey: string;
-
-        switch (metadata.type) {
-
-        case DocumentType.configuration:
-            documentKey = `configuration/configuration_${metadata.id}.json`;
-            break;
-        
-        default:
-            throw new Error(`Unhandled document type: ${metadata.type}`);
-        }
+        const documentKey = `${metadata.type}/${metadata.type}_${metadata.id}.json`;
 
         const document: Document = {
             metadata,
-            content: content,
+            content,
         };
 
-        await this.s3Client.putJsonObject(documentKey, document);
+        await this.contentClient.putJsonObject(documentKey, document);
     }
 
     async getContent<T>(id: string, type: DocumentType): Promise<T> {
 
-        // TODO 16Nov20: Load the key from the DynamoDB index
+        const indexKey = { documentType: type, documentId: id };
 
-        let documentKey: string;
+        const documentIndex = await this.indexClient.get<DocumentIndex>(indexKey);
 
-        switch (type) {
-
-        case 'configuration':
-            documentKey = `configuration/configuration_${id}.json`;
-            break;
-        
-        default:
-            throw new Error(`Unhandled document type: ${type}`);
+        if (documentIndex === undefined) {
+            throw new Error(`No document found for indexKey: ${JSON.stringify(indexKey)}`);
         }
 
-        const document = await this.s3Client.getJsonObject<Document>(documentKey);
+        const document = 
+            await this.contentClient.getJsonObject<Document>(documentIndex.s3Key, documentIndex.s3BucketName);
+
         return document.content;
     }
 }
