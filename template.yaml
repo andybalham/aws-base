@@ -114,6 +114,29 @@ Resources:
           Properties:
             Topic: !Ref DocumentUpdateTopic
 
+  DocumentUpdatePublisherFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AppPrefix}-document-update-publisher-function
+      Handler: index.handleDocumentIndexStream
+      # Environment:
+      #   Variables:
+      #     LOOKUP_TABLE_EVENT_TOPIC: !Ref LookupTableEventTopic
+      Policies:
+        - DynamoDBStreamReadPolicy:
+            TableName: !Ref DocumentIndexTable
+            StreamName: "*"
+        # - SNSPublishMessagePolicy:
+        #     TopicName: !GetAtt LookupTableEventTopic.TopicName
+      Events:
+        DatabaseEvent:
+          Type: DynamoDB
+          Properties:
+            Stream: !GetAtt DocumentIndexTable.StreamArn
+            Enabled: !Ref EnableSQS
+            MaximumRetryAttempts: 0
+            StartingPosition: TRIM_HORIZON
+
   AffordabilityApi:
     Type: AWS::Serverless::Api
     Properties:

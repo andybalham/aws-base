@@ -10,6 +10,7 @@ import UpdateConfigurationApiLambda from './functions/configurationApi/UpdateCon
 import DocumentIndexerFunction from './functions/documentIndexer/DocumentIndexerFunction';
 import S3Client from './common/S3Client';
 import DynamoDBClient from './common/DynamoDBClient';
+import DocumentUpdatePublisherFunction from './functions/documentUpdatePublisher/DocumentUpdatePublisherFunction';
 
 // TODO 24Nov20: How would we initialise components that require environment variables set by middleware?
 
@@ -45,3 +46,11 @@ export const handleDocumentUpdate =
     })
         .use(correlationIds({ sampleDebugLogRate: 0.01 }));
             
+
+const documentUpdatePublisherFunction = new DocumentUpdatePublisherFunction();
+
+export const handleDocumentIndexStream = 
+    middy(async (event: any, context: Context): Promise<any> => {
+        documentUpdatePublisherFunction.handle(event, context);
+    })
+        .use(correlationIds({ sampleDebugLogRate: 0.01 }));
