@@ -114,20 +114,26 @@ Resources:
           Properties:
             Topic: !Ref DocumentUpdateTopic
 
+  DocumentUpdateTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName:
+        Fn::Sub: ${AppPrefix}-document-update-topic
+
   DocumentUpdatePublisherFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub ${AppPrefix}-document-update-publisher-function
       Handler: index.handleDocumentIndexStream
-      # Environment:
-      #   Variables:
-      #     LOOKUP_TABLE_EVENT_TOPIC: !Ref LookupTableEventTopic
+      Environment:
+        Variables:
+          DOCUMENT_UPDATE_TOPIC: !Ref DocumentUpdateTopic
       Policies:
         - DynamoDBStreamReadPolicy:
             TableName: !Ref DocumentIndexTable
             StreamName: "*"
-        # - SNSPublishMessagePolicy:
-        #     TopicName: !GetAtt LookupTableEventTopic.TopicName
+        - SNSPublishMessagePolicy:
+            TopicName: !GetAtt DocumentUpdateTopic.TopicName
       Events:
         DatabaseEvent:
           Type: DynamoDB
