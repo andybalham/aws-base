@@ -36,6 +36,13 @@ export default abstract class DynamoDBStreamFunction<T> {
     }
 
     abstract processEventRecord(
-        eventName: 'INSERT' | 'MODIFY' | 'REMOVE' | undefined, oldImage?: T, newImage?: T): Promise<void>
+        eventType?: DynamoDBEventTypes, oldImage?: T, newImage?: T): Promise<void>
 }
 
+export enum DynamoDBEventType {
+    INSERT,
+    MODIFY,
+    REMOVE,
+}
+
+export type DynamoDBEventTypes = keyof typeof DynamoDBEventType

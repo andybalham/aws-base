@@ -1,17 +1,20 @@
 import { ImportMock, MockManager } from 'ts-mock-imports';
-import * as Services from '../src/services';
-import { ClientConfiguration } from '../src/domain/configuration';
-import * as AffordabilityApi from '../src/functions/affordabilityApi/index';
-import * as Common from '../src/common';
-import { Document, DocumentType } from '../src/services/DocumentRepository';
+import * as Services from '../../src/services';
+import { ClientConfiguration } from '../../src/domain/configuration';
+import * as AffordabilityApi from '../../src/functions/affordabilityApi/index';
+import * as Common from '../../src/common';
+import { Document, DocumentType } from '../../src/services/DocumentRepository';
 import { expect } from 'chai';
+import { DocumentIndex } from '../../src/domain/documentIndex';
 
 describe('Test AffordabilityApiFunction', () => {
 
     let s3ClientMock: MockManager<Common.S3Client>;
+    let dynamodbClientMock: MockManager<Common.DynamoDBClient>;
 
     beforeEach('mock out dependencies', function () {
         s3ClientMock = ImportMock.mockClass<Common.S3Client>(Common, 'S3Client');
+        dynamodbClientMock = ImportMock.mockClass<Common.DynamoDBClient>(Common, 'DynamoDBClient');
     });
     
     afterEach('restore dependencies', function () {
@@ -33,11 +36,20 @@ describe('Test AffordabilityApiFunction', () => {
             content: testClientConfiguration
         };
 
+        const testClientConfigurationDocumentIndex: DocumentIndex = {
+            documentId: 'id',
+            documentType: DocumentType.configuration,
+            s3BucketName: 'bucketName',
+            s3ETag: 'ETag',
+            s3Key: 'key',
+        };
+
+        dynamodbClientMock.mock('get', testClientConfigurationDocumentIndex);
         s3ClientMock.mock('getJsonObject', testClientConfigurationDocument);
 
         const sutAffordabilityApiFunction = 
             new AffordabilityApi.Function(
-                new Services.DocumentRepository(new Common.S3Client()),
+                new Services.DocumentRepository(new Common.S3Client(), new Common.DynamoDBClient()),
             );
 
         const request: AffordabilityApi.Request = {

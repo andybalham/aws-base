@@ -5,13 +5,14 @@ import httpErrorHandler from '@middy/http-error-handler';
 import correlationIds from '@dazn/lambda-powertools-middleware-correlation-ids';
 
 import { DocumentRepository } from './services';
-import AffordabilityApiFunction from './functions/affordabilityApi/AffordabilityApiFunction';
-import UpdateConfigurationApiLambda from './functions/configurationApi/UpdateConfigurationApiLambda';
-import DocumentIndexerFunction from './functions/documentIndexer/DocumentIndexerFunction';
 import S3Client from './common/S3Client';
 import DynamoDBClient from './common/DynamoDBClient';
-import DocumentUpdatePublisherFunction from './functions/documentUpdatePublisher/DocumentUpdatePublisherFunction';
 import SNSClient from './common/SNSClient';
+
+import * as AffordabilityApi from './functions/affordabilityApi/index';
+import * as DocumentUpdatePublisher from './functions/documentUpdatePublisher/index';
+import * as DocumentIndexer from './functions/documentIndexer/index';
+import UpdateConfigurationApiLambda from './functions/configurationApi/UpdateConfigurationApiLambda';
 
 // TODO 24Nov20: How would we initialise components that require environment variables set by middleware?
 
@@ -20,7 +21,7 @@ const documentIndexDynamoDbClient = new DynamoDBClient(process.env.DOCUMENT_INDE
 const documentRepository = new DocumentRepository(new S3Client(process.env.FILE_BUCKET), documentIndexDynamoDbClient);
 const documentUpdateSNSClient = new SNSClient(process.env.DOCUMENT_UPDATE_TOPIC);
 
-const affordabilityApiFunction = new AffordabilityApiFunction(documentRepository);
+const affordabilityApiFunction = new AffordabilityApi.Function(documentRepository);
 
 export const handleAffordabilityApiRequest = 
     middy(async (event: any, context: Context): Promise<any> => {
@@ -40,7 +41,7 @@ export const handleUpdateConfigurationApiRequest =
         .use(httpErrorHandler()); // handles common http errors and returns proper responses
 
 
-const documentIndexerFunction = new DocumentIndexerFunction(s3Client, documentIndexDynamoDbClient);
+const documentIndexerFunction = new DocumentIndexer.Function(s3Client, documentIndexDynamoDbClient);
 
 export const handleDocumentUpdate = 
     middy(async (event: any, context: Context): Promise<any> => {
@@ -49,7 +50,7 @@ export const handleDocumentUpdate =
         .use(correlationIds({ sampleDebugLogRate: 0.01 }));
             
 
-const documentUpdatePublisherFunction = new DocumentUpdatePublisherFunction(documentUpdateSNSClient);
+const documentUpdatePublisherFunction = new DocumentUpdatePublisher.Function(documentUpdateSNSClient);
 
 export const handleDocumentIndexStream = 
     middy(async (event: any, context: Context): Promise<any> => {
