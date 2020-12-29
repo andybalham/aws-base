@@ -1,9 +1,9 @@
-import UpdateConfigurationApiLambda from './UpdateConfigurationApiLambda';
+import UpdateConfigurationApiFunction from './UpdateConfigurationApiFunction';
 import UpdateConfigurationApiRequest from './UpdateConfigurationApiRequest';
 import UpdateConfigurationApiResponse from './UpdateConfigurationApiResponse';
 
 export { 
     UpdateConfigurationApiRequest as UpdateRequest, 
     UpdateConfigurationApiResponse as UpdateResponse, 
-    UpdateConfigurationApiLambda as Lambda
+    UpdateConfigurationApiFunction as Function
 };

@@ -9,9 +9,10 @@ import S3Client from './common/S3Client';
 import DynamoDBClient from './common/DynamoDBClient';
 import SNSClient from './common/SNSClient';
 
-import * as AffordabilityApi from './functions/affordabilityApi/index';
-import * as DocumentUpdatePublisher from './functions/documentUpdatePublisher/index';
-import * as DocumentIndexer from './functions/documentIndexer/index';
+import * as AffordabilityApi from './functions/affordabilityApi';
+import * as DocumentUpdatePublisher from './functions/documentUpdatePublisher';
+import * as DocumentIndexer from './functions/documentIndexer';
+import * as UpdateConfigurationApi from './functions/configurationApi';
 
 // TODO 24Nov20: How would we initialise components that require environment variables set by middleware?
 
@@ -31,11 +32,11 @@ export const handleAffordabilityApiRequest =
         .use(httpErrorHandler()); // handles common http errors and returns proper responses
 
 
-const updateConfigurationApiLambda = new UpdateConfigurationApiLambda(documentRepository);
+const updateConfigurationApiFunction = new UpdateConfigurationApi.Function(documentRepository);
 
 export const handleUpdateConfigurationApiRequest = 
     middy(async (event: any, context: Context): Promise<any> => {
-        return updateConfigurationApiLambda.handle(event, context);
+        return updateConfigurationApiFunction.handle(event, context);
     })
         .use(correlationIds({ sampleDebugLogRate: 0.01 }))
         .use(httpErrorHandler()); // handles common http errors and returns proper responses

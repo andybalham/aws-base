@@ -3,7 +3,7 @@ import { UpdateRequest, UpdateResponse } from '.';
 import DocumentRepository from '../../services/DocumentRepository';
 import { DocumentMetadata, DocumentType } from '../../domain/document';
 
-export default class UpdateConfigurationApiLambda extends ApiGatewayFunction<UpdateRequest, UpdateResponse> {
+export default class UpdateConfigurationApiFunction extends ApiGatewayFunction<UpdateRequest, UpdateResponse> {
 
     constructor(
         private documentRepository: DocumentRepository,
