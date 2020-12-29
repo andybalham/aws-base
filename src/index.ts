@@ -4,7 +4,7 @@ import middy from '@middy/core';
 import httpErrorHandler from '@middy/http-error-handler';
 import correlationIds from '@dazn/lambda-powertools-middleware-correlation-ids';
 
-import { DocumentRepository } from './services';
+import { DocumentRepository, ProductEngine } from './services';
 import S3Client from './common/S3Client';
 import DynamoDBClient from './common/DynamoDBClient';
 import SNSClient from './common/SNSClient';
@@ -12,7 +12,6 @@ import SNSClient from './common/SNSClient';
 import * as AffordabilityApi from './functions/affordabilityApi/index';
 import * as DocumentUpdatePublisher from './functions/documentUpdatePublisher/index';
 import * as DocumentIndexer from './functions/documentIndexer/index';
-import UpdateConfigurationApiLambda from './functions/configurationApi/UpdateConfigurationApiLambda';
 
 // TODO 24Nov20: How would we initialise components that require environment variables set by middleware?
 
@@ -20,8 +19,9 @@ const s3Client = new S3Client();
 const documentIndexDynamoDbClient = new DynamoDBClient(process.env.DOCUMENT_INDEX_TABLE_NAME);
 const documentRepository = new DocumentRepository(new S3Client(process.env.FILE_BUCKET), documentIndexDynamoDbClient);
 const documentUpdateSNSClient = new SNSClient(process.env.DOCUMENT_UPDATE_TOPIC);
+const productEngine = new ProductEngine();
 
-const affordabilityApiFunction = new AffordabilityApi.Function(documentRepository);
+const affordabilityApiFunction = new AffordabilityApi.Function(documentRepository, productEngine);
 
 export const handleAffordabilityApiRequest = 
     middy(async (event: any, context: Context): Promise<any> => {

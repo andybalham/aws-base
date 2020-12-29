@@ -1,5 +1,5 @@
 import { Request, Response } from '.';
-import { DocumentRepository, CalculationEngine } from '../../services';
+import { DocumentRepository, ProductEngine } from '../../services';
 import { ClientConfiguration } from '../../domain/configuration';
 import { DocumentType } from '../../domain/document';
 import { ApiGatewayFunction } from '../../common';
@@ -8,6 +8,7 @@ export default class AffordabilityApiFunction extends ApiGatewayFunction<Request
 
     constructor(
         private documentRepository: DocumentRepository,
+        private productEngine: ProductEngine,
     ) {
         super();
     }
@@ -17,22 +18,9 @@ export default class AffordabilityApiFunction extends ApiGatewayFunction<Request
         const clientConfiguration: ClientConfiguration = 
             await this.documentRepository.getContent('client', DocumentType.Configuration);
 
-        const calculationEngine = new CalculationEngine();
-
-        const calculationResults =
-            calculationEngine.evaluate(request.application, clientConfiguration);
-
         const productSummaries = 
-            request.products.map(product => {
-                
-                const maximumLoanAmount = 
-                    calculationResults.applicableIncome * product.incomeMultiplier;
-
-                return { 
-                    product,
-                    maximumLoanAmount
-                };
-            });
+            this.productEngine.calculateProductSummaries(
+                clientConfiguration, request.application, request.products);
 
         const response: Response = {
             outputs: {

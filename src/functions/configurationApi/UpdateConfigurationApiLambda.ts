@@ -1,8 +1,7 @@
 import { ApiGatewayFunction } from '../../common/ApiGatewayFunction';
 import { UpdateRequest, UpdateResponse } from '.';
 import DocumentRepository from '../../services/DocumentRepository';
-import { DocumentMetadata } from "../../domain/DocumentMetadata";
-import { DocumentType } from "../../domain/DocumentType";
+import { DocumentMetadata, DocumentType } from '../../domain/document';
 
 export default class UpdateConfigurationApiLambda extends ApiGatewayFunction<UpdateRequest, UpdateResponse> {
 

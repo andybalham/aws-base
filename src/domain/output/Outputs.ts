@@ -1,4 +1,4 @@
-import { ProductSummary } from './ProductSummary';
+import { ProductSummary } from '../product';
 
 export class Outputs {
 

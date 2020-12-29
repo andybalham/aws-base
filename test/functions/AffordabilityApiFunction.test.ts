@@ -49,6 +49,7 @@ describe('Test AffordabilityApiFunction', () => {
         const sutAffordabilityApiFunction = 
             new AffordabilityApi.Function(
                 new Services.DocumentRepository(new Common.S3Client(), new Common.DynamoDBClient()),
+                new Services.ProductEngine()
             );
 
         const request: AffordabilityApi.Request = {

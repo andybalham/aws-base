@@ -1,6 +1,6 @@
-import { Product } from '../product';
+import { Product } from '.';
 
-export class ProductSummary {
+export default class ProductSummary {
     
     product: Product;
     maximumLoanAmount: number;
