@@ -1,7 +1,7 @@
 import Log from '@dazn/lambda-powertools-logger';
 import DynamoDBStreamFunction, { DynamoDBEventTypes } from '../../common/DynamoDBStreamFunction';
 import SNSClient from '../../common/SNSClient';
-import DocumentIndex from '../../domain/documentIndex/DocumentIndex';
+import { DocumentIndex } from '../../domain/document';
 
 export default class DocumentUpdatePublisherFunction extends DynamoDBStreamFunction<DocumentIndex> {
 

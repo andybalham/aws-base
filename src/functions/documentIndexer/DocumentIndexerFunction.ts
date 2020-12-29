@@ -1,10 +1,9 @@
 import { S3Event, S3EventRecord } from 'aws-lambda/trigger/s3';
 import SNSFunction from '../../common/SNSFunction';
 import S3Function from '../../common/S3Function';
-import { Document } from '../../services';
 import S3Client from '../../common/S3Client';
 import DynamoDBClient from '../../common/DynamoDBClient';
-import { DocumentIndex } from '../../domain/documentIndex';
+import { Document, DocumentIndex } from '../../domain/document';
 import Log from '@dazn/lambda-powertools-logger';
 
 export default class DocumentIndexerFunction extends SNSFunction<S3Event> {

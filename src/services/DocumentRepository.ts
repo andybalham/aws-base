@@ -1,5 +1,5 @@
 import { DynamoDBClient, S3Client } from '../common';
-import { DocumentIndex } from '../domain/documentIndex';
+import { DocumentType, DocumentMetadata, DocumentIndex, Document } from '../domain/document';
 
 export default class DocumentRepository {
 
@@ -32,25 +32,4 @@ export default class DocumentRepository {
 
         return document.content;
     }
-}
-
-export enum DocumentType {
-    configuration = 'configuration',
-    request = 'request',
-    response = 'response',
-    audit = 'audit',
-    scenario = 'scenario',
-    product = 'product',
-    result = 'result',
-}
-
-export class DocumentMetadata {
-    type: DocumentType;
-    id: string;
-    description?: string
-}
-
-export class Document {
-    metadata: DocumentMetadata;
-    content: any;
 }

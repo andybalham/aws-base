@@ -3,9 +3,8 @@ import * as Services from '../../src/services';
 import { ClientConfiguration } from '../../src/domain/configuration';
 import * as AffordabilityApi from '../../src/functions/affordabilityApi/index';
 import * as Common from '../../src/common';
-import { Document, DocumentType } from '../../src/services/DocumentRepository';
+import { Document, DocumentType, DocumentIndex } from '../../src/domain/document';
 import { expect } from 'chai';
-import { DocumentIndex } from '../../src/domain/documentIndex';
 
 describe('Test AffordabilityApiFunction', () => {
 
@@ -31,14 +30,14 @@ describe('Test AffordabilityApiFunction', () => {
         const testClientConfigurationDocument: Document = {
             metadata: {
                 id: 'id',
-                type: DocumentType.configuration
+                type: DocumentType.Configuration
             },
             content: testClientConfiguration
         };
 
         const testClientConfigurationDocumentIndex: DocumentIndex = {
             documentId: 'id',
-            documentType: DocumentType.configuration,
+            documentType: DocumentType.Configuration,
             s3BucketName: 'bucketName',
             s3ETag: 'ETag',
             s3Key: 'key',

@@ -1,5 +1,7 @@
-export default class DocumentIndex {
-    documentType: string;
+import { DocumentType } from './DocumentType';
+
+export class DocumentIndex {
+    documentType: DocumentType;
     documentId: string;
     description?: string;
     s3BucketName: string;

@@ -1,6 +1,7 @@
 import { Request, Response } from '.';
-import { DocumentType, DocumentRepository, CalculationEngine } from '../../services';
+import { DocumentRepository, CalculationEngine } from '../../services';
 import { ClientConfiguration } from '../../domain/configuration';
+import { DocumentType } from '../../domain/document';
 import { ApiGatewayFunction } from '../../common';
 
 export default class AffordabilityApiFunction extends ApiGatewayFunction<Request, Response> {
@@ -14,7 +15,7 @@ export default class AffordabilityApiFunction extends ApiGatewayFunction<Request
     async handleRequest(request: Request): Promise<Response> {
 
         const clientConfiguration: ClientConfiguration = 
-            await this.documentRepository.getContent('client', DocumentType.configuration);
+            await this.documentRepository.getContent('client', DocumentType.Configuration);
 
         const calculationEngine = new CalculationEngine();
 

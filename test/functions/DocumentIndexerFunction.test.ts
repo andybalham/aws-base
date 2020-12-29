@@ -2,10 +2,10 @@ import * as DocumentIndexer from '../../src/functions/documentIndexer/index';
 import * as Common from '../../src/common';
 import { S3Event } from 'aws-lambda/trigger/s3';
 import { ImportMock, MockManager } from 'ts-mock-imports';
-import { Document, DocumentType } from '../../src/services/DocumentRepository';
+import { Document, DocumentType } from '../../src/domain/document';
 import { expect } from 'chai';
 import { SinonStub } from 'sinon';
-import { DocumentIndex } from '../../src/domain/documentIndex';
+import { DocumentIndex } from '../../src/domain/document';
 
 describe('Test AffordabilityApiFunction', () => {
     
@@ -28,7 +28,7 @@ describe('Test AffordabilityApiFunction', () => {
         const testDocument: Document = {
             metadata: {
                 id: 'expectedId',
-                type: DocumentType.scenario,
+                type: DocumentType.Scenario,
                 description: 'expectedDescription'
             },
             content: {}

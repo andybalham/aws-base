@@ -1,6 +1,8 @@
 import { ApiGatewayFunction } from '../../common/ApiGatewayFunction';
 import { UpdateRequest, UpdateResponse } from '.';
-import { DocumentType, DocumentMetadata, DocumentRepository } from '../../services';
+import DocumentRepository from '../../services/DocumentRepository';
+import { DocumentMetadata } from "../../domain/DocumentMetadata";
+import { DocumentType } from "../../domain/DocumentType";
 
 export default class UpdateConfigurationApiLambda extends ApiGatewayFunction<UpdateRequest, UpdateResponse> {
 
@@ -14,7 +16,7 @@ export default class UpdateConfigurationApiLambda extends ApiGatewayFunction<Upd
         
         const configurationMetadata: DocumentMetadata = {
             id: request.configurationType,
-            type: DocumentType.configuration,
+            type: DocumentType.Configuration,
             description: 'The client configuration'
         };
 

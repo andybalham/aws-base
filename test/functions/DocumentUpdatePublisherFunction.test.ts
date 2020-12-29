@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { SinonStub } from 'sinon';
 import { ImportMock, MockManager } from 'ts-mock-imports';
 import * as Common from '../../src/common';
-import { DocumentIndex } from '../../src/domain/documentIndex';
+import { DocumentIndex, DocumentType } from '../../src/domain/document';
 import * as DocumentUpdatePublisher from '../../src/functions/documentUpdatePublisher/index';
 
 describe('Test DocumentUpdatePublisherFunction', () => {
@@ -27,7 +27,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
 
         const newImage: DocumentIndex = {
             documentId: 'documentId',
-            documentType: 'documentType',
+            documentType: DocumentType.Configuration,
             s3BucketName: 's3BucketName',
             s3ETag: 's3ETag',
             s3Key: 's3Key',
@@ -58,7 +58,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
 
         const Image: DocumentIndex = {
             documentId: 'documentId',
-            documentType: 'documentType',
+            documentType: DocumentType.Configuration,
             s3BucketName: 's3BucketName',
             s3ETag: 's3ETag',
             s3Key: 's3Key',
@@ -66,7 +66,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
 
         const newImage: DocumentIndex = {
             documentId: 'documentIdNew',
-            documentType: 'documentTypeNew',
+            documentType: DocumentType.Configuration,
             s3BucketName: 's3BucketNameNew',
             s3ETag: 's3ETagNew',
             s3Key: 's3KeyNew',
@@ -97,7 +97,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
 
         const image: DocumentIndex = {
             documentId: 'documentId',
-            documentType: 'documentType',
+            documentType: DocumentType.Configuration,
             s3BucketName: 's3BucketName',
             s3ETag: 's3ETag',
             s3Key: 's3Key',
@@ -122,7 +122,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
 
         const oldImage: DocumentIndex = {
             documentId: 'documentId',
-            documentType: 'documentType',
+            documentType: DocumentType.Configuration,
             s3BucketName: 's3BucketName',
             s3ETag: 's3ETag',
             s3Key: 's3Key',
