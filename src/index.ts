@@ -12,7 +12,8 @@ import SNSClient from './common/SNSClient';
 import * as AffordabilityApi from './functions/affordabilityApi';
 import * as DocumentUpdatePublisher from './functions/documentUpdatePublisher';
 import * as DocumentIndexer from './functions/documentIndexer';
-import * as UpdateConfigurationApi from './functions/configurationApi';
+import * as ConfigurationApi from './functions/configurationApi';
+import * as ScenarioApi from './functions/scenarioApi';
 
 // TODO 24Nov20: How would we initialise components that require environment variables set by middleware?
 
@@ -32,11 +33,21 @@ export const handleAffordabilityApiRequest =
         .use(httpErrorHandler()); // handles common http errors and returns proper responses
 
 
-const updateConfigurationApiFunction = new UpdateConfigurationApi.Function(documentRepository);
+const updateConfigurationApiFunction = new ConfigurationApi.UpdateFunction(documentRepository);
 
 export const handleUpdateConfigurationApiRequest = 
     middy(async (event: any, context: Context): Promise<any> => {
         return updateConfigurationApiFunction.handle(event, context);
+    })
+        .use(correlationIds({ sampleDebugLogRate: 0.01 }))
+        .use(httpErrorHandler()); // handles common http errors and returns proper responses
+
+
+const updateScenarioApiFunction = new ScenarioApi.UpdateFunction(documentRepository);
+
+export const handleUpdateScenarioApiRequest = 
+    middy(async (event: any, context: Context): Promise<any> => {
+        return updateScenarioApiFunction.handle(event, context);
     })
         .use(correlationIds({ sampleDebugLogRate: 0.01 }))
         .use(httpErrorHandler()); // handles common http errors and returns proper responses

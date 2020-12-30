@@ -1,7 +1,7 @@
 import { ImportMock, MockManager } from 'ts-mock-imports';
 import * as Services from '../../src/services';
 import { ClientConfiguration } from '../../src/domain/configuration';
-import * as AffordabilityApi from '../../src/functions/affordabilityApi/index';
+import * as AffordabilityApi from '../../src/functions/affordabilityApi';
 import * as Common from '../../src/common';
 import { Document, DocumentType, DocumentIndex } from '../../src/domain/document';
 import { expect } from 'chai';

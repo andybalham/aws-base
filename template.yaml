@@ -183,7 +183,7 @@ Resources:
             Path: /affordability
 
   UpdateConfigurationApiFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub ${AppPrefix}-update-configuration-api-function
       Handler: index.handleUpdateConfigurationApiRequest
@@ -200,6 +200,25 @@ Resources:
             RestApiId: !Ref AffordabilityApi
             Method: POST
             Path: /configuration
+
+  UpdateScenarioApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AppPrefix}-update-scenario-api-function
+      Handler: index.handleUpdateScenarioApiRequest
+      Environment:
+        Variables:
+          FILE_BUCKET: !Ref DocumentBucket
+      Policies:
+        - S3WritePolicy:
+            BucketName: !Ref DocumentBucket
+      Events:
+        HttpEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref AffordabilityApi
+            Method: POST
+            Path: /scenario
 
 Outputs:
 
