@@ -7,42 +7,36 @@ import CorrelationIds from '@dazn/lambda-powertools-correlation-ids';
 
 import { HttpStatusCode } from './HttpStatusCode';
 
-export class ApiGatewayFunctionResponse<T> {
-    statusCode: HttpStatusCode; 
-    content: T;    
-}
-
 export abstract class ApiGatewayFunction<TReq, TRes> {
 
+    responseStatusCode = HttpStatusCode.OK;
+    includeCorrelationAndRequestIds = true;
+
     event: APIGatewayProxyEvent;
-    context: Context;
+    context?: Context;
     requestId: string;
     correlationId: string;
-    responseStatusCode: HttpStatusCode;
-
-    async handle(event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult>  {
+    
+    async handle(event: APIGatewayProxyEvent, context?: Context): Promise<APIGatewayProxyResult>  {
             
         Log.debug('APIGatewayProxyEvent', {event});
 
         this.event = event;
         this.context = context;
 
-        // TODO 31Oct20: We could even do the parsing and validation, both for the input and output
-
         const correlationIds = CorrelationIds.get();
         this.requestId = correlationIds.awsRequestId;
         this.correlationId = correlationIds['x-correlation-id'];
 
-        // TODO 31Oct20: Allow for other ways of assembling the requests
+        const request: TReq = this.getRequest(event);
+
         // TODO 31Oct20: Allow for input schema validation
-        const request: TReq = JSON.parse(event.body ?? '{}');
 
         try {
 
             const response = await this.handleRequest(request);
 
-            // TODO 17Nov20: How could we suppress this behaviour?
-            if (response !== undefined) {
+            if (this.includeCorrelationAndRequestIds && (response !== undefined)) {
                 (response as any).correlationId = this.correlationId;
                 (response as any).requestId = this.requestId;
             }
@@ -66,6 +60,11 @@ export abstract class ApiGatewayFunction<TReq, TRes> {
                 requestId: this.requestId,
             }));
         }
+    }
+
+    protected getRequest(event: APIGatewayProxyEvent): TReq {
+        // TODO 30Dec20: Add support for other ways of assembling the request, e.g. from the path and query parameters
+        return JSON.parse(event.body ?? '{}');
     }
 
     abstract handleRequest(request: TReq): Promise<TRes>;
