@@ -13,6 +13,10 @@ export default class UpdateConfigurationApiFunction extends ApiGatewayFunction<U
 
     async handleRequest(request: UpdateRequest): Promise<UpdateResponse> {
         
+        if (request.configurationType !== 'client') {
+            throw new Error(`Configuration type not supported: '${request.configurationType}'`);
+        }
+        
         const metadata: DocumentMetadata = {
             id: request.configurationType,
             type: DocumentType.Configuration,

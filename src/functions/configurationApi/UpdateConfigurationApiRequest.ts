@@ -1,6 +1,6 @@
 import { ClientConfiguration } from '../../domain/configuration';
 
 export default class UpdateConfigurationApiRequest {    
-    configurationType: 'client';
+    configurationType: string;
     configuration: ClientConfiguration
 }

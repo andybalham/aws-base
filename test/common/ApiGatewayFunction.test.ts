@@ -3,24 +3,43 @@ import { ApiGatewayFunction } from '../../src/common';
 import fs from 'fs';
 import path from 'path';
 import { expect } from 'chai';
+import { ImportMock } from 'ts-mock-imports';
+import CorrelationIds from '@dazn/lambda-powertools-correlation-ids';
 
 describe('Test ApiGatewayFunction', () => {
 
-    it('POST parses and stringifies and returns OK by default', async () => {
+    beforeEach('mock out dependencies', function () {
+    });
+    
+    afterEach('restore dependencies', function () {
+        ImportMock.restore();
+    });
+
+    it('POST parses, stringifies and returns OK and ids by default', async () => {
    
         // Arrange
 
-        class Request { input: string }        
-        class Response { output: string}
+        class Request { pathParameter: string; queryStringParameter: string; bodyParameter: string }
+        class Response { pathOutput: string; queryStringOutput: string; bodyOutput: string }
 
         class TestApiGatewayFunction extends ApiGatewayFunction<Request, Response> {
             async handleRequest(request: Request): Promise<Response> {
-                return { output: request.input};
+                return { 
+                    pathOutput: request.pathParameter,
+                    queryStringOutput: request.queryStringParameter,
+                    bodyOutput: request.bodyParameter,
+                };
             }            
         }
         
-        const request: Request = { input: 'XXX' };
-        const event = getAPIGatewayProxyPOSTEvent(request);
+        const body = { bodyParameter: 'bodyParameter' };
+        const pathParameters = { pathParameter: 'pathParameter' };
+        const queryStringParameters = { queryStringParameter: 'queryStringParameter' };
+        
+        const event = getAPIGatewayProxyPOSTEvent(body, pathParameters, queryStringParameters);
+
+        ImportMock.mockFunction(
+            CorrelationIds, 'get', { 'awsRequestId': 'requestId', 'x-correlation-id': 'correlationId'});
 
         const sutTestApiGatewayFunction = new TestApiGatewayFunction();
 
@@ -35,15 +54,21 @@ describe('Test ApiGatewayFunction', () => {
 
         const actualResponse: Response = JSON.parse(actualResult.body);
 
-        expect(actualResponse.output).to.equal(request.input);
+        expect(actualResponse['requestId']).to.equal('requestId');
+        expect(actualResponse['correlationId']).to.equal('correlationId');
+
+        expect(actualResponse.bodyOutput).to.equal(body.bodyParameter);
+        expect(actualResponse.pathOutput).to.equal(pathParameters.pathParameter);
+        expect(actualResponse.queryStringOutput).to.equal(queryStringParameters.queryStringParameter);
     });
     
     function getAPIGatewayProxyPOSTEvent(
         bodyObject: any, 
         pathParameters: { [name: string]: string } | null = null,
+        queryStringParameters: { [name: string]: string } | null = null,
     ): APIGatewayProxyEvent {
 
-        const event = getAPIGatewayProxyEvent(pathParameters);
+        const event = getAPIGatewayProxyEvent(pathParameters, queryStringParameters);
         
         event.httpMethod = 'POST';
         event.body = JSON.stringify(bodyObject);

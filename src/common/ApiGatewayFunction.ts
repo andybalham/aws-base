@@ -63,8 +63,18 @@ export abstract class ApiGatewayFunction<TReq, TRes> {
     }
 
     protected getRequest(event: APIGatewayProxyEvent): TReq {
-        // TODO 30Dec20: Add support for other ways of assembling the request, e.g. from the path and query parameters
-        return JSON.parse(event.body ?? '{}');
+        
+        const request = JSON.parse(event.body ?? '{}');
+
+        for (const name in event.pathParameters) {
+            request[name] = event.pathParameters[name];
+        }
+
+        for (const name in event.queryStringParameters) {
+            request[name] = event.queryStringParameters[name];
+        }
+
+        return request;
     }
 
     abstract handleRequest(request: TReq): Promise<TRes>;
