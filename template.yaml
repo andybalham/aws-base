@@ -161,7 +161,7 @@ Resources:
           #   RateLimit: 50
 
   AffordabilityApiFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub ${AppPrefix}-affordability-api-function
       Handler: index.handleAffordabilityApiRequest
@@ -182,11 +182,11 @@ Resources:
             Method: POST
             Path: /affordability
 
-  UpdateConfigurationApiFunction:
+  UpdateDocumentApiFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${AppPrefix}-update-configuration-api-function
-      Handler: index.handleUpdateConfigurationApiRequest
+      FunctionName: !Sub ${AppPrefix}-update-document-api-function
+      Handler: index.handleUpdateDocumentApiRequest
       Environment:
         Variables:
           FILE_BUCKET: !Ref DocumentBucket
@@ -194,31 +194,18 @@ Resources:
         - S3WritePolicy:
             BucketName: !Ref DocumentBucket
       Events:
-        HttpEvent:
+        InsertEvent:
           Type: Api
           Properties:
             RestApiId: !Ref AffordabilityApi
             Method: POST
-            Path: /document/configuration/{configurationType}
-
-  UpdateScenarioApiFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub ${AppPrefix}-update-scenario-api-function
-      Handler: index.handleUpdateScenarioApiRequest
-      Environment:
-        Variables:
-          FILE_BUCKET: !Ref DocumentBucket
-      Policies:
-        - S3WritePolicy:
-            BucketName: !Ref DocumentBucket
-      Events:
-        HttpEvent:
+            Path: /document/{type}
+        UpdateEvent:
           Type: Api
           Properties:
             RestApiId: !Ref AffordabilityApi
             Method: POST
-            Path: /scenario
+            Path: /document/{type}/{id}
 
 Outputs:
 

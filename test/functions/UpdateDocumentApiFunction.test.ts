@@ -1,4 +1,4 @@
-import * as ScenarioApi from '../../src/functions/scenarioApi';
+import * as DocumentApi from '../../src/functions/documentApi';
 import * as Services from '../../src/services';
 import * as Common from '../../src/common';
 import { expect } from 'chai';
@@ -6,7 +6,7 @@ import { DocumentMetadata, DocumentType } from '../../src/domain/document';
 import { ImportMock, MockManager } from 'ts-mock-imports';
 import { SinonStub } from 'sinon';
 
-describe('Test UpdateScenarioApiFunction', () => {
+describe('Test UpdateDocumentApiFunction', () => {
 
     let documentRepositoryMock: MockManager<Services.DocumentRepository>;
 
@@ -22,9 +22,10 @@ describe('Test UpdateScenarioApiFunction', () => {
        
         // Arrange
 
-        const request: ScenarioApi.UpdateRequest = {
+        const request: DocumentApi.UpdateRequest = {
+            type: DocumentType.Scenario,
             description: 'Expected description',
-            application: {
+            content: {
                 applicants: []
             }
         };
@@ -34,11 +35,11 @@ describe('Test UpdateScenarioApiFunction', () => {
 
         const putContentStub: SinonStub = documentRepositoryMock.mock('putContent');
     
-        const sutScenarioUpdateApiFunction = new ScenarioApi.UpdateFunction(documentRepository);
+        const sutDocumentUpdateApiFunction = new DocumentApi.UpdateFunction(documentRepository);
 
         // Act
 
-        const response = await sutScenarioUpdateApiFunction.handleRequest(request);
+        const response = await sutDocumentUpdateApiFunction.handleRequest(request);
 
         // Assert
 
@@ -56,17 +57,18 @@ describe('Test UpdateScenarioApiFunction', () => {
             description: request.description            
         });
 
-        expect(actualContent).to.deep.equal(request.application);
+        expect(actualContent).to.deep.equal(request.content);
     });    
     
     it('preserves a given id', async () => {
        
         // Arrange
 
-        const request: ScenarioApi.UpdateRequest = {
+        const request: DocumentApi.UpdateRequest = {
             id: 'ExpectedID',
+            type: DocumentType.Scenario,
             description: 'Expected description',
-            application: {
+            content: {
                 applicants: []
             }
         };
@@ -76,11 +78,11 @@ describe('Test UpdateScenarioApiFunction', () => {
 
         const putContentStub: SinonStub = documentRepositoryMock.mock('putContent');
     
-        const sutScenarioUpdateApiFunction = new ScenarioApi.UpdateFunction(documentRepository);
+        const sutDocumentUpdateApiFunction = new DocumentApi.UpdateFunction(documentRepository);
 
         // Act
 
-        const response = await sutScenarioUpdateApiFunction.handleRequest(request);
+        const response = await sutDocumentUpdateApiFunction.handleRequest(request);
 
         // Assert
 
@@ -98,6 +100,6 @@ describe('Test UpdateScenarioApiFunction', () => {
             description: request.description            
         });
 
-        expect(actualContent).to.deep.equal(request.application);
+        expect(actualContent).to.deep.equal(request.content);
     });    
 });

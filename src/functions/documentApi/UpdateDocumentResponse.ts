@@ -1,6 +1,6 @@
 import { DocumentType } from '../../domain/document';
 
-export default class UpdateScenarioResponse {
+export default class UpdateDocumentResponse {
     documentType: DocumentType;
     documentId: string;
 }
