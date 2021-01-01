@@ -3,7 +3,7 @@ import DynamoDBStreamFunction, { DynamoDBEventTypes } from '../../common/DynamoD
 import SNSClient from '../../common/SNSClient';
 import { DocumentIndex } from '../../domain/document';
 
-export default class DocumentUpdatePublisherFunction extends DynamoDBStreamFunction<DocumentIndex> {
+export default class DocumentIndexUpdatePublisherFunction extends DynamoDBStreamFunction<DocumentIndex> {
 
     constructor(private documentUpdateTopic: SNSClient) {
         super();

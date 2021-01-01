@@ -29,6 +29,8 @@ export default class SNSClient {
             MessageAttributes: this.getMessageAttributeMap(attributes),
         };
         
+        console.log(`publishInput: ${JSON.stringify(publishInput)}`);
+        
         const publishResponse = await this.sns.publish(publishInput).promise();
 
         return publishResponse;

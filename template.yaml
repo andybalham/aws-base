@@ -67,7 +67,7 @@ Resources:
           - Event: 's3:ObjectCreated:*'
             Topic: !Ref DocumentUpdateTopic
 
-  DocumentIndexTable:    
+  DocumentIndexTable:
     Type: AWS::DynamoDB::Table
     Properties: 
       TableName: !Sub ${AppPrefix}-document-index-table
@@ -96,7 +96,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub ${AppPrefix}-document-indexer-function
-      Handler: index.handleDocumentUpdate
+      Handler: index.handleDocumentIndexerFunction
       Environment:
         Variables:
           # UNPROCESSED_UPDATE_QUEUE_URL: !Ref UnprocessedFileUpdateQueue
@@ -114,26 +114,26 @@ Resources:
           Properties:
             Topic: !Ref DocumentUpdateTopic
 
-  DocumentUpdateTopic:
+  DocumentIndexUpdateTopic:
     Type: AWS::SNS::Topic
     Properties:
       TopicName:
-        Fn::Sub: ${AppPrefix}-document-update-topic
+        Fn::Sub: ${AppPrefix}-document-index-update-topic
 
-  DocumentUpdatePublisherFunction:
+  DocumentIndexUpdatePublisherFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${AppPrefix}-document-update-publisher-function
-      Handler: index.handleDocumentIndexStream
+      FunctionName: !Sub ${AppPrefix}-document-index-update-publisher-function
+      Handler: index.handleDocumentIndexUpdatePublisherFunction
       Environment:
         Variables:
-          DOCUMENT_UPDATE_TOPIC: !Ref DocumentUpdateTopic
+          DOCUMENT_UPDATE_TOPIC: !Ref DocumentIndexUpdateTopic
       Policies:
         - DynamoDBStreamReadPolicy:
             TableName: !Ref DocumentIndexTable
             StreamName: "*"
         - SNSPublishMessagePolicy:
-            TopicName: !GetAtt DocumentUpdateTopic.TopicName
+            TopicName: !GetAtt DocumentIndexUpdateTopic.TopicName
       Events:
         DatabaseEvent:
           Type: DynamoDB
@@ -142,6 +142,63 @@ Resources:
             Enabled: !Ref EnableSQS
             MaximumRetryAttempts: 0
             StartingPosition: TRIM_HORIZON
+
+  RecalculationInitiatorSubscription:
+    Type: AWS::SNS::Subscription
+    Properties: 
+      Endpoint: !GetAtt RecalculationInitiatorQueue.Arn
+      FilterPolicy: 
+        documentType: [ configuration, scenario, product ]
+      Protocol: sqs
+      TopicArn: !Ref DocumentIndexUpdateTopic
+
+  RecalculationInitiatorQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub ${AppPrefix}-recalculation-initiator-queue
+      ReceiveMessageWaitTimeSeconds: 20
+      VisibilityTimeout: 60
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt RecalculationInitiatorDLQ.Arn
+        maxReceiveCount: 1
+
+  RecalculationInitiatorDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub ${AppPrefix}-recalculation-initiator-dlq
+      ReceiveMessageWaitTimeSeconds: 20
+      VisibilityTimeout: 18
+
+  RecalculationInitiatorQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties: 
+      Queues: 
+        - !Ref RecalculationInitiatorQueue
+      PolicyDocument: 
+        Statement: 
+          - 
+            Action: 
+              - SQS:SendMessage
+            Effect: Allow
+            Resource: !GetAtt RecalculationInitiatorQueue.Arn
+            Principal:  
+              Service: sns.amazonaws.com # TODO: Could this be more restrictive?
+
+  RecalculationInitiatorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AppPrefix}-recalculation-initiator-function
+      Handler: index.handleRecalculationInitiatorFunction
+      Policies:
+        - SQSPollerPolicy:
+            QueueName: !GetAtt RecalculationInitiatorQueue.QueueName
+      Events:
+        UnprocessedUpdateEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt RecalculationInitiatorQueue.Arn
+            BatchSize: 10
+            Enabled: !Ref EnableSQS
 
   AffordabilityApi:
     Type: AWS::Serverless::Api
@@ -164,7 +221,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub ${AppPrefix}-affordability-api-function
-      Handler: index.handleAffordabilityApiRequest
+      Handler: index.handleAffordabilityApiFunction
       Environment:
         Variables:
           FILE_BUCKET: !Ref DocumentBucket
@@ -182,11 +239,11 @@ Resources:
             Method: POST
             Path: /affordability
 
-  UpdateDocumentApiFunction:
+  DocumentApiUpdateFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${AppPrefix}-update-document-api-function
-      Handler: index.handleUpdateDocumentApiRequest
+      FunctionName: !Sub ${AppPrefix}-document-api-update-function
+      Handler: index.handleDocumentApiUpdateFunction
       Environment:
         Variables:
           FILE_BUCKET: !Ref DocumentBucket

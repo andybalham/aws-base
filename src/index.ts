@@ -10,9 +10,10 @@ import DynamoDBClient from './common/DynamoDBClient';
 import SNSClient from './common/SNSClient';
 
 import * as AffordabilityApi from './functions/affordabilityApi';
-import * as DocumentUpdatePublisher from './functions/documentUpdatePublisher';
+import * as DocumentIndexUpdatePublisher from './functions/documentIndexUpdatePublisher';
 import * as DocumentIndexer from './functions/documentIndexer';
 import * as DocumentApi from './functions/documentApi';
+import * as RecalculationInitiator from './functions/recalculationInitiator';
 
 // TODO 24Nov20: How would we initialise components that require environment variables set by middleware?
 
@@ -24,7 +25,7 @@ const productEngine = new ProductEngine();
 
 const affordabilityApiFunction = new AffordabilityApi.Function(documentRepository, productEngine);
 
-export const handleAffordabilityApiRequest = 
+export const handleAffordabilityApiFunction = 
     middy(async (event: any, context: Context): Promise<any> => {
         return affordabilityApiFunction.handle(event, context);
     })
@@ -32,11 +33,11 @@ export const handleAffordabilityApiRequest =
         .use(httpErrorHandler()); // handles common http errors and returns proper responses
 
 
-const updateDocumentApiFunction = new DocumentApi.UpdateFunction(documentRepository);
+const documentApiUpdateFunction = new DocumentApi.UpdateFunction(documentRepository);
 
-export const handleUpdateDocumentApiRequest = 
+export const handleDocumentApiUpdateFunction = 
     middy(async (event: any, context: Context): Promise<any> => {
-        return updateDocumentApiFunction.handle(event, context);
+        return documentApiUpdateFunction.handle(event, context);
     })
         .use(correlationIds({ sampleDebugLogRate: 0.01 }))
         .use(httpErrorHandler()); // handles common http errors and returns proper responses
@@ -44,17 +45,26 @@ export const handleUpdateDocumentApiRequest =
 
 const documentIndexerFunction = new DocumentIndexer.Function(s3Client, documentIndexDynamoDbClient);
 
-export const handleDocumentUpdate = 
+export const handleDocumentIndexerFunction = 
     middy(async (event: any, context: Context): Promise<any> => {
         documentIndexerFunction.handle(event, context);
     })
         .use(correlationIds({ sampleDebugLogRate: 0.01 }));
             
 
-const documentUpdatePublisherFunction = new DocumentUpdatePublisher.Function(documentUpdateSNSClient);
+const documentIndexUpdatePublisherFunction = new DocumentIndexUpdatePublisher.Function(documentUpdateSNSClient);
 
-export const handleDocumentIndexStream = 
+export const handleDocumentIndexUpdatePublisherFunction = 
     middy(async (event: any, context: Context): Promise<any> => {
-        documentUpdatePublisherFunction.handle(event, context);
+        documentIndexUpdatePublisherFunction.handle(event, context);
+    })
+        .use(correlationIds({ sampleDebugLogRate: 0.01 }));
+
+
+const recalculationInitiatorFunction = new RecalculationInitiator.Function();
+
+export const handleRecalculationInitiatorFunction =
+    middy(async (event: any, context: Context): Promise<any> => {
+        recalculationInitiatorFunction.handle(event, context);
     })
         .use(correlationIds({ sampleDebugLogRate: 0.01 }));

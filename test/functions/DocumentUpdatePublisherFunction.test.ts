@@ -3,7 +3,7 @@ import { SinonStub } from 'sinon';
 import { ImportMock, MockManager } from 'ts-mock-imports';
 import * as Common from '../../src/common';
 import { DocumentIndex, DocumentType } from '../../src/domain/document';
-import * as DocumentUpdatePublisher from '../../src/functions/documentUpdatePublisher/index';
+import * as DocumentIndexUpdatePublisher from '../../src/functions/documentIndexUpdatePublisher';
 
 describe('Test DocumentUpdatePublisherFunction', () => {
 
@@ -23,7 +23,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
 
         const publishMessageStub: SinonStub = snsClientMock.mock('publishMessage');
 
-        const sutDocumentUpdatePublisherFunction = new DocumentUpdatePublisher.Function(new Common.SNSClient);
+        const sutDocumentIndexUpdatePublisherFunction = new DocumentIndexUpdatePublisher.Function(new Common.SNSClient);
 
         const newImage: DocumentIndex = {
             documentId: 'documentId',
@@ -35,7 +35,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
 
         // Act
 
-        await sutDocumentUpdatePublisherFunction.processEventRecord('INSERT', undefined, newImage);
+        await sutDocumentIndexUpdatePublisherFunction.processEventRecord('INSERT', undefined, newImage);
 
         // Assert
 
@@ -54,7 +54,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
 
         const publishMessageStub: SinonStub = snsClientMock.mock('publishMessage');
 
-        const sutDocumentUpdatePublisherFunction = new DocumentUpdatePublisher.Function(new Common.SNSClient);
+        const sutDocumentIndexUpdatePublisherFunction = new DocumentIndexUpdatePublisher.Function(new Common.SNSClient);
 
         const Image: DocumentIndex = {
             documentId: 'documentId',
@@ -74,7 +74,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
 
         // Act
 
-        await sutDocumentUpdatePublisherFunction.processEventRecord('MODIFY', Image, newImage);
+        await sutDocumentIndexUpdatePublisherFunction.processEventRecord('MODIFY', Image, newImage);
 
         // Assert
 
@@ -93,7 +93,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
 
         const publishMessageStub: SinonStub = snsClientMock.mock('publishMessage');
 
-        const sutDocumentUpdatePublisherFunction = new DocumentUpdatePublisher.Function(new Common.SNSClient);
+        const sutDocumentIndexUpdatePublisherFunction = new DocumentIndexUpdatePublisher.Function(new Common.SNSClient);
 
         const image: DocumentIndex = {
             documentId: 'documentId',
@@ -105,7 +105,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
 
         // Act
 
-        await sutDocumentUpdatePublisherFunction.processEventRecord('MODIFY', image, image);
+        await sutDocumentIndexUpdatePublisherFunction.processEventRecord('MODIFY', image, image);
 
         // Assert
 
@@ -118,7 +118,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
 
         const publishMessageStub: SinonStub = snsClientMock.mock('publishMessage');
 
-        const sutDocumentUpdatePublisherFunction = new DocumentUpdatePublisher.Function(new Common.SNSClient);
+        const sutDocumentIndexUpdatePublisherFunction = new DocumentIndexUpdatePublisher.Function(new Common.SNSClient);
 
         const oldImage: DocumentIndex = {
             documentId: 'documentId',
@@ -130,7 +130,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
 
         // Act
 
-        await sutDocumentUpdatePublisherFunction.processEventRecord('REMOVE', oldImage, undefined);
+        await sutDocumentIndexUpdatePublisherFunction.processEventRecord('REMOVE', oldImage, undefined);
 
         // Assert
 
