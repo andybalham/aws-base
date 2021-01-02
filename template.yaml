@@ -11,8 +11,8 @@ Parameters:
     Type: String
   AppPrefix:
     Type: String
-  # ApiVersion:
-  #   Type: String
+  AssetVersion:
+    Type: String
   EnableSQS:
     Type: String
     AllowedValues: [true, false]
@@ -189,9 +189,14 @@ Resources:
     Properties:
       FunctionName: !Sub ${AppPrefix}-recalculation-initiator-function
       Handler: index.handleRecalculationInitiatorFunction
+      Environment:
+        Variables:
+          RECALCULATION_STATE_MACHINE_ARN: !Ref RecalculationStateMachine
       Policies:
         - SQSPollerPolicy:
             QueueName: !GetAtt RecalculationInitiatorQueue.QueueName
+        - StepFunctionsExecutionPolicy:
+            StateMachineName: !GetAtt RecalculationStateMachine.Name
       Events:
         UnprocessedUpdateEvent:
           Type: SQS
@@ -199,6 +204,19 @@ Resources:
             Queue: !GetAtt RecalculationInitiatorQueue.Arn
             BatchSize: 10
             Enabled: !Ref EnableSQS
+
+  RecalculationStateMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      Name: !Sub ${AppPrefix}-recalculation-state-machine
+      # TODO: For express state machines we need to add logging: https://www.davehall.com.au/blog/dave/2020/07/10/logging-step-functions-cloudwatch
+      # Type: EXPRESS
+      Type: STANDARD
+      DefinitionUri:
+        Bucket: !Sub ${SourceBucket}
+        Key: !Sub ${StackName}/statemachine-${AssetVersion}/recalculation.asl.json
+      Policies:
+        - AWSLambdaRole
 
   AffordabilityApi:
     Type: AWS::Serverless::Api

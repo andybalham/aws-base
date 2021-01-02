@@ -1,25 +1,28 @@
-import { SNSEvent } from 'aws-lambda';
-import SNSFunction from '../../common/SNSFunction';
+import { SNSMessage } from 'aws-lambda';
 import SQSFunction from '../../common/SQSFunction';
-import { DocumentIndex } from '../../domain/document';
+import StepFunctions, { StartExecutionInput } from 'aws-sdk/clients/stepfunctions';
 
-export default class RecalculationInitiatorFunction extends SQSFunction<SNSEvent> {
+const stepFunctions = new StepFunctions();
 
-    private readonly snsHandler: SNSHandler;
+export default class RecalculationInitiatorFunction extends SQSFunction<SNSMessage> {
 
     constructor() {
         super();
-        this.snsHandler = new SNSHandler();
     }
 
-    async handleMessage(message: SNSEvent): Promise<void> {
-        await this.snsHandler.handle(message, this.context);
-    }
-}
+    async handleMessage(message: SNSMessage): Promise<void> {
+        
+        const documentIndexJson = message.Message;    
+        const recalculationStateMachineArn = process.env.RECALCULATION_STATE_MACHINE_ARN ?? 'undefined';
 
-class SNSHandler extends SNSFunction<DocumentIndex> {
-
-    async handleMessage(message: DocumentIndex): Promise<void> {
-        console.log(`message: ${JSON.stringify(message)}`);
+        const params: StartExecutionInput = {
+            stateMachineArn: recalculationStateMachineArn,
+            input: documentIndexJson
+        };
+    
+        stepFunctions.startExecution(params, function(err, data) {
+            if (err) console.log(err, err.stack); // an error occurred
+            else     console.log(data);           // successful response
+        });        
     }
 }
