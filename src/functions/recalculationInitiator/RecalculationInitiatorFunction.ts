@@ -1,28 +1,21 @@
 import { SNSMessage } from 'aws-lambda';
-import SQSFunction from '../../common/SQSFunction';
-import StepFunctions, { StartExecutionInput } from 'aws-sdk/clients/stepfunctions';
-
-const stepFunctions = new StepFunctions();
+import { SQSFunction, StepFunctionClient } from '../../common';
+import { DocumentIndex } from '../../domain/document';
 
 export default class RecalculationInitiatorFunction extends SQSFunction<SNSMessage> {
 
-    constructor() {
+    constructor(private recalculationStepFunctionClient: StepFunctionClient) {
         super();
     }
 
     async handleMessage(message: SNSMessage): Promise<void> {
         
-        const documentIndexJson = message.Message;    
-        const recalculationStateMachineArn = process.env.RECALCULATION_STATE_MACHINE_ARN ?? 'undefined';
+        const documentIndex: DocumentIndex = JSON.parse(message.Message);
 
-        const params: StartExecutionInput = {
-            stateMachineArn: recalculationStateMachineArn,
-            input: documentIndexJson
-        };
-    
-        stepFunctions.startExecution(params, function(err, data) {
-            if (err) console.log(err, err.stack); // an error occurred
-            else     console.log(data);           // successful response
-        });        
+        await this.recalculationStepFunctionClient
+            .startExecution({
+                documentType: documentIndex.documentType,
+                documentId: documentIndex.documentId,
+            });
     }
 }

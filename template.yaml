@@ -242,7 +242,7 @@ Resources:
       Handler: index.handleAffordabilityApiFunction
       Environment:
         Variables:
-          FILE_BUCKET: !Ref DocumentBucket
+          DOCUMENT_BUCKET: !Ref DocumentBucket
           DOCUMENT_INDEX_TABLE_NAME: !Ref DocumentIndexTable
       Policies:
         - S3ReadPolicy:
@@ -264,7 +264,7 @@ Resources:
       Handler: index.handleDocumentApiUpdateFunction
       Environment:
         Variables:
-          FILE_BUCKET: !Ref DocumentBucket
+          DOCUMENT_BUCKET: !Ref DocumentBucket
       Policies:
         - S3WritePolicy:
             BucketName: !Ref DocumentBucket

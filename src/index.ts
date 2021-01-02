@@ -8,6 +8,7 @@ import { DocumentRepository, ProductEngine } from './services';
 import S3Client from './common/S3Client';
 import DynamoDBClient from './common/DynamoDBClient';
 import SNSClient from './common/SNSClient';
+import StepFunctionClient from './common/StepFunctionClient';
 
 import * as AffordabilityApi from './functions/affordabilityApi';
 import * as DocumentIndexUpdatePublisher from './functions/documentIndexUpdatePublisher';
@@ -17,11 +18,16 @@ import * as RecalculationInitiator from './functions/recalculationInitiator';
 
 // TODO 24Nov20: How would we initialise components that require environment variables set by middleware?
 
-const s3Client = new S3Client();
-const documentIndexDynamoDbClient = new DynamoDBClient(process.env.DOCUMENT_INDEX_TABLE_NAME);
-const documentRepository = new DocumentRepository(new S3Client(process.env.FILE_BUCKET), documentIndexDynamoDbClient);
-const documentUpdateSNSClient = new SNSClient(process.env.DOCUMENT_UPDATE_TOPIC);
 const productEngine = new ProductEngine();
+
+const s3Client = new S3Client();
+const documentS3Client = new S3Client(process.env.DOCUMENT_BUCKET);
+const documentIndexDynamoDbClient = new DynamoDBClient(process.env.DOCUMENT_INDEX_TABLE_NAME);
+const documentUpdateSNSClient = new SNSClient(process.env.DOCUMENT_UPDATE_TOPIC);
+const recalculationStepFunctionClient = new StepFunctionClient(process.env.RECALCULATION_STATE_MACHINE_ARN);
+
+const documentRepository = new DocumentRepository(documentS3Client, documentIndexDynamoDbClient);
+
 
 const affordabilityApiFunction = new AffordabilityApi.Function(documentRepository, productEngine);
 
@@ -61,7 +67,7 @@ export const handleDocumentIndexUpdatePublisherFunction =
         .use(correlationIds({ sampleDebugLogRate: 0.01 }));
 
 
-const recalculationInitiatorFunction = new RecalculationInitiator.Function();
+const recalculationInitiatorFunction = new RecalculationInitiator.Function(recalculationStepFunctionClient);
 
 export const handleRecalculationInitiatorFunction =
     middy(async (event: any, context: Context): Promise<any> => {
