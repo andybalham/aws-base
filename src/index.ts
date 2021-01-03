@@ -14,6 +14,7 @@ import * as AffordabilityApi from './functions/affordabilityApi';
 import * as DocumentIndexUpdatePublisher from './functions/documentIndexUpdatePublisher';
 import * as DocumentIndexer from './functions/documentIndexer';
 import * as DocumentApi from './functions/documentApi';
+import * as RecalculationTrigger from './functions/recalculationTrigger';
 import * as RecalculationInitiator from './functions/recalculationInitiator';
 
 // TODO 24Nov20: How would we initialise components that require environment variables set by middleware?
@@ -28,6 +29,7 @@ const recalculationStepFunctionClient = new StepFunctionClient(process.env.RECAL
 
 const documentRepository = new DocumentRepository(documentS3Client, documentIndexDynamoDbClient);
 
+// Functions
 
 const affordabilityApiFunction = new AffordabilityApi.Function(documentRepository, productEngine);
 
@@ -67,8 +69,16 @@ export const handleDocumentIndexUpdatePublisherFunction =
         .use(correlationIds({ sampleDebugLogRate: 0.01 }));
 
 
-const recalculationInitiatorFunction = 
-    new RecalculationInitiator.Function(documentRepository, recalculationStepFunctionClient);
+const recalculationTriggerFunction = new RecalculationTrigger.Function(recalculationStepFunctionClient);
+    
+export const handleRecalculationTriggerFunction =
+    middy(async (event: any, context: Context): Promise<any> => {
+        recalculationTriggerFunction.handle(event, context);
+    })
+        .use(correlationIds({ sampleDebugLogRate: 0.01 }));
+    
+
+const recalculationInitiatorFunction = new RecalculationInitiator.Function(documentRepository);
 
 export const handleRecalculationInitiatorFunction =
     middy(async (event: any, context: Context): Promise<any> => {

@@ -1,46 +1,41 @@
-import { SNSMessage } from 'aws-lambda';
-import { SQSFunction, StepFunctionClient } from '../../common';
-import { DocumentIndex, DocumentType } from '../../domain/document';
+import { ActivityFunction } from '../../common';
+import { Request, Response} from '.';
+import { DocumentType } from '../../domain/document';
 import { DocumentRepository } from '../../services';
-import * as Recalculator from '../recalculator';
 
-export default class RecalculationInitiatorFunction extends SQSFunction<SNSMessage> {
+// TODO 03Jan21: Rename all RecalculationInitialiser and TaskFunction
+export default class RecalculationInitiatorFunction extends ActivityFunction<Request, Response> {
 
-    constructor(private documentRepository: DocumentRepository, private recalculationStepFunctionClient: StepFunctionClient) {
+    constructor(private documentRepository: DocumentRepository) {
         super();
     }
 
-    async handleMessage(message: SNSMessage): Promise<void> {
+    async handleRequest(request: Request): Promise<Response> {
         
-        const documentIndex: DocumentIndex = JSON.parse(message.Message);
+        let response: Response;
 
-        let recalculatorRequests: Recalculator.Request[];
-
-        switch (documentIndex.documentType) {
+        switch (request.documentType) {
 
         case DocumentType.Configuration:
-            recalculatorRequests = 
-                await this.getConfigurationRecalculatorRequest(documentIndex.documentId);
+            response = await this.getConfigurationRecalculatorRequests(request.documentId);
             break;
             
         case DocumentType.Scenario:
-            recalculatorRequests = 
-                await this.getScenarioRecalculatorRequest(documentIndex.documentId);
+            response = await this.getScenarioRecalculatorRequests(request.documentId);
             break;
             
         case DocumentType.Product:
-            recalculatorRequests = 
-                    await this.getProductRecalculatorRequest(documentIndex.documentId);
+            response = await this.getProductRecalculatorRequests(request.documentId);
             break;
             
         default:
-            throw new Error(`Unhandled document type: ${documentIndex.documentType}`);
+            throw new Error(`Unhandled document type: ${request.documentType}`);
         }
 
-        await this.recalculationStepFunctionClient.startExecution(recalculatorRequests);
+        return response;
     }
 
-    async getConfigurationRecalculatorRequest(configurationId: string): Promise<Recalculator.Request[]> {
+    async getConfigurationRecalculatorRequests(configurationId: string): Promise<Response> {
         
         const scenarioIds = (await this.documentRepository.listScenarios()).map(index => index.documentId);
         const productIds = (await this.documentRepository.listProducts()).map(index => index.documentId);
@@ -50,7 +45,7 @@ export default class RecalculationInitiatorFunction extends SQSFunction<SNSMessa
         return recalculatorRequests;
     }
 
-    async getScenarioRecalculatorRequest(scenarioId: string): Promise<Recalculator.Request[]> {
+    async getScenarioRecalculatorRequests(scenarioId: string): Promise<Response> {
         
         const configurationIds = (await this.documentRepository.listConfigurations()).map(index => index.documentId);
         const productIds = (await this.documentRepository.listProducts()).map(index => index.documentId);
@@ -60,7 +55,7 @@ export default class RecalculationInitiatorFunction extends SQSFunction<SNSMessa
         return recalculatorRequests;
     }
 
-    async getProductRecalculatorRequest(productId: string): Promise<Recalculator.Request[]> {
+    async getProductRecalculatorRequests(productId: string): Promise<Response> {
         
         const configurationIds = (await this.documentRepository.listConfigurations()).map(index => index.documentId);
         const scenarioIds = (await this.documentRepository.listScenarios()).map(index => index.documentId);
@@ -74,9 +69,9 @@ export default class RecalculationInitiatorFunction extends SQSFunction<SNSMessa
         configurationIds: string[],
         scenarioIds: string[], 
         productIds: string[], 
-    ): Recalculator.Request[] {
+    ): Response {
 
-        const recalculatorRequests: Recalculator.Request[] = [];
+        const recalculatorRequests: Response = [];
 
         for (const configurationId of configurationIds) {
             for (const scenarioId of scenarioIds) {

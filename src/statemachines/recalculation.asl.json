@@ -1,15 +1,10 @@
 {
-  "Comment": "A Hello World example of the Amazon States Language using Pass states",
-  "StartAt": "Hello",
+  "Comment": "Recalculates the results for each combination of configuration, scenario and product",
+  "StartAt": "InitialiseRecalculation",
   "States": {
-    "Hello": {
-      "Type": "Pass",
-      "Result": "Hello",
-      "Next": "World"
-    },
-    "World": {
-      "Type": "Pass",
-      "Result": "World",
+    "InitialiseRecalculation": {
+      "Type": "Task",
+      "Resource": "${RecalculationInitiatorFunctionArn}",
       "End": true
     }
   }

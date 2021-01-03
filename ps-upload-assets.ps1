@@ -8,7 +8,7 @@ Foreach-Object {
     aws s3 cp $_.FullName $S3Location
 }
 
-Get-ChildItem ".\src\statemachines" |
+Get-ChildItem ".\src\statemachines\*.asl.json" |
 Foreach-Object {
     $S3Location = "s3://agb-app-source/$StackName/statemachine-$AssetVersion/" + $_.Name
     aws s3 cp $_.FullName $S3Location

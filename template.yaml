@@ -141,46 +141,67 @@ Resources:
             MaximumRetryAttempts: 0
             StartingPosition: TRIM_HORIZON
 
-  RecalculationInitiatorSubscription:
+  RecalculationTriggerSubscription:
     Type: AWS::SNS::Subscription
     Properties: 
-      Endpoint: !GetAtt RecalculationInitiatorQueue.Arn
+      Endpoint: !GetAtt RecalculationTriggerQueue.Arn
       FilterPolicy: 
         documentType: [ configuration, scenario, product ]
       Protocol: sqs
       TopicArn: !Ref DocumentIndexUpdateTopic
 
-  RecalculationInitiatorQueue:
+  RecalculationTriggerQueue:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: !Sub ${AppPrefix}-recalculation-initiator-queue
+      QueueName: !Sub ${AppPrefix}-recalculation-trigger-queue
       ReceiveMessageWaitTimeSeconds: 20
       VisibilityTimeout: 60
       RedrivePolicy:
-        deadLetterTargetArn: !GetAtt RecalculationInitiatorDLQ.Arn
+        deadLetterTargetArn: !GetAtt RecalculationTriggerDLQ.Arn
         maxReceiveCount: 1
 
-  RecalculationInitiatorDLQ:
+  RecalculationTriggerDLQ:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: !Sub ${AppPrefix}-recalculation-initiator-dlq
+      QueueName: !Sub ${AppPrefix}-recalculation-trigger-dlq
       ReceiveMessageWaitTimeSeconds: 20
       VisibilityTimeout: 18
 
-  RecalculationInitiatorQueuePolicy:
+  RecalculationTriggerQueuePolicy:
     Type: AWS::SQS::QueuePolicy
     Properties: 
       Queues: 
-        - !Ref RecalculationInitiatorQueue
+        - !Ref RecalculationTriggerQueue
       PolicyDocument: 
         Statement: 
           - 
             Action: 
               - SQS:SendMessage
             Effect: Allow
-            Resource: !GetAtt RecalculationInitiatorQueue.Arn
+            Resource: !GetAtt RecalculationTriggerQueue.Arn
             Principal:  
               Service: sns.amazonaws.com # TODO: Could this be more restrictive?
+
+  RecalculationTriggerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AppPrefix}-recalculation-trigger-function
+      Handler: index.handleRecalculationTriggerFunction
+      Environment:
+        Variables:
+          RECALCULATION_STATE_MACHINE_ARN: !Ref RecalculationStateMachine
+      Policies:
+        - SQSPollerPolicy:
+            QueueName: !GetAtt RecalculationTriggerQueue.QueueName
+        - StepFunctionsExecutionPolicy:
+            StateMachineName: !GetAtt RecalculationStateMachine.Name
+      Events:
+        UnprocessedUpdateEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt RecalculationTriggerQueue.Arn
+            BatchSize: 10
+            Enabled: !Ref EnableSQS
 
   RecalculationInitiatorFunction:
     Type: AWS::Serverless::Function
@@ -189,22 +210,10 @@ Resources:
       Handler: index.handleRecalculationInitiatorFunction
       Environment:
         Variables:
-          RECALCULATION_STATE_MACHINE_ARN: !Ref RecalculationStateMachine
           DOCUMENT_INDEX_TABLE_NAME: !Ref DocumentIndexTable
       Policies:
-        - SQSPollerPolicy:
-            QueueName: !GetAtt RecalculationInitiatorQueue.QueueName
         - DynamoDBReadPolicy:
             TableName: !Ref DocumentIndexTable
-        - StepFunctionsExecutionPolicy:
-            StateMachineName: !GetAtt RecalculationStateMachine.Name
-      Events:
-        UnprocessedUpdateEvent:
-          Type: SQS
-          Properties:
-            Queue: !GetAtt RecalculationInitiatorQueue.Arn
-            BatchSize: 10
-            Enabled: !Ref EnableSQS
 
   RecalculationStateMachine:
     Type: AWS::Serverless::StateMachine
@@ -216,6 +225,8 @@ Resources:
       DefinitionUri:
         Bucket: !Sub ${SourceBucket}
         Key: !Sub ${StackName}/statemachine-${AssetVersion}/recalculation.asl.json
+      DefinitionSubstitutions:
+        RecalculationInitiatorFunctionArn: !GetAtt RecalculationInitiatorFunction.Arn
       Policies:
         - AWSLambdaRole
 

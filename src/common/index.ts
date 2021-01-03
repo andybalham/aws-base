@@ -1,3 +1,4 @@
+import ActivityFunction from './ActivityFunction';
 import { ApiGatewayFunction } from './ApiGatewayFunction';
 import DynamoDBClient from './DynamoDBClient';
 import DynamoDBStreamFunction from './DynamoDBStreamFunction';
@@ -8,6 +9,7 @@ import SQSFunction from './SQSFunction';
 import StepFunctionClient from './StepFunctionClient';
 
 export {
+    ActivityFunction,
     ApiGatewayFunction,
     SNSFunction,
     SQSFunction,
