@@ -1,7 +1,7 @@
 import { Context } from 'aws-lambda/handler';
 import Log from '@dazn/lambda-powertools-logger';
 
-export default abstract class ActivityFunction<TReq, TRes> {
+export default abstract class TaskFunction<TReq, TRes> {
     
     context: Context;
 

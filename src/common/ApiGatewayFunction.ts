@@ -7,7 +7,7 @@ import CorrelationIds from '@dazn/lambda-powertools-correlation-ids';
 
 import { HttpStatusCode } from './HttpStatusCode';
 
-export abstract class ApiGatewayFunction<TReq, TRes> {
+export default abstract class ApiGatewayFunction<TReq, TRes> {
 
     responseStatusCode = HttpStatusCode.OK;
     includeCorrelationAndRequestIds = true;

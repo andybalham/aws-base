@@ -1,10 +1,10 @@
-import { ActivityFunction } from '../../common';
+import { TaskFunction } from '../../common';
 import { Request, Response} from '.';
 import { DocumentType } from '../../domain/document';
 import { DocumentRepository } from '../../services';
 
 // TODO 03Jan21: Rename all RecalculationInitialiser and TaskFunction
-export default class RecalculationInitiatorFunction extends ActivityFunction<Request, Response> {
+export default class RecalculationInitiatorFunction extends TaskFunction<Request, Response> {
 
     constructor(private documentRepository: DocumentRepository) {
         super();

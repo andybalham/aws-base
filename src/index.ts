@@ -82,6 +82,6 @@ const recalculationInitiatorFunction = new RecalculationInitiator.Function(docum
 
 export const handleRecalculationInitiatorFunction =
     middy(async (event: any, context: Context): Promise<any> => {
-        recalculationInitiatorFunction.handle(event, context);
+        return recalculationInitiatorFunction.handle(event, context);
     })
         .use(correlationIds({ sampleDebugLogRate: 0.01 }));
