@@ -1,4 +1,3 @@
-import Log from '@dazn/lambda-powertools-logger';
 import DynamoDBStreamFunction, { DynamoDBEventTypes } from '../../common/DynamoDBStreamFunction';
 import SNSClient from '../../common/SNSClient';
 import { DocumentIndex } from '../../domain/document';
@@ -19,12 +18,8 @@ export default class DocumentIndexUpdatePublisherFunction extends DynamoDBStream
             (eventType === 'INSERT')
             || ((eventType === 'MODIFY') && (newImage?.s3ETag !== oldImage?.s3ETag));
 
-        if (isDocumentUpdate && newImage) {
-            
-            const response = 
-                await this.documentUpdateTopic.publishMessage(newImage, { documentType: newImage.documentType });
-
-            Log.debug('Published document update message', {response});
+        if (isDocumentUpdate && newImage) {            
+            await this.documentUpdateTopic.publishMessage(newImage, { documentType: newImage.documentType });
         }
     }
 }

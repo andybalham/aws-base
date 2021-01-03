@@ -1,3 +1,4 @@
+import Log from '@dazn/lambda-powertools-logger';
 import SNS, { MessageAttributeMap, MessageAttributeValue, PublishInput, PublishResponse } from 'aws-sdk/clients/sns';
 import https from 'https';
 
@@ -29,9 +30,11 @@ export default class SNSClient {
             MessageAttributes: this.getMessageAttributeMap(attributes),
         };
         
-        console.log(`publishInput: ${JSON.stringify(publishInput)}`);
+        Log.debug('Publishing', {topicName: this.topicName, publishInput});
         
         const publishResponse = await this.sns.publish(publishInput).promise();
+
+        Log.debug('Published', {topicName: this.topicName, publishResponse});
 
         return publishResponse;
     }

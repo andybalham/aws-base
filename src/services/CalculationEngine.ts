@@ -1,9 +1,9 @@
 import { CalculationResults } from '../domain/calculation';
-import { ClientConfiguration } from '../domain/configuration';
+import { Configuration } from '../domain/configuration';
 import { Application } from '../domain/input';
 
 export default class CalculationEngine {
-    evaluate(application: Application, clientConfiguration: ClientConfiguration): CalculationResults {
+    evaluate(application: Application, configuration: Configuration): CalculationResults {
 
         const applicableIncome =
             application.applicants
@@ -14,10 +14,10 @@ export default class CalculationEngine {
                     ].map(employedAmounts => {
                         if (employedAmounts) {
                             let amountUsed = 
-                                employedAmounts.basicSalary * clientConfiguration.basicSalaryUsed;
+                                employedAmounts.basicSalary * configuration.basicSalaryUsed;
                             if (employedAmounts.overtime) {
                                 amountUsed += 
-                                    employedAmounts.overtime * clientConfiguration.overtimeUsed;
+                                    employedAmounts.overtime * configuration.overtimeUsed;
                             }
                             return amountUsed;
                         }

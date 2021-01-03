@@ -1,19 +1,19 @@
 import { CalculationEngine } from '.';
-import { ClientConfiguration } from '../domain/configuration';
+import { Configuration } from '../domain/configuration';
 import { Application } from '../domain/input';
 import { Product, ProductSummary } from '../domain/product';
 
 export default class ProductEngine {
 
     calculateProductSummaries(
-        clientConfiguration: ClientConfiguration, 
+        configuration: Configuration, 
         application: Application, 
         products: Product[]
     ): ProductSummary[] {
 
         const calculationEngine = new CalculationEngine();
 
-        const calculationResults = calculationEngine.evaluate(application, clientConfiguration);
+        const calculationResults = calculationEngine.evaluate(application, configuration);
 
         const productSummaries = products.map(product => {
 

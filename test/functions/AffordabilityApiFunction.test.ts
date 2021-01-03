@@ -1,6 +1,6 @@
 import { ImportMock, MockManager } from 'ts-mock-imports';
 import * as Services from '../../src/services';
-import { ClientConfiguration } from '../../src/domain/configuration';
+import { Configuration } from '../../src/domain/configuration';
 import * as AffordabilityApi from '../../src/functions/affordabilityApi';
 import * as Common from '../../src/common';
 import { Document, DocumentType, DocumentIndex } from '../../src/domain/document';
@@ -22,20 +22,20 @@ describe('Test AffordabilityApiFunction', () => {
       
     it('handles request', async () => {
 
-        const testClientConfiguration: ClientConfiguration = {
+        const testConfiguration: Configuration = {
             basicSalaryUsed: 1.0,
             overtimeUsed: 0.5,
         };
 
-        const testClientConfigurationDocument: Document = {
+        const testConfigurationDocument: Document = {
             metadata: {
                 id: 'id',
                 type: DocumentType.Configuration
             },
-            content: testClientConfiguration
+            content: testConfiguration
         };
 
-        const testClientConfigurationDocumentIndex: DocumentIndex = {
+        const testConfigurationDocumentIndex: DocumentIndex = {
             documentId: 'id',
             documentType: DocumentType.Configuration,
             s3BucketName: 'bucketName',
@@ -43,8 +43,8 @@ describe('Test AffordabilityApiFunction', () => {
             s3Key: 'key',
         };
 
-        dynamodbClientMock.mock('get', testClientConfigurationDocumentIndex);
-        s3ClientMock.mock('getJsonObject', testClientConfigurationDocument);
+        dynamodbClientMock.mock('get', testConfigurationDocumentIndex);
+        s3ClientMock.mock('getJsonObject', testConfigurationDocument);
 
         const sutAffordabilityApiFunction = 
             new AffordabilityApi.Function(

@@ -1,4 +1,4 @@
-export default class ClientConfiguration {
+export default class Configuration {
     basicSalaryUsed: number;
     overtimeUsed: number;
 }
