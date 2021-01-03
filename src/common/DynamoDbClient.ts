@@ -15,7 +15,11 @@ export default class DynamoDBClient {
 
     private documentClient: DocumentClient;
 
-    constructor(private tableName?: string, documentClientOverride?: DocumentClient) {
+    constructor(
+        private tableName?: string, 
+        private partitionKeyName?: string, 
+        documentClientOverride?: DocumentClient
+    ) {
         this.documentClient = documentClientOverride ?? documentClient;
     }
 
@@ -42,6 +46,27 @@ export default class DynamoDBClient {
             };    
 
         this.documentClient.put(putItem).promise();
+    }
+
+    async queryByPartitionKey<T>(keyValue: string): Promise<T[]> {
+
+        if (this.tableName === undefined) throw new Error('this.tableName === undefined');
+        if (this.partitionKeyName === undefined) throw new Error('this.partitionKeyName === undefined');
+
+        const queryOutput = 
+            await this.documentClient.query({
+                TableName: this.tableName,
+                KeyConditionExpression: `${this.partitionKeyName} = :partitionKey`,
+                ExpressionAttributeValues: {
+                    ':partitionKey': keyValue,
+                }
+            }).promise();
+
+        if (!queryOutput.Items) {
+            return [];
+        }
+
+        return queryOutput.Items.map(i => i as T);
     }
 }
 

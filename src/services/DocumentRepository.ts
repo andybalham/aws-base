@@ -37,4 +37,21 @@ export default class DocumentRepository {
 
         return document.content;
     }
+
+    async listConfigurations(): Promise<DocumentIndex[]> {
+        return await this.listIndexesByDocumentType(DocumentType.Configuration);
+    }
+
+    async listScenarios(): Promise<DocumentIndex[]> {
+        return await this.listIndexesByDocumentType(DocumentType.Scenario);
+    }
+
+    async listProducts(): Promise<DocumentIndex[]> {
+        return await this.listIndexesByDocumentType(DocumentType.Product);
+    }
+
+    private async listIndexesByDocumentType(type: DocumentType): Promise<DocumentIndex[]> {
+        const indexesByDocumentType = await this.indexClient.queryByPartitionKey<DocumentIndex>(type);
+        return indexesByDocumentType;
+    }
 }

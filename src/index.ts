@@ -22,7 +22,7 @@ const productEngine = new ProductEngine();
 
 const s3Client = new S3Client();
 const documentS3Client = new S3Client(process.env.DOCUMENT_BUCKET);
-const documentIndexDynamoDbClient = new DynamoDBClient(process.env.DOCUMENT_INDEX_TABLE_NAME);
+const documentIndexDynamoDbClient = new DynamoDBClient(process.env.DOCUMENT_INDEX_TABLE_NAME, 'documentType');
 const documentUpdateSNSClient = new SNSClient(process.env.DOCUMENT_UPDATE_TOPIC);
 const recalculationStepFunctionClient = new StepFunctionClient(process.env.RECALCULATION_STATE_MACHINE_ARN);
 
@@ -67,7 +67,8 @@ export const handleDocumentIndexUpdatePublisherFunction =
         .use(correlationIds({ sampleDebugLogRate: 0.01 }));
 
 
-const recalculationInitiatorFunction = new RecalculationInitiator.Function(recalculationStepFunctionClient);
+const recalculationInitiatorFunction = 
+    new RecalculationInitiator.Function(documentRepository, recalculationStepFunctionClient);
 
 export const handleRecalculationInitiatorFunction =
     middy(async (event: any, context: Context): Promise<any> => {

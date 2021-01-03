@@ -106,8 +106,6 @@ Resources:
             BucketName: !Ref DocumentBucket
         - DynamoDBCrudPolicy:
             TableName: !Ref DocumentIndexTable
-        # - SQSSendMessagePolicy:
-        #     QueueName: !GetAtt UnprocessedFileUpdateQueue.QueueName
       Events:
         FileUpdateEvent:
           Type: SNS
@@ -192,9 +190,12 @@ Resources:
       Environment:
         Variables:
           RECALCULATION_STATE_MACHINE_ARN: !Ref RecalculationStateMachine
+          DOCUMENT_INDEX_TABLE_NAME: !Ref DocumentIndexTable
       Policies:
         - SQSPollerPolicy:
             QueueName: !GetAtt RecalculationInitiatorQueue.QueueName
+        - DynamoDBReadPolicy:
+            TableName: !Ref DocumentIndexTable
         - StepFunctionsExecutionPolicy:
             StateMachineName: !GetAtt RecalculationStateMachine.Name
       Events:
