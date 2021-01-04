@@ -4,7 +4,7 @@ import { SinonStub } from 'sinon';
 import { ImportMock, MockManager } from 'ts-mock-imports';
 import * as Common from '../../src/common';
 import * as RecalculationTrigger from '../../src/functions/recalculationTrigger';
-import * as RecalculationInitiator from '../../src/functions/recalculationInitiator';
+import * as RecalculationInitialiser from '../../src/functions/recalculationInitialiser';
 import { DocumentIndex, DocumentType } from '../../src/domain/document';
 
 describe('Test RecalculationTriggerFunction', () => {
@@ -42,7 +42,7 @@ describe('Test RecalculationTriggerFunction', () => {
 
         const actualInputObject = startExecutionStub.lastCall.args[0];
 
-        const expectedInputObject: RecalculationInitiator.Request = {
+        const expectedInputObject: RecalculationInitialiser.Request = {
             documentType: documentIndex.documentType,
             documentId: documentIndex.documentId,
         };

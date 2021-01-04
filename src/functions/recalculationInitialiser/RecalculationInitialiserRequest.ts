@@ -1,6 +1,6 @@
 import { DocumentType } from '../../domain/document';
 
-export default class RecalculationInitiatorRequest {
+export default class RecalculationInitialiserRequest {
     documentType: DocumentType;
     documentId: string;
 }

@@ -1,6 +1,8 @@
 import { DynamoDBClient, S3Client } from '../common';
 import { Configuration } from '../domain/configuration';
 import { DocumentType, DocumentMetadata, DocumentIndex, Document } from '../domain/document';
+import { Application } from '../domain/input';
+import { Product } from '../domain/product';
 
 export default class DocumentRepository {
 
@@ -20,6 +22,14 @@ export default class DocumentRepository {
 
     async getConfiguration(id: string): Promise<Configuration> {
         return await this.getContent(id, DocumentType.Configuration);
+    }
+
+    async getScenario(id: string): Promise<Application> {
+        return await this.getContent(id, DocumentType.Scenario);
+    }
+
+    async getProduct(id: string): Promise<Product> {
+        return await this.getContent(id, DocumentType.Product);
     }
 
     async getContent<T>(id: string, type: DocumentType): Promise<T> {

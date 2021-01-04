@@ -99,7 +99,6 @@ Resources:
       Handler: index.handleDocumentIndexerFunction
       Environment:
         Variables:
-          # UNPROCESSED_UPDATE_QUEUE_URL: !Ref UnprocessedFileUpdateQueue
           DOCUMENT_INDEX_TABLE_NAME: !Ref DocumentIndexTable
       Policies:
         - S3ReadPolicy:
@@ -203,17 +202,32 @@ Resources:
             BatchSize: 10
             Enabled: !Ref EnableSQS
 
-  RecalculationInitiatorFunction:
+  RecalculationInitialiserFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${AppPrefix}-recalculation-initiator-function
-      Handler: index.handleRecalculationInitiatorFunction
+      FunctionName: !Sub ${AppPrefix}-recalculation-initialiser-function
+      Handler: index.handleRecalculationInitialiserFunction
       Environment:
         Variables:
           DOCUMENT_INDEX_TABLE_NAME: !Ref DocumentIndexTable
       Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref DocumentIndexTable
+
+  RecalculatorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AppPrefix}-recalculator-function
+      Handler: index.handleRecalculatorFunction
+      Environment:
+        Variables:
+          DOCUMENT_INDEX_TABLE_NAME: !Ref DocumentIndexTable
+          DOCUMENT_BUCKET: !Ref DocumentBucket
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref DocumentIndexTable
+        - S3CrudPolicy:
+            BucketName: !Ref DocumentBucket
 
   RecalculationStateMachine:
     Type: AWS::Serverless::StateMachine
@@ -226,7 +240,8 @@ Resources:
         Bucket: !Sub ${SourceBucket}
         Key: !Sub ${StackName}/statemachine-${AssetVersion}/recalculation.asl.json
       DefinitionSubstitutions:
-        RecalculationInitiatorFunctionArn: !GetAtt RecalculationInitiatorFunction.Arn
+        RecalculationInitialiserFunctionArn: !GetAtt RecalculationInitialiserFunction.Arn
+        RecalculatorFunctionArn: !GetAtt RecalculatorFunction.Arn
       Policies:
         - AWSLambdaRole
 

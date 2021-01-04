@@ -1,7 +1,7 @@
 import { SNSMessage } from 'aws-lambda';
 import { SQSFunction, StepFunctionClient } from '../../common';
 import { DocumentIndex} from '../../domain/document';
-import RecalculationInitiatorRequest from '../recalculationInitiator/RecalculationInitiatorRequest';
+import RecalculationInitialiserRequest from '../recalculationInitialiser/RecalculationInitialiserRequest';
 
 export default class RecalculationTriggerFunction extends SQSFunction<SNSMessage> {
 
@@ -13,11 +13,11 @@ export default class RecalculationTriggerFunction extends SQSFunction<SNSMessage
         
         const documentIndex: DocumentIndex = JSON.parse(message.Message);
 
-        const recalculationInitiatorRequest: RecalculationInitiatorRequest = {
+        const recalculationInitialiserRequest: RecalculationInitialiserRequest = {
             documentType: documentIndex.documentType,
             documentId: documentIndex.documentId,
         };
         
-        await this.recalculationStepFunctionClient.startExecution(recalculationInitiatorRequest);
+        await this.recalculationStepFunctionClient.startExecution(recalculationInitialiserRequest);
     }
 }

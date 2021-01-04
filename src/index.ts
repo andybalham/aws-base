@@ -15,11 +15,12 @@ import * as DocumentIndexUpdatePublisher from './functions/documentIndexUpdatePu
 import * as DocumentIndexer from './functions/documentIndexer';
 import * as DocumentApi from './functions/documentApi';
 import * as RecalculationTrigger from './functions/recalculationTrigger';
-import * as RecalculationInitiator from './functions/recalculationInitiator';
+import * as RecalculationInitialiser from './functions/recalculationInitialiser';
+import * as Recalculator from './functions/recalculator';
 
 // TODO 24Nov20: How would we initialise components that require environment variables set by middleware?
 
-const productEngine = new ProductEngine();
+// AWS clients
 
 const s3Client = new S3Client();
 const documentS3Client = new S3Client(process.env.DOCUMENT_BUCKET);
@@ -27,7 +28,10 @@ const documentIndexDynamoDbClient = new DynamoDBClient(process.env.DOCUMENT_INDE
 const documentUpdateSNSClient = new SNSClient(process.env.DOCUMENT_UPDATE_TOPIC);
 const recalculationStepFunctionClient = new StepFunctionClient(process.env.RECALCULATION_STATE_MACHINE_ARN);
 
+// Domain services
+
 const documentRepository = new DocumentRepository(documentS3Client, documentIndexDynamoDbClient);
+const productEngine = new ProductEngine();
 
 // Functions
 
@@ -78,10 +82,20 @@ export const handleRecalculationTriggerFunction =
         .use(correlationIds({ sampleDebugLogRate: 0.01 }));
     
 
-const recalculationInitiatorFunction = new RecalculationInitiator.Function(documentRepository);
+const recalculationInitialiserFunction = new RecalculationInitialiser.Function(documentRepository);
 
-export const handleRecalculationInitiatorFunction =
+export const handleRecalculationInitialiserFunction =
     middy(async (event: any, context: Context): Promise<any> => {
-        return recalculationInitiatorFunction.handle(event, context);
+        return recalculationInitialiserFunction.handle(event, context);
     })
         .use(correlationIds({ sampleDebugLogRate: 0.01 }));
+    
+
+const recalculatorFunction = new Recalculator.Function(documentRepository, productEngine);
+
+export const handleRecalculatorFunction =
+    middy(async (event: any, context: Context): Promise<any> => {
+        return recalculatorFunction.handle(event, context);
+    })
+        .use(correlationIds({ sampleDebugLogRate: 0.01 }));
+        

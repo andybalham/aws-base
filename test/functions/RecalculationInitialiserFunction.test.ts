@@ -5,11 +5,11 @@ import { ImportMock, MockManager } from 'ts-mock-imports';
 import * as Common from '../../src/common';
 import * as Services from '../../src/services';
 import { DocumentIndex, DocumentType } from '../../src/domain/document';
-import * as RecalculationInitiator from '../../src/functions/recalculationInitiator';
+import * as RecalculationInitialiser from '../../src/functions/recalculationInitialiser';
 
 chai.use(deepEqualInAnyOrder);
 
-describe('Test RecalculationInitiatorFunction', () => {
+describe('Test RecalculationInitialiserFunction', () => {
 
     let documentRepositoryMock: MockManager<Services.DocumentRepository>;
 
@@ -42,20 +42,20 @@ describe('Test RecalculationInitiatorFunction', () => {
 
         const documentRepository = new Services.DocumentRepository(new Common.S3Client(), new Common.DynamoDBClient());
         
-        const request: RecalculationInitiator.Request = {
+        const request: RecalculationInitialiser.Request = {
             documentType: DocumentType.Configuration,
             documentId: 'configurationId',
         };
 
-        const sutRecalculationInitiatorFunction = new RecalculationInitiator.Function(documentRepository);
+        const sutRecalculationInitialiserFunction = new RecalculationInitialiser.Function(documentRepository);
 
         // Act
 
-        const actualResponse = await sutRecalculationInitiatorFunction.handleRequest(request);
+        const actualResponse = await sutRecalculationInitialiserFunction.handleRequest(request);
 
         // Assert
 
-        const expectedResponse: RecalculationInitiator.Response = [
+        const expectedResponse: RecalculationInitialiser.Response = [
             { configurationId: 'configurationId', scenarioId: 'scenarioIdX', productId: 'productIdX' },
             { configurationId: 'configurationId', scenarioId: 'scenarioIdX', productId: 'productIdY' },
             { configurationId: 'configurationId', scenarioId: 'scenarioIdY', productId: 'productIdX' },
@@ -71,20 +71,20 @@ describe('Test RecalculationInitiatorFunction', () => {
 
         const documentRepository = new Services.DocumentRepository(new Common.S3Client(), new Common.DynamoDBClient());
         
-        const request: RecalculationInitiator.Request = {
+        const request: RecalculationInitialiser.Request = {
             documentType: DocumentType.Scenario,
             documentId: 'scenarioId',
         };
 
-        const sutRecalculationInitiatorFunction = new RecalculationInitiator.Function(documentRepository);
+        const sutRecalculationInitialiserFunction = new RecalculationInitialiser.Function(documentRepository);
 
         // Act
 
-        const actualResponse = await sutRecalculationInitiatorFunction.handleRequest(request);
+        const actualResponse = await sutRecalculationInitialiserFunction.handleRequest(request);
 
         // Assert
 
-        const expectedResponse: RecalculationInitiator.Response = [
+        const expectedResponse: RecalculationInitialiser.Response = [
             { configurationId: 'configurationId', scenarioId: 'scenarioId', productId: 'productIdX' },
             { configurationId: 'configurationId', scenarioId: 'scenarioId', productId: 'productIdY' },
         ];
@@ -98,20 +98,20 @@ describe('Test RecalculationInitiatorFunction', () => {
 
         const documentRepository = new Services.DocumentRepository(new Common.S3Client(), new Common.DynamoDBClient());
         
-        const request: RecalculationInitiator.Request = {
+        const request: RecalculationInitialiser.Request = {
             documentType: DocumentType.Product,
             documentId: 'productId',
         };
 
-        const sutRecalculationInitiatorFunction = new RecalculationInitiator.Function(documentRepository);
+        const sutRecalculationInitialiserFunction = new RecalculationInitialiser.Function(documentRepository);
 
         // Act
 
-        const actualResponse = await sutRecalculationInitiatorFunction.handleRequest(request);
+        const actualResponse = await sutRecalculationInitialiserFunction.handleRequest(request);
 
         // Assert
 
-        const expectedResponse: RecalculationInitiator.Response = [
+        const expectedResponse: RecalculationInitialiser.Response = [
             { configurationId: 'configurationId', scenarioId: 'scenarioIdX', productId: 'productId' },
             { configurationId: 'configurationId', scenarioId: 'scenarioIdY', productId: 'productId' },
         ];
