@@ -9,15 +9,17 @@ export default abstract class SQSFunction<T> {
 
     async handle(event: SQSEvent, context: Context): Promise<void> {
             
+        context.callbackWaitsForEmptyEventLoop = false;
+
         Log.debug('SQSEvent', {event});
+
+        this.event = event;
+        this.context = context;
 
         for (const eventRecord of event.Records) {
         
             Log.debug('eventRecord', {eventRecord});
 
-            this.event = event;
-            this.context = context;
-    
             const message = JSON.parse(eventRecord.body);
 
             if (message.Event?.endsWith(':TestEvent')) {

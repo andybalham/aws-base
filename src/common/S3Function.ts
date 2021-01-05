@@ -11,12 +11,14 @@ export default abstract class S3Function {
             
         Log.debug('S3Event', {event});
 
+        if (context) context.callbackWaitsForEmptyEventLoop = false;
+
+        this.event = event;
+        this.context = context;
+
         for (const eventRecord of event.Records) {
         
             Log.debug('eventRecord', {eventRecord});
-
-            this.event = event;
-            this.context = context;
 
             // TODO 25Nov20: Is there a test event from S3?
 

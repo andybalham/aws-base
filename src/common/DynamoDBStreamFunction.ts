@@ -12,13 +12,15 @@ export default abstract class DynamoDBStreamFunction<T> {
             
         Log.debug('DynamoDBStreamEvent', {event});
 
+        context.callbackWaitsForEmptyEventLoop = false;
+
+        this.event = event;
+        this.context = context;
+
         for (const eventRecord of event.Records) {
         
             Log.debug('eventRecord', {eventRecord});
 
-            this.event = event;
-            this.context = context;
-    
             const eventName = eventRecord.eventName;            
             
             const oldImage = 

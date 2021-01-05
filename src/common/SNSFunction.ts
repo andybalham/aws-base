@@ -11,13 +11,15 @@ export default abstract class SNSFunction<T> {
             
         Log.debug('SNSEvent', {event});
 
+        context.callbackWaitsForEmptyEventLoop = false;
+
+        this.event = event;
+        this.context = context;
+
         for (const eventRecord of event.Records) {
         
             Log.debug('eventRecord', {eventRecord});
 
-            this.event = event;
-            this.context = context;
-    
             const message = JSON.parse(eventRecord.Sns.Message);
 
             if (message.Event?.endsWith(':TestEvent')) {

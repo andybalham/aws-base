@@ -2,9 +2,9 @@ import { expect } from 'chai';
 import { ImportMock, MockManager } from 'ts-mock-imports';
 import * as Common from '../../src/common';
 import * as Services from '../../src/services';
-import * as Recalculator from '../../src/functions/Recalculator';
 import { ProductSummary } from '../../src/domain/product';
 import { DocumentMetadata, DocumentType } from '../../src/domain/document';
+import * as Recalculator from '../../src/functions/recalculator';
 
 describe('Test RecalculatorFunction', () => {
 
