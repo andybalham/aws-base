@@ -2,17 +2,17 @@ import { S3Event, S3EventRecord } from 'aws-lambda/trigger/s3';
 import SNSFunction from '../../common/SNSFunction';
 import S3Function from '../../common/S3Function';
 import S3Client from '../../common/S3Client';
-import DynamoDBClient from '../../common/DynamoDBClient';
-import { Document, DocumentIndex } from '../../domain/document';
+import { Document } from '../../domain/document';
 import Log from '@dazn/lambda-powertools-logger';
+import { DocumentRepository } from '../../services';
 
 export default class DocumentIndexerFunction extends SNSFunction<S3Event> {
 
     private readonly s3Handler: S3Handler;
 
-    constructor(s3Client: S3Client, documentIndexDynamoDbClient: DynamoDBClient) {        
+    constructor(s3Client: S3Client, documentRepository: DocumentRepository) {        
         super();
-        this.s3Handler = new S3Handler(s3Client, documentIndexDynamoDbClient);
+        this.s3Handler = new S3Handler(s3Client, documentRepository);
     }
 
     async handleMessage(s3Event: S3Event): Promise<void> {
@@ -22,7 +22,7 @@ export default class DocumentIndexerFunction extends SNSFunction<S3Event> {
 
 class S3Handler extends S3Function {
 
-    constructor(private s3Client: S3Client, private documentIndexDynamoDbClient: DynamoDBClient) {
+    constructor(private s3Client: S3Client, private documentRepository: DocumentRepository) {
         super();
     }
     
@@ -31,16 +31,10 @@ class S3Handler extends S3Function {
         const document: Document = 
             await this.s3Client.getJsonObject(eventRecord.s3.object.key, eventRecord.s3.bucket.name);
 
-        const newDocumentIndex: DocumentIndex = {
-            documentType: document.metadata.type,
-            documentId: document.metadata.id,
-            description: document.metadata.description,
-            s3BucketName: eventRecord.s3.bucket.name,
-            s3Key: eventRecord.s3.object.key,
-            s3ETag: eventRecord.s3.object.eTag,
-        };
+        const s3Details = eventRecord.s3;
 
-        await this.documentIndexDynamoDbClient.put(newDocumentIndex);
+        const newDocumentIndex = 
+            await this.documentRepository.putIndex(document.metadata, s3Details.bucket.name, s3Details.object);
 
         Log.info('Put document index', {newDocumentIndex});
     }

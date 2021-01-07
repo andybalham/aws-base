@@ -55,7 +55,7 @@ export const handleDocumentApiUpdateFunction =
         .use(httpErrorHandler()); // handles common http errors and returns proper responses
 
 
-const documentIndexerFunction = new DocumentIndexer.Function(s3Client, documentIndexDynamoDbClient);
+const documentIndexerFunction = new DocumentIndexer.Function(s3Client, documentRepository);
 
 export const handleDocumentIndexerFunction = 
     middy(async (event: any, context: Context): Promise<any> => {
