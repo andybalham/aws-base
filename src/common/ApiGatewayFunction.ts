@@ -21,8 +21,6 @@ export default abstract class ApiGatewayFunction<TReq, TRes> {
             
         Log.debug('APIGatewayProxyEvent', {event});
 
-        if (context) context.callbackWaitsForEmptyEventLoop = false;
-
         this.event = event;
         this.context = context;
 

@@ -11,8 +11,6 @@ export default abstract class S3Function {
             
         Log.debug('S3Event', {event});
 
-        if (context) context.callbackWaitsForEmptyEventLoop = false;
-
         this.event = event;
         this.context = context;
 

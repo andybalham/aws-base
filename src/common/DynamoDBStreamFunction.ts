@@ -12,8 +12,6 @@ export default abstract class DynamoDBStreamFunction<T> {
             
         Log.debug('DynamoDBStreamEvent', {event});
 
-        context.callbackWaitsForEmptyEventLoop = false;
-
         this.event = event;
         this.context = context;
 
