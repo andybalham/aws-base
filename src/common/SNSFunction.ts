@@ -24,6 +24,7 @@ export default abstract class SNSFunction<T> {
 
             if (message.Event?.endsWith(':TestEvent')) {
                 Log.info('Skipping test event', {messageEvent: message.Event});
+                break;
             }
 
             await this.handleMessage(message);
