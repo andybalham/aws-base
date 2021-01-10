@@ -11,6 +11,8 @@ export default abstract class SNSFunction<T> {
             
         Log.debug('SNSEvent', {event});
 
+        context.callbackWaitsForEmptyEventLoop = false;
+
         this.event = event;
         this.context = context;
 

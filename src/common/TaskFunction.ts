@@ -9,6 +9,8 @@ export default abstract class TaskFunction<TReq, TRes> {
 
         Log.debug('TaskFunction.handle', {event});
 
+        context.callbackWaitsForEmptyEventLoop = false;
+
         this.context = context;
 
         const response = await this.handleRequest(event);

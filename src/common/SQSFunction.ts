@@ -9,6 +9,8 @@ export default abstract class SQSFunction<T> {
 
     async handle(event: SQSEvent, context: Context): Promise<void> {
             
+        context.callbackWaitsForEmptyEventLoop = false;
+
         Log.debug('SQSEvent', {event});
 
         this.event = event;
