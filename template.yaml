@@ -70,7 +70,7 @@ Resources:
   DocumentIndexTable:
     Type: AWS::DynamoDB::Table
     Properties: 
-      TableName: !Sub ${AppPrefix}-document-index-table
+      TableName: !Sub ${AppPrefix}-document-index-table-gsi
       BillingMode: PAY_PER_REQUEST
       # ProvisionedThroughput: 
       #   ReadCapacityUnits: 5
@@ -79,6 +79,9 @@ Resources:
         StreamViewType: NEW_AND_OLD_IMAGES
       AttributeDefinitions: 
         - 
+          AttributeName: id
+          AttributeType: S
+        - 
           AttributeName: documentType
           AttributeType: S
         - 
@@ -86,11 +89,17 @@ Resources:
           AttributeType: S
       KeySchema: 
         - 
-          AttributeName: documentType
+          AttributeName: id
           KeyType: HASH
-        - 
-          AttributeName: documentId
-          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: DocumentType
+          KeySchema:
+            - AttributeName: documentType
+              KeyType: HASH
+            - AttributeName: documentId
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
 
   DocumentIndexerFunction:
     Type: AWS::Serverless::Function

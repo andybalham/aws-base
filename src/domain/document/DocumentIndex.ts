@@ -1,6 +1,7 @@
 import { DocumentType } from './DocumentType';
 
 export class DocumentIndex {
+    id: string;
     documentType: DocumentType;
     documentId: string;
     description?: string;

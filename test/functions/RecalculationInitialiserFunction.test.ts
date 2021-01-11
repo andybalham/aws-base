@@ -122,8 +122,9 @@ describe('Test RecalculationInitialiserFunction', () => {
 
 function getDocumentIndex(documentType: DocumentType, documentId: string): DocumentIndex {
     return {
-        documentType: documentType,
-        documentId: documentId,
+        id: `${documentType}-${documentId}`,
+        documentType,
+        documentId,
         s3BucketName: 's3BucketName',
         s3Key: 's3Key',
         s3ETag: 's3ETag',

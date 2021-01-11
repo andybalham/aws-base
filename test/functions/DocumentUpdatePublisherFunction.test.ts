@@ -26,6 +26,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
         const sutDocumentIndexUpdatePublisherFunction = new DocumentIndexUpdatePublisher.Function(new Common.SNSClient);
 
         const newImage: DocumentIndex = {
+            id: 'C-documentId',
             documentId: 'documentId',
             documentType: DocumentType.Configuration,
             s3BucketName: 's3BucketName',
@@ -57,6 +58,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
         const sutDocumentIndexUpdatePublisherFunction = new DocumentIndexUpdatePublisher.Function(new Common.SNSClient);
 
         const Image: DocumentIndex = {
+            id: 'C-documentId',
             documentId: 'documentId',
             documentType: DocumentType.Configuration,
             s3BucketName: 's3BucketName',
@@ -65,6 +67,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
         };
 
         const newImage: DocumentIndex = {
+            id: 'C-documentIdNew',
             documentId: 'documentIdNew',
             documentType: DocumentType.Configuration,
             s3BucketName: 's3BucketNameNew',
@@ -96,6 +99,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
         const sutDocumentIndexUpdatePublisherFunction = new DocumentIndexUpdatePublisher.Function(new Common.SNSClient);
 
         const image: DocumentIndex = {
+            id: 'C-documentId',
             documentId: 'documentId',
             documentType: DocumentType.Configuration,
             s3BucketName: 's3BucketName',
@@ -121,6 +125,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
         const sutDocumentIndexUpdatePublisherFunction = new DocumentIndexUpdatePublisher.Function(new Common.SNSClient);
 
         const oldImage: DocumentIndex = {
+            id: 'C-documentId',
             documentId: 'documentId',
             documentType: DocumentType.Configuration,
             s3BucketName: 's3BucketName',

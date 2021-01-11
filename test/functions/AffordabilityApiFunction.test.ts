@@ -36,7 +36,8 @@ describe('Test AffordabilityApiFunction', () => {
         };
 
         const testConfigurationDocumentIndex: DocumentIndex = {
-            documentId: 'id',
+            id: 'C-documentId',
+            documentId: 'documentId',
             documentType: DocumentType.Configuration,
             s3BucketName: 'bucketName',
             s3ETag: 'ETag',

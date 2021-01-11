@@ -17,6 +17,7 @@ export default class DocumentRepository {
     ): Promise<DocumentIndex> {
 
         const newDocumentIndex: DocumentIndex = {
+            id: this.getTableId(metadata.type, metadata.id),
             documentType: metadata.type,
             documentId: metadata.id,
             description: metadata.description,
@@ -56,9 +57,7 @@ export default class DocumentRepository {
 
     async getContent<T>(id: string, type: DocumentType): Promise<T> {
 
-        // TODO 06Jan21: Use simple key
-        
-        const indexKey = { documentType: type, documentId: id };
+        const indexKey = { id: this.getTableId(type, id) };
 
         const documentIndex = await this.indexClient.get<DocumentIndex>(indexKey);
 
@@ -85,8 +84,13 @@ export default class DocumentRepository {
     }
 
     private async listIndexesByDocumentType(type: DocumentType): Promise<DocumentIndex[]> {
-        // TODO 06Jan21: Change this to use GSI
-        const indexesByDocumentType = await this.indexClient.queryByPartitionKey<DocumentIndex>(type);
+        const indexesByDocumentType = 
+            await this.indexClient.queryByIndexPartitionKey<DocumentIndex>('DocumentType', 'documentType', type);
         return indexesByDocumentType;
+    }
+
+    private getTableId(type: DocumentType, id: string): string {
+        const tableId = `${type.substr(0, 3).toUpperCase()}-${id}`;
+        return tableId;
     }
 }

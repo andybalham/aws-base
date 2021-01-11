@@ -1,4 +1,4 @@
-import { DocumentClient, PutItemInput } from 'aws-sdk/clients/dynamodb';
+import { DocumentClient, PutItemInput, QueryInput } from 'aws-sdk/clients/dynamodb';
 import https from 'https';
 
 const agent = new https.Agent({
@@ -48,19 +48,42 @@ export default class DynamoDBClient {
         this.documentClient.put(putItem).promise();
     }
 
-    async queryByPartitionKey<T>(keyValue: string): Promise<T[]> {
+    async queryByTablePartitionKey<T>(keyValue: string): Promise<T[]> {
 
         if (this.tableName === undefined) throw new Error('this.tableName === undefined');
         if (this.partitionKeyName === undefined) throw new Error('this.partitionKeyName === undefined');
 
-        const queryOutput = 
-            await this.documentClient.query({
-                TableName: this.tableName,
-                KeyConditionExpression: `${this.partitionKeyName} = :partitionKey`,
-                ExpressionAttributeValues: {
-                    ':partitionKey': keyValue,
-                }
-            }).promise();
+        const queryParams: QueryInput = {
+            TableName: this.tableName,
+            KeyConditionExpression: `${this.partitionKeyName} = :partitionKey`,
+            ExpressionAttributeValues: {
+                ':partitionKey': { S: keyValue },
+            }
+        };
+
+        const queryOutput = await this.documentClient.query(queryParams).promise();
+
+        if (!queryOutput.Items) {
+            return [];
+        }
+
+        return queryOutput.Items.map(i => i as T);
+    }
+
+    async queryByIndexPartitionKey<T>(indexName: string, keyName: string, keyValue: string): Promise<T[]> {
+
+        if (this.tableName === undefined) throw new Error('this.tableName === undefined');
+
+        const queryParams = {
+            TableName: this.tableName,
+            IndexName: indexName,
+            KeyConditionExpression: `${keyName} = :partitionKey`,
+            ExpressionAttributeValues: {
+                ':partitionKey': keyValue,
+            }
+        };
+
+        const queryOutput = await this.documentClient.query(queryParams).promise();
 
         if (!queryOutput.Items) {
             return [];
