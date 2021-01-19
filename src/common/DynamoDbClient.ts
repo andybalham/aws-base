@@ -70,17 +70,29 @@ export default class DynamoDBClient {
         return queryOutput.Items.map(i => i as T);
     }
 
-    async queryByIndexPartitionKey<T>(indexName: string, keyName: string, keyValue: string): Promise<T[]> {
+    async queryByIndex<T>(
+        indexName: string, 
+        partitionKey: {name: string; value: string},
+        sortKey?: {name: string; value: string},
+    ): Promise<T[]> {
 
         if (this.tableName === undefined) throw new Error('this.tableName === undefined');
+
+        let keyConditionExpression = `${partitionKey.name} = :partitionKey`;
+        const expressionAttributeValues = {
+            ':partitionKey': partitionKey.value,
+        };
+
+        if (sortKey) {
+            keyConditionExpression += ` AND ${sortKey.name} = :sortKey`;
+            expressionAttributeValues[':sortKey'] = sortKey.value;
+        }
 
         const queryParams = {
             TableName: this.tableName,
             IndexName: indexName,
-            KeyConditionExpression: `${keyName} = :partitionKey`,
-            ExpressionAttributeValues: {
-                ':partitionKey': keyValue,
-            }
+            KeyConditionExpression: keyConditionExpression,
+            ExpressionAttributeValues: expressionAttributeValues
         };
 
         const queryOutput = await this.documentClient.query(queryParams).promise();

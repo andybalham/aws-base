@@ -1,8 +1,8 @@
 import { DynamoDBClient, S3Client } from '../common';
-import { Configuration } from '../domain/configuration';
-import { DocumentType, DocumentMetadata, DocumentIndex, Document } from '../domain/document';
-import { Application } from '../domain/input';
-import { Product } from '../domain/product';
+import { DocumentContentType, DocumentContentIndex } from '../domain/document';
+import { customAlphabet } from 'nanoid';
+
+const nanoid = customAlphabet('1234567890abcdef0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 12);
 
 export default class DocumentRepository {
 
@@ -10,87 +10,82 @@ export default class DocumentRepository {
 
     constructor(private contentClient: S3Client, private indexClient: DynamoDBClient) {}
 
-    async putIndex(
-        metadata: DocumentMetadata, 
-        s3BucketName: string, 
-        s3Object: { key: string; eTag: string }
-    ): Promise<DocumentIndex> {
+    async put(index: {contentType: DocumentContentType; id?: string; description?: string}, content: any): Promise<string> {
 
-        const newDocumentIndex: DocumentIndex = {
-            id: this.getTableId(metadata.type, metadata.id),
-            documentType: metadata.type,
-            documentId: metadata.id,
-            description: metadata.description,
-            s3BucketName: s3BucketName,
-            s3Key: s3Object.key,
-            s3ETag: s3Object.eTag,
-        };
+        const id = index.id ?? nanoid();
+        const contentS3Key = `${index.contentType}/${index.contentType}_${id}.json`;
+        
+        if (this.contentClient.bucketName === undefined) throw new Error('this.contentClient.bucketName === undefined');
 
-        await this.indexClient.put(newDocumentIndex);
+        const contentIndex: DocumentContentIndex = {
+            id,
+            contentType: index.contentType,
+            s3BucketName: this.contentClient.bucketName,
+            s3Key: contentS3Key,
+            description: index.description,
+        };    
 
-        return newDocumentIndex;
+        await this.indexClient.put(contentIndex);
+        await this.contentClient.putJsonObject(contentS3Key, content);
+
+        return id;
     }
 
-    async putContent(metadata: DocumentMetadata, content: any): Promise<void> {
+    async putIndex(index: DocumentContentIndex): Promise<string> {
 
-        const documentKey = `${metadata.type}/${metadata.type}_${metadata.id}.json`;
+        index.id = index.id ?? nanoid();
 
-        const document: Document = {
-            metadata,
-            content,
-        };
+        await this.indexClient.put(index);
 
-        await this.contentClient.putJsonObject(documentKey, document);
+        return index.id;
     }
 
-    async getConfiguration(id: string): Promise<Configuration> {
-        return await this.getContent(id, DocumentType.Configuration);
-    }
+    async get<T>(id: string): Promise<{index: DocumentContentIndex; content: T}> {
 
-    async getScenario(id: string): Promise<Application> {
-        return await this.getContent(id, DocumentType.Scenario);
-    }
+        const indexKey = { id };
 
-    async getProduct(id: string): Promise<Product> {
-        return await this.getContent(id, DocumentType.Product);
-    }
+        const index = await this.indexClient.get<DocumentContentIndex>(indexKey);
 
-    async getContent<T>(id: string, type: DocumentType): Promise<T> {
-
-        const indexKey = { id: this.getTableId(type, id) };
-
-        const documentIndex = await this.indexClient.get<DocumentIndex>(indexKey);
-
-        if (documentIndex === undefined) {
+        if (index === undefined) {
             throw new Error(`No document found for indexKey: ${JSON.stringify(indexKey)}`);
         }
 
-        const document = 
-            await this.contentClient.getJsonObject<Document>(documentIndex.s3Key, documentIndex.s3BucketName);
+        const content = await this.contentClient.getJsonObject<T>(index.s3Key, index.s3BucketName);
 
-        return document.content;
+        return { index, content};
     }
 
-    async listConfigurations(): Promise<DocumentIndex[]> {
-        return await this.listIndexesByDocumentType(DocumentType.Configuration);
+    async getIndexByS3Details<T>(bucketName: string, key: string): Promise<DocumentContentIndex> {
+
+        const indexes = 
+            await this.indexClient.queryByIndex<DocumentContentIndex>(
+                'S3', 
+                { name: 's3BucketName', value: bucketName}, 
+                { name: 's3Key', value: key}
+            );
+
+        if (indexes.length !== 1) {
+            throw new Error(`${indexes.length}} indexes found when one was expected: ${JSON.stringify({bucketName, key})}`);
+        }
+
+        return indexes[0];
     }
 
-    async listScenarios(): Promise<DocumentIndex[]> {
-        return await this.listIndexesByDocumentType(DocumentType.Scenario);
+    async listConfigurations(): Promise<DocumentContentIndex[]> {
+        return await this.listIndexesByDocumentType(DocumentContentType.Configuration);
     }
 
-    async listProducts(): Promise<DocumentIndex[]> {
-        return await this.listIndexesByDocumentType(DocumentType.Product);
+    async listScenarios(): Promise<DocumentContentIndex[]> {
+        return await this.listIndexesByDocumentType(DocumentContentType.Scenario);
     }
 
-    private async listIndexesByDocumentType(type: DocumentType): Promise<DocumentIndex[]> {
+    async listProducts(): Promise<DocumentContentIndex[]> {
+        return await this.listIndexesByDocumentType(DocumentContentType.Product);
+    }
+
+    private async listIndexesByDocumentType(contentType: DocumentContentType): Promise<DocumentContentIndex[]> {
         const indexesByDocumentType = 
-            await this.indexClient.queryByIndexPartitionKey<DocumentIndex>('DocumentType', 'documentType', type);
+            await this.indexClient.queryByIndex<DocumentContentIndex>('ContentType', { name: 'contentType', value: contentType});
         return indexesByDocumentType;
-    }
-
-    private getTableId(type: DocumentType, id: string): string {
-        const tableId = `${type.substr(0, 3).toUpperCase()}-${id}`;
-        return tableId;
     }
 }

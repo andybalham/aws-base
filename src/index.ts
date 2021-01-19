@@ -22,7 +22,6 @@ import * as Recalculator from './functions/recalculator';
 
 // AWS clients
 
-const s3Client = new S3Client();
 const documentS3Client = new S3Client(process.env.DOCUMENT_BUCKET);
 const documentIndexDynamoDbClient = new DynamoDBClient(process.env.DOCUMENT_INDEX_TABLE_NAME, 'documentType');
 const documentUpdateSNSClient = new SNSClient(process.env.DOCUMENT_UPDATE_TOPIC);
@@ -55,7 +54,7 @@ export const handleDocumentApiUpdateFunction =
         .use(httpErrorHandler()); // handles common http errors and returns proper responses
 
 
-const documentIndexerFunction = new DocumentIndexer.Function(s3Client, documentRepository);
+const documentIndexerFunction = new DocumentIndexer.Function(documentRepository);
 
 export const handleDocumentIndexerFunction = 
     middy(async (event: any, context: Context): Promise<any> => {

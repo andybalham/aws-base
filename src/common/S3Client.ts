@@ -15,13 +15,13 @@ export default class S3Client {
 
     private s3: S3;
 
-    constructor(private bucket?: string, s3Override?: S3) {
+    constructor(public bucketName?: string, s3Override?: S3) {
         this.s3 = s3Override ?? s3;
     }
 
     async getJsonObject<T>(key: string, bucket?: string): Promise<T> {
 
-        bucket = bucket ?? this.bucket;
+        bucket = bucket ?? this.bucketName;
 
         if (bucket === undefined) throw new Error('bucket === undefined');
 
@@ -54,7 +54,7 @@ export default class S3Client {
 
     async putJsonObject(key: string, obj: any, bucket?: string): Promise<void> {
 
-        bucket = bucket ?? this.bucket;
+        bucket = bucket ?? this.bucketName;
 
         if (bucket === undefined) throw new Error('bucket === undefined');
 

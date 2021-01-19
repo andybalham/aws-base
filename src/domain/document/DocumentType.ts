@@ -1,4 +1,4 @@
-export enum DocumentType {
+export enum DocumentContentType {
     Configuration = 'configuration',
     Scenario = 'scenario',
     Product = 'product',

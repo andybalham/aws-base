@@ -1,8 +1,8 @@
 import DynamoDBStreamFunction, { DynamoDBEventTypes } from '../../common/DynamoDBStreamFunction';
 import SNSClient from '../../common/SNSClient';
-import { DocumentIndex } from '../../domain/document';
+import { DocumentContentIndex } from '../../domain/document';
 
-export default class DocumentIndexUpdatePublisherFunction extends DynamoDBStreamFunction<DocumentIndex> {
+export default class DocumentIndexUpdatePublisherFunction extends DynamoDBStreamFunction<DocumentContentIndex> {
 
     constructor(private documentUpdateTopic: SNSClient) {
         super();
@@ -10,16 +10,16 @@ export default class DocumentIndexUpdatePublisherFunction extends DynamoDBStream
 
     async processEventRecord(
         eventType: DynamoDBEventTypes,
-        oldImage?: DocumentIndex, 
-        newImage?: DocumentIndex,
+        oldImage?: DocumentContentIndex, 
+        newImage?: DocumentContentIndex,
     ): Promise<void> {
-
-        const isDocumentUpdate = 
+        
+        const isContentUpdate = 
             (eventType === 'INSERT')
             || ((eventType === 'MODIFY') && (newImage?.s3ETag !== oldImage?.s3ETag));
 
-        if (isDocumentUpdate && newImage) {            
-            await this.documentUpdateTopic.publishMessage(newImage, { documentType: newImage.documentType });
+        if (isContentUpdate && newImage) {            
+            await this.documentUpdateTopic.publishMessage(newImage, { contentType: newImage.contentType });
         }
     }
 }

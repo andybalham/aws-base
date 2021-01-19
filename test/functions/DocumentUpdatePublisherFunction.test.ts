@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { SinonStub } from 'sinon';
 import { ImportMock, MockManager } from 'ts-mock-imports';
 import * as Common from '../../src/common';
-import { DocumentIndex, DocumentType } from '../../src/domain/document';
+import { DocumentContentIndex, DocumentContentType } from '../../src/domain/document';
 import * as DocumentIndexUpdatePublisher from '../../src/functions/documentIndexUpdatePublisher';
 
 describe('Test DocumentUpdatePublisherFunction', () => {
@@ -25,10 +25,9 @@ describe('Test DocumentUpdatePublisherFunction', () => {
 
         const sutDocumentIndexUpdatePublisherFunction = new DocumentIndexUpdatePublisher.Function(new Common.SNSClient);
 
-        const newImage: DocumentIndex = {
+        const newImage: DocumentContentIndex = {
             id: 'C-documentId',
-            documentId: 'documentId',
-            documentType: DocumentType.Configuration,
+            contentType: DocumentContentType.Configuration,
             s3BucketName: 's3BucketName',
             s3ETag: 's3ETag',
             s3Key: 's3Key',
@@ -46,7 +45,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
         expect(publishedImage).to.deep.equal(newImage);
 
         const publishedAttributes = publishMessageStub.lastCall.args[1];
-        expect(publishedAttributes).to.deep.equal({documentType: newImage.documentType});
+        expect(publishedAttributes).to.deep.equal({contentType:newImage.contentType});
     });
 
     it('publishes an update on MODIFY when ETag has changed', async () => {
@@ -57,19 +56,17 @@ describe('Test DocumentUpdatePublisherFunction', () => {
 
         const sutDocumentIndexUpdatePublisherFunction = new DocumentIndexUpdatePublisher.Function(new Common.SNSClient);
 
-        const Image: DocumentIndex = {
+        const Image: DocumentContentIndex = {
             id: 'C-documentId',
-            documentId: 'documentId',
-            documentType: DocumentType.Configuration,
+            contentType:DocumentContentType.Configuration,
             s3BucketName: 's3BucketName',
             s3ETag: 's3ETag',
             s3Key: 's3Key',
         };
 
-        const newImage: DocumentIndex = {
+        const newImage: DocumentContentIndex = {
             id: 'C-documentIdNew',
-            documentId: 'documentIdNew',
-            documentType: DocumentType.Configuration,
+            contentType:DocumentContentType.Configuration,
             s3BucketName: 's3BucketNameNew',
             s3ETag: 's3ETagNew',
             s3Key: 's3KeyNew',
@@ -87,7 +84,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
         expect(publishedImage).to.deep.equal(newImage);
 
         const publishedAttributes = publishMessageStub.lastCall.args[1];
-        expect(publishedAttributes).to.deep.equal({documentType: newImage.documentType});
+        expect(publishedAttributes).to.deep.equal({contentType:newImage.contentType});
     });    
 
     it('does not publish an update on MODIFY when ETag has not changed', async () => {
@@ -98,10 +95,9 @@ describe('Test DocumentUpdatePublisherFunction', () => {
 
         const sutDocumentIndexUpdatePublisherFunction = new DocumentIndexUpdatePublisher.Function(new Common.SNSClient);
 
-        const image: DocumentIndex = {
+        const image: DocumentContentIndex = {
             id: 'C-documentId',
-            documentId: 'documentId',
-            documentType: DocumentType.Configuration,
+            contentType:DocumentContentType.Configuration,
             s3BucketName: 's3BucketName',
             s3ETag: 's3ETag',
             s3Key: 's3Key',
@@ -124,10 +120,9 @@ describe('Test DocumentUpdatePublisherFunction', () => {
 
         const sutDocumentIndexUpdatePublisherFunction = new DocumentIndexUpdatePublisher.Function(new Common.SNSClient);
 
-        const oldImage: DocumentIndex = {
+        const oldImage: DocumentContentIndex = {
             id: 'C-documentId',
-            documentId: 'documentId',
-            documentType: DocumentType.Configuration,
+            contentType:DocumentContentType.Configuration,
             s3BucketName: 's3BucketName',
             s3ETag: 's3ETag',
             s3Key: 's3Key',

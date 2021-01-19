@@ -3,7 +3,7 @@ import { ImportMock, MockManager } from 'ts-mock-imports';
 import * as Common from '../../src/common';
 import * as Services from '../../src/services';
 import { ProductSummary } from '../../src/domain/product';
-import { DocumentMetadata, DocumentType } from '../../src/domain/document';
+import { DocumentContentType } from '../../src/domain/document';
 import * as Recalculator from '../../src/functions/recalculator';
 
 describe('Test RecalculatorFunction', () => {
@@ -24,10 +24,8 @@ describe('Test RecalculatorFunction', () => {
             
         // Arrange
         
-        documentRepositoryMock.mock('getConfiguration', {});
-        documentRepositoryMock.mock('getScenario', {});
-        documentRepositoryMock.mock('getProduct', {});        
-        const documentRepositoryPutContentStub = documentRepositoryMock.mock('putContent');
+        documentRepositoryMock.mock('get', {});
+        const documentRepositoryPutStub = documentRepositoryMock.mock('put');
 
         const expectedProductSummary: ProductSummary = 
             {
@@ -63,13 +61,13 @@ describe('Test RecalculatorFunction', () => {
 
         expect(productEngineCalculateProductSummariesStub.called).to.be.true;
 
-        expect(documentRepositoryPutContentStub.called).to.be.true;
+        expect(documentRepositoryPutStub.called).to.be.true;
 
-        const actualResultMetadata: DocumentMetadata = documentRepositoryPutContentStub.lastCall.args[0];
-        const actualResult = documentRepositoryPutContentStub.lastCall.args[1];
+        const actualResultIndex = documentRepositoryPutStub.lastCall.args[0];
+        const actualResult = documentRepositoryPutStub.lastCall.args[1];
 
-        expect(actualResultMetadata.type).to.equal(DocumentType.Result);
-        expect(actualResultMetadata.id).to.equal(`${request.configurationId}-${request.scenarioId}-${request.productId}`);
+        expect(actualResultIndex.contentType).to.equal(DocumentContentType.Result);
+        expect(actualResultIndex.id).to.equal(`${request.configurationId}-${request.scenarioId}-${request.productId}`);
 
         expect(actualResult).to.deep.equal(expectedProductSummary);
     });

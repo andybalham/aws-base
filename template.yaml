@@ -70,7 +70,7 @@ Resources:
   DocumentIndexTable:
     Type: AWS::DynamoDB::Table
     Properties: 
-      TableName: !Sub ${AppPrefix}-document-index-table-gsi
+      TableName: !Sub ${AppPrefix}-document-index-table
       BillingMode: PAY_PER_REQUEST
       # ProvisionedThroughput: 
       #   ReadCapacityUnits: 5
@@ -82,21 +82,32 @@ Resources:
           AttributeName: id
           AttributeType: S
         - 
-          AttributeName: documentType
+          AttributeName: contentType
           AttributeType: S
         - 
-          AttributeName: documentId
+          AttributeName: s3BucketName
+          AttributeType: S
+        - 
+          AttributeName: s3Key
           AttributeType: S
       KeySchema: 
         - 
           AttributeName: id
           KeyType: HASH
       GlobalSecondaryIndexes:
-        - IndexName: DocumentType
+        - IndexName: ContentType
           KeySchema:
-            - AttributeName: documentType
+            - AttributeName: contentType
               KeyType: HASH
-            - AttributeName: documentId
+            - AttributeName: id
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: S3
+          KeySchema:
+            - AttributeName: s3BucketName
+              KeyType: HASH
+            - AttributeName: s3Key
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
@@ -154,7 +165,7 @@ Resources:
     Properties: 
       Endpoint: !GetAtt RecalculationTriggerQueue.Arn
       FilterPolicy: 
-        documentType: [ configuration, scenario, product ]
+        contentType: [ configuration, scenario, product ]
       Protocol: sqs
       TopicArn: !Ref DocumentIndexUpdateTopic
 

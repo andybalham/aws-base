@@ -1,6 +1,6 @@
-import { DocumentType } from '../../domain/document';
+import { DocumentContentType } from '../../domain/document';
 
 export default class RecalculationInitialiserRequest {
-    documentType: DocumentType;
-    documentId: string;
+    contentType: DocumentContentType;
+    id: string;
 }

@@ -1,6 +1,6 @@
 import { TaskFunction } from '../../common';
 import { Request, Response} from '.';
-import { DocumentType } from '../../domain/document';
+import { DocumentContentType } from '../../domain/document';
 import { DocumentRepository } from '../../services';
 
 export default class RecalculationInitialiserFunction extends TaskFunction<Request, Response> {
@@ -13,22 +13,22 @@ export default class RecalculationInitialiserFunction extends TaskFunction<Reque
         
         let response: Response;
 
-        switch (request.documentType) {
+        switch (request.contentType) {
 
-        case DocumentType.Configuration:
-            response = await this.getConfigurationRecalculatorRequests(request.documentId);
+        case DocumentContentType.Configuration:
+            response = await this.getConfigurationRecalculatorRequests(request.id);
             break;
             
-        case DocumentType.Scenario:
-            response = await this.getScenarioRecalculatorRequests(request.documentId);
+        case DocumentContentType.Scenario:
+            response = await this.getScenarioRecalculatorRequests(request.id);
             break;
             
-        case DocumentType.Product:
-            response = await this.getProductRecalculatorRequests(request.documentId);
+        case DocumentContentType.Product:
+            response = await this.getProductRecalculatorRequests(request.id);
             break;
             
         default:
-            throw new Error(`Unhandled document type: ${request.documentType}`);
+            throw new Error(`Unhandled document type: ${request.contentType}`);
         }
 
         return response;
@@ -36,8 +36,8 @@ export default class RecalculationInitialiserFunction extends TaskFunction<Reque
 
     async getConfigurationRecalculatorRequests(configurationId: string): Promise<Response> {
         
-        const scenarioIds = (await this.documentRepository.listScenarios()).map(index => index.documentId);
-        const productIds = (await this.documentRepository.listProducts()).map(index => index.documentId);
+        const scenarioIds = (await this.documentRepository.listScenarios()).map(index => index.id);
+        const productIds = (await this.documentRepository.listProducts()).map(index => index.id);
 
         const recalculatorRequests = this.getRecalculatorRequests([configurationId], scenarioIds, productIds);
 
@@ -46,8 +46,8 @@ export default class RecalculationInitialiserFunction extends TaskFunction<Reque
 
     async getScenarioRecalculatorRequests(scenarioId: string): Promise<Response> {
         
-        const configurationIds = (await this.documentRepository.listConfigurations()).map(index => index.documentId);
-        const productIds = (await this.documentRepository.listProducts()).map(index => index.documentId);
+        const configurationIds = (await this.documentRepository.listConfigurations()).map(index => index.id);
+        const productIds = (await this.documentRepository.listProducts()).map(index => index.id);
 
         const recalculatorRequests = this.getRecalculatorRequests(configurationIds, [scenarioId], productIds);
 
@@ -56,8 +56,8 @@ export default class RecalculationInitialiserFunction extends TaskFunction<Reque
 
     async getProductRecalculatorRequests(productId: string): Promise<Response> {
         
-        const configurationIds = (await this.documentRepository.listConfigurations()).map(index => index.documentId);
-        const scenarioIds = (await this.documentRepository.listScenarios()).map(index => index.documentId);
+        const configurationIds = (await this.documentRepository.listConfigurations()).map(index => index.id);
+        const scenarioIds = (await this.documentRepository.listScenarios()).map(index => index.id);
 
         const recalculatorRequests = this.getRecalculatorRequests(configurationIds, scenarioIds, [productId]);
 

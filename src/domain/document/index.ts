@@ -1,11 +1,7 @@
-import { DocumentType } from './DocumentType';
-import { DocumentMetadata } from './DocumentMetadata';
-import { Document } from './Document';
-import { DocumentIndex } from './DocumentIndex';
+import { DocumentContentType } from './DocumentType';
+import { DocumentContentIndex } from './DocumentContentIndex';
 
 export {
-    DocumentType,
-    DocumentMetadata,
-    Document,
-    DocumentIndex
+    DocumentContentType,
+    DocumentContentIndex
 };
