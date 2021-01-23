@@ -1,25 +1,40 @@
+import { DynamoDBSingleTableItem } from '../../common';
 import DynamoDBStreamFunction, { DynamoDBEventTypes } from '../../common/DynamoDBStreamFunction';
 import SNSClient from '../../common/SNSClient';
-import { DocumentContentIndex } from '../../domain/document';
+import { DocumentHash } from '../../domain/document';
+import { DocumentRepository } from '../../services';
 
-export default class DocumentIndexUpdatePublisherFunction extends DynamoDBStreamFunction<DocumentContentIndex> {
+export default class DocumentIndexUpdatePublisherFunction extends DynamoDBStreamFunction<DynamoDBSingleTableItem> {
 
-    constructor(private documentUpdateTopic: SNSClient) {
+    constructor(
+        private documentRepository: DocumentRepository, 
+        private documentUpdateTopic: SNSClient
+    ) {
         super();
     }
 
     async processEventRecord(
         eventType: DynamoDBEventTypes,
-        oldImage?: DocumentContentIndex, 
-        newImage?: DocumentContentIndex,
+        oldImage?: DynamoDBSingleTableItem, 
+        newImage?: DynamoDBSingleTableItem,
     ): Promise<void> {
         
-        const isContentUpdate = 
-            (eventType === 'INSERT')
-            || ((eventType === 'MODIFY') && (newImage?.s3ETag !== oldImage?.s3ETag));
+        if (newImage?.itemType === 'hash') {
 
-        if (isContentUpdate && newImage) {            
-            await this.documentUpdateTopic.publishMessage(newImage, { contentType: newImage.contentType });
+            const oldHash = oldImage && DynamoDBSingleTableItem.getEntity<DocumentHash>(oldImage);
+            const newHash = newImage && DynamoDBSingleTableItem.getEntity<DocumentHash>(newImage);
+
+            const isHashUpdate = 
+                (eventType === 'INSERT')
+                || ((eventType === 'MODIFY') && (newHash?.hash !== oldHash?.hash));
+
+            if (isHashUpdate && newImage) {
+                
+                const index = 
+                    await this.documentRepository.getIndexByS3Async(newHash.s3BucketName, newHash.s3Key);
+
+                await this.documentUpdateTopic.publishMessageAsync(index, { contentType: index.contentType });
+            }
         }
     }
 }

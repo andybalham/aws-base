@@ -7,6 +7,8 @@ import SNSClient from './SNSClient';
 import SNSFunction from './SNSFunction';
 import SQSFunction from './SQSFunction';
 import StepFunctionClient from './StepFunctionClient';
+import DynamoDBSingleTableItem from './DynamoDBSingleTableItem';
+import DynamoDBSingleTableClient from './DynamoDBSingleTableClient';
 
 export {
     TaskFunction,
@@ -16,6 +18,8 @@ export {
     DynamoDBStreamFunction,
     S3Client,
     DynamoDBClient,
+    DynamoDBSingleTableItem,
+    DynamoDBSingleTableClient,
     SNSClient,
     StepFunctionClient,
 };

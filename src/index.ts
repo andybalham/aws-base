@@ -17,19 +17,22 @@ import * as DocumentApi from './functions/documentApi';
 import * as RecalculationTrigger from './functions/recalculationTrigger';
 import * as RecalculationInitialiser from './functions/recalculationInitialiser';
 import * as Recalculator from './functions/recalculator';
+import { DynamoDBSingleTableClient } from './common';
 
 // TODO 24Nov20: How would we initialise components that require environment variables set by middleware?
 
 // AWS clients
 
 const documentS3Client = new S3Client(process.env.DOCUMENT_BUCKET);
-const documentIndexDynamoDbClient = new DynamoDBClient(process.env.DOCUMENT_INDEX_TABLE_NAME, 'documentType');
+const documentMetadataDynamoDbClient = 
+    new DynamoDBSingleTableClient(
+        new DynamoDBClient(process.env.DOCUMENT_INDEX_TABLE_NAME));
 const documentUpdateSNSClient = new SNSClient(process.env.DOCUMENT_UPDATE_TOPIC);
 const recalculationStepFunctionClient = new StepFunctionClient(process.env.RECALCULATION_STATE_MACHINE_ARN);
 
 // Domain services
 
-const documentRepository = new DocumentRepository(documentS3Client, documentIndexDynamoDbClient);
+const documentRepository = new DocumentRepository(documentS3Client, documentMetadataDynamoDbClient);
 const productEngine = new ProductEngine();
 
 // Functions
@@ -63,7 +66,8 @@ export const handleDocumentIndexerFunction =
         .use(correlationIds({ sampleDebugLogRate: 0.01 }));
             
 
-const documentIndexUpdatePublisherFunction = new DocumentIndexUpdatePublisher.Function(documentUpdateSNSClient);
+const documentIndexUpdatePublisherFunction = 
+    new DocumentIndexUpdatePublisher.Function(documentRepository, documentUpdateSNSClient);
 
 export const handleDocumentIndexUpdatePublisherFunction = 
     middy(async (event: any, context: Context): Promise<any> => {

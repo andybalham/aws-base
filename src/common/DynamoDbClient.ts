@@ -16,14 +16,15 @@ export default class DynamoDBClient {
     private documentClient: DocumentClient;
 
     constructor(
-        private tableName?: string, 
-        private partitionKeyName?: string, 
+        public readonly tableName?: string, 
+        public partitionKeyName?: string, 
+        public sortKeyName?: string, 
         documentClientOverride?: DocumentClient
     ) {
         this.documentClient = documentClientOverride ?? documentClient;
     }
 
-    async get<T>(key: {[key: string]: any}): Promise<T | undefined> {
+    async getAsync<T>(key: {[key: string]: any}): Promise<T | undefined> {
 
         if (this.tableName === undefined) throw new Error('this.tableName === undefined');
 
@@ -35,7 +36,7 @@ export default class DynamoDBClient {
             : itemOutput.Item as T;
     }
 
-    async put(item: any): Promise<void> {
+    async putAsync(item: any): Promise<void> {
 
         if (this.tableName === undefined) throw new Error('this.tableName === undefined');
 
@@ -48,7 +49,7 @@ export default class DynamoDBClient {
         this.documentClient.put(putItem).promise();
     }
 
-    async queryByTablePartitionKey<T>(keyValue: string): Promise<T[]> {
+    async queryByPartitionKeyAsync<T>(keyValue: string): Promise<T[]> {
 
         if (this.tableName === undefined) throw new Error('this.tableName === undefined');
         if (this.partitionKeyName === undefined) throw new Error('this.partitionKeyName === undefined');
@@ -70,7 +71,7 @@ export default class DynamoDBClient {
         return queryOutput.Items.map(i => i as T);
     }
 
-    async queryByIndex<T>(
+    async queryByIndexAsync<T>(
         indexName: string, 
         partitionKey: {name: string; value: string},
         sortKey?: {name: string; value: string},
@@ -104,4 +105,5 @@ export default class DynamoDBClient {
         return queryOutput.Items.map(i => i as T);
     }
 }
+
 

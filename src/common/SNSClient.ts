@@ -20,7 +20,7 @@ export default class SNSClient {
         this.sns = snsOverride ?? sns;
     }
 
-    async publishMessage(content: object, attributes?: object): Promise<PublishResponse> {
+    async publishMessageAsync(content: object, attributes?: object): Promise<PublishResponse> {
 
         if (this.topicName === undefined) throw new Error('this.topicName === undefined');
 

@@ -1,7 +1,9 @@
+import DocumentHash from './DocumentHash';
+import DocumentIndex from './DocumentIndex';
 import { DocumentContentType } from './DocumentType';
-import { DocumentContentIndex } from './DocumentContentIndex';
 
 export {
     DocumentContentType,
-    DocumentContentIndex
+    DocumentIndex,
+    DocumentHash,
 };

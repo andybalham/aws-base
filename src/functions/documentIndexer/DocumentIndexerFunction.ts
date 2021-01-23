@@ -3,6 +3,7 @@ import SNSFunction from '../../common/SNSFunction';
 import S3Function from '../../common/S3Function';
 import Log from '@dazn/lambda-powertools-logger';
 import { DocumentRepository } from '../../services';
+import { DocumentHash } from '../../domain/document';
 
 export default class DocumentIndexerFunction extends SNSFunction<S3Event> {
 
@@ -26,16 +27,14 @@ class S3Handler extends S3Function {
     
     async handleEventRecord(eventRecord: S3EventRecord): Promise<void> {
 
-        const index = 
-            await this.documentRepository.getIndexByS3Details(
-                eventRecord.s3.bucket.name, 
-                eventRecord.s3.object.key
-            );
+        const hash: DocumentHash = {
+            s3BucketName: eventRecord.s3.bucket.name, 
+            s3Key: eventRecord.s3.object.key,
+            hash: eventRecord.s3.object.eTag
+        };
 
-        index.s3ETag = eventRecord.s3.object.eTag;
+        await this.documentRepository.putHashAsync(hash);
 
-        await this.documentRepository.putIndex(index);
-
-        Log.info('Put document index', {index});
+        Log.info('Put document hash', {hash});
     }
 }

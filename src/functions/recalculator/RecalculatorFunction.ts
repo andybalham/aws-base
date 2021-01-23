@@ -2,9 +2,6 @@ import { TaskFunction } from '../../common';
 import { Request } from '.';
 import { DocumentRepository, ProductEngine } from '../../services';
 import { DocumentContentType } from '../../domain/document';
-import { Configuration } from '../../domain/configuration';
-import { Product } from '../../domain/product';
-import { Application } from '../../domain/input';
 
 export default class RecalculatorFunction extends TaskFunction<Request, void> {
 
@@ -17,15 +14,15 @@ export default class RecalculatorFunction extends TaskFunction<Request, void> {
 
     async handleRequest(request: Request): Promise<void> {
 
-        const configuration = await this.documentRepository.get<Configuration>(request.configurationId);
-        const application = await this.documentRepository.get<Application>(request.scenarioId);
-        const product = await this.documentRepository.get<Product>(request.productId);
+        const configuration = await this.documentRepository.getConfigurationAsync(request.configurationId);
+        const application = await this.documentRepository.getApplicationAsync(request.scenarioId);
+        const product = await this.documentRepository.getProductAsync(request.productId);
 
         const productSummaries =
-            this.productEngine.calculateProductSummaries(configuration.content, application.content, [product.content]);
+            this.productEngine.calculateProductSummaries(configuration, application, [product]);
 
         this.documentRepository
-            .put(
+            .putContentAsync(
                 {
                     id: `${request.configurationId}-${request.scenarioId}-${request.productId}`,
                     contentType: DocumentContentType.Result,

@@ -61,5 +61,4 @@ describe('Test DocumentIndexerFunction', () => {
         expect(documentRepositoryPutIndexStub.called).is.true;
         expect(documentRepositoryPutIndexStub.lastCall.args[0]).to.deep.equal(expectedIndex);
     });
-    
 });

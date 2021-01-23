@@ -36,8 +36,8 @@ export default class RecalculationInitialiserFunction extends TaskFunction<Reque
 
     async getConfigurationRecalculatorRequests(configurationId: string): Promise<Response> {
         
-        const scenarioIds = (await this.documentRepository.listScenarios()).map(index => index.id);
-        const productIds = (await this.documentRepository.listProducts()).map(index => index.id);
+        const scenarioIds = (await this.documentRepository.listScenariosAsync()).map(index => index.id);
+        const productIds = (await this.documentRepository.listProductsAsync()).map(index => index.id);
 
         const recalculatorRequests = this.getRecalculatorRequests([configurationId], scenarioIds, productIds);
 
@@ -46,8 +46,8 @@ export default class RecalculationInitialiserFunction extends TaskFunction<Reque
 
     async getScenarioRecalculatorRequests(scenarioId: string): Promise<Response> {
         
-        const configurationIds = (await this.documentRepository.listConfigurations()).map(index => index.id);
-        const productIds = (await this.documentRepository.listProducts()).map(index => index.id);
+        const configurationIds = (await this.documentRepository.listConfigurationsAsync()).map(index => index.id);
+        const productIds = (await this.documentRepository.listProductsAsync()).map(index => index.id);
 
         const recalculatorRequests = this.getRecalculatorRequests(configurationIds, [scenarioId], productIds);
 
@@ -56,8 +56,8 @@ export default class RecalculationInitialiserFunction extends TaskFunction<Reque
 
     async getProductRecalculatorRequests(productId: string): Promise<Response> {
         
-        const configurationIds = (await this.documentRepository.listConfigurations()).map(index => index.id);
-        const scenarioIds = (await this.documentRepository.listScenarios()).map(index => index.id);
+        const configurationIds = (await this.documentRepository.listConfigurationsAsync()).map(index => index.id);
+        const scenarioIds = (await this.documentRepository.listScenariosAsync()).map(index => index.id);
 
         const recalculatorRequests = this.getRecalculatorRequests(configurationIds, scenarioIds, [productId]);
 

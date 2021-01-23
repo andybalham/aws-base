@@ -20,7 +20,7 @@ export default class StepFunctionClient {
         this.stepFunctions = stepFunctionsOverride ?? stepFunctions;
     }
 
-    async startExecution(inputObject: object): Promise<void> {
+    async startExecutionAsync(inputObject: object): Promise<void> {
         
         if (this.stateMachineArn === undefined) throw new Error('this.stateMachineArn === undefined');
 

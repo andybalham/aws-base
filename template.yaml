@@ -79,10 +79,16 @@ Resources:
         StreamViewType: NEW_AND_OLD_IMAGES
       AttributeDefinitions: 
         - 
-          AttributeName: id
+          AttributeName: partitionKey
           AttributeType: S
         - 
-          AttributeName: contentType
+          AttributeName: sortKey
+          AttributeType: S
+        - 
+          AttributeName: itemType
+          AttributeType: S
+        - 
+          AttributeName: id
           AttributeType: S
         - 
           AttributeName: s3BucketName
@@ -92,17 +98,12 @@ Resources:
           AttributeType: S
       KeySchema: 
         - 
-          AttributeName: id
+          AttributeName: partitionKey
           KeyType: HASH
+        - 
+          AttributeName: sortKey
+          KeyType: RANGE
       GlobalSecondaryIndexes:
-        - IndexName: ContentType
-          KeySchema:
-            - AttributeName: contentType
-              KeyType: HASH
-            - AttributeName: id
-              KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
         - IndexName: S3
           KeySchema:
             - AttributeName: s3BucketName
