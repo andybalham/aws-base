@@ -24,9 +24,7 @@ import { DynamoDBSingleTableClient } from './common';
 // AWS clients
 
 const documentS3Client = new S3Client(process.env.DOCUMENT_BUCKET);
-const documentMetadataDynamoDbClient = 
-    new DynamoDBSingleTableClient(
-        new DynamoDBClient(process.env.DOCUMENT_INDEX_TABLE_NAME));
+const documentMetadataDynamoDbClient = new DynamoDBSingleTableClient(process.env.DOCUMENT_INDEX_TABLE_NAME);
 const documentUpdateSNSClient = new SNSClient(process.env.DOCUMENT_UPDATE_TOPIC);
 const recalculationStepFunctionClient = new StepFunctionClient(process.env.RECALCULATION_STATE_MACHINE_ARN);
 

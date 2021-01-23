@@ -5,10 +5,10 @@ export default class DynamoDBSingleTableItem {
     sortKey: string;
 
     static getItem<T extends object>(
+        entity: T,
         itemType: string, 
         partitionKeyName: keyof T, 
         sortKeyName: keyof T,
-        entity: T
     ): DynamoDBSingleTableItem {
         
         const item: DynamoDBSingleTableItem = {

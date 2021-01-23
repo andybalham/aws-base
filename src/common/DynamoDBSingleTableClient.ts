@@ -1,11 +1,17 @@
+import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { DynamoDBSingleTableItem } from '.';
 import DynamoDBClient from './DynamoDBClient';
 
 export default class DynamoDBSingleTableClient {
 
-    constructor(private dynamoDBClient: DynamoDBClient) {
-        this.dynamoDBClient.partitionKeyName = 'partitionKey';
-        this.dynamoDBClient.sortKeyName = 'sortKey';
+    private dynamoDBClient: DynamoDBClient;
+
+    constructor(
+        public readonly tableName?: string, 
+        documentClientOverride?: DocumentClient
+    ) {
+        this.dynamoDBClient = 
+            new DynamoDBClient(tableName, 'partitionKey', 'sortKey', documentClientOverride);
     }
 
     async getAsync<T extends object>(partitionKey: string, sortKey?: string): Promise<T | undefined> {
@@ -28,7 +34,8 @@ export default class DynamoDBSingleTableClient {
         entity: T
     ): Promise<void> {
 
-        const singleTableItem = DynamoDBSingleTableItem.getItem(itemType, partitionKeyName, sortKeyName, entity);
+        const singleTableItem = 
+            DynamoDBSingleTableItem.getItem(entity, itemType, partitionKeyName, sortKeyName);
 
         await this.dynamoDBClient.putAsync(singleTableItem);
     }

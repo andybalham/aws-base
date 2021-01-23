@@ -3,17 +3,18 @@ import * as Services from '../../src/services';
 import { Configuration } from '../../src/domain/configuration';
 import * as AffordabilityApi from '../../src/functions/affordabilityApi';
 import * as Common from '../../src/common';
-import { DocumentContentType, DocumentContentIndex } from '../../src/domain/document';
+import { DocumentContentType, DocumentIndex } from '../../src/domain/document';
 import { expect } from 'chai';
 
 describe('Test AffordabilityApiFunction', () => {
 
     let s3ClientMock: MockManager<Common.S3Client>;
-    let dynamodbClientMock: MockManager<Common.DynamoDBClient>;
+    let dynamoDBSingleTableClientMock: MockManager<Common.DynamoDBSingleTableClient>;
 
     beforeEach('mock out dependencies', function () {
         s3ClientMock = ImportMock.mockClass<Common.S3Client>(Common, 'S3Client');
-        dynamodbClientMock = ImportMock.mockClass<Common.DynamoDBClient>(Common, 'DynamoDBClient');
+        dynamoDBSingleTableClientMock = 
+            ImportMock.mockClass<Common.DynamoDBSingleTableClient>(Common, 'DynamoDBSingleTableClient');
     });
     
     afterEach('restore dependencies', function () {
@@ -22,11 +23,10 @@ describe('Test AffordabilityApiFunction', () => {
       
     it('handles request', async () => {
 
-        const testConfigurationIndex: DocumentContentIndex = {
+        const testConfigurationIndex: DocumentIndex = {
             id: 'id',
             contentType: DocumentContentType.Configuration,
             s3BucketName: 'bucketName',
-            s3ETag: 'eTag',
             s3Key: 'key',
         };
 
@@ -35,12 +35,15 @@ describe('Test AffordabilityApiFunction', () => {
             overtimeUsed: 0.5,
         };
 
-        dynamodbClientMock.mock('get', testConfigurationIndex);
-        s3ClientMock.mock('getJsonObject', testConfigurationContent);
+        dynamoDBSingleTableClientMock.mock('getAsync', testConfigurationIndex);
+        s3ClientMock.mock('getObjectAsync', testConfigurationContent);
 
         const sutAffordabilityApiFunction = 
             new AffordabilityApi.Function(
-                new Services.DocumentRepository(new Common.S3Client(), new Common.DynamoDBClient()),
+                new Services.DocumentRepository(
+                    new Common.S3Client(), 
+                    new Common.DynamoDBSingleTableClient('TableName')
+                ),
                 new Services.ProductEngine()
             );
 

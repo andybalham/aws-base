@@ -29,7 +29,7 @@ export default class DocumentRepository {
         };    
 
         await this.metadataClient.putAsync('index', 'contentType', 'id', contentIndex);
-        await this.contentClient.putJsonObject(contentS3Key, content);
+        await this.contentClient.putObjectAsync(contentS3Key, content);
 
         return id;
     }
@@ -62,7 +62,7 @@ export default class DocumentRepository {
         return indexes[0];
     }
 
-    async getContentAsync<T>(contentType: DocumentContentType, id: string): Promise<T> {
+    async getContentAsync<T extends object>(contentType: DocumentContentType, id: string): Promise<T> {
 
         const indexKey = { partitionKey: contentType, sortKey: id };
 
@@ -72,7 +72,7 @@ export default class DocumentRepository {
             throw new Error(`No document found for indexKey: ${JSON.stringify(indexKey)}`);
         }
 
-        const content = await this.contentClient.getJsonObject<T>(index.s3Key, index.s3BucketName);
+        const content = await this.contentClient.getObjectAsync<T>(index.s3Key, index.s3BucketName);
 
         return content;
     }
