@@ -2,9 +2,8 @@ import chai from 'chai';
 import { expect } from 'chai';
 import deepEqualInAnyOrder from 'deep-equal-in-any-order';
 import { ImportMock, MockManager } from 'ts-mock-imports';
-import * as Common from '../../src/common';
 import * as Services from '../../src/services';
-import { DocumentContentIndex, DocumentContentType } from '../../src/domain/document';
+import { DocumentIndex, DocumentContentType } from '../../src/domain/document';
 import * as RecalculationInitialiser from '../../src/functions/recalculationInitialiser';
 
 chai.use(deepEqualInAnyOrder);
@@ -17,16 +16,16 @@ describe('Test RecalculationInitialiserFunction', () => {
 
         documentRepositoryMock = ImportMock.mockClass<Services.DocumentRepository>(Services, 'DocumentRepository');
 
-        documentRepositoryMock.mock('listConfigurations', [
+        documentRepositoryMock.mock('listConfigurationsAsync', [
             getDocumentIndex(DocumentContentType.Configuration, 'configurationId'),
         ]);
 
-        documentRepositoryMock.mock('listScenarios', [
+        documentRepositoryMock.mock('listScenariosAsync', [
             getDocumentIndex(DocumentContentType.Scenario, 'scenarioIdX'),
             getDocumentIndex(DocumentContentType.Scenario, 'scenarioIdY'),
         ]);
 
-        documentRepositoryMock.mock('listProducts', [
+        documentRepositoryMock.mock('listProductsAsync', [
             getDocumentIndex(DocumentContentType.Product, 'productIdX'),
             getDocumentIndex(DocumentContentType.Product, 'productIdY'),
         ]);
@@ -40,7 +39,7 @@ describe('Test RecalculationInitialiserFunction', () => {
             
         // Arrange
 
-        const documentRepository = new Services.DocumentRepository(new Common.S3Client(), new Common.DynamoDBClient());
+        const documentRepository = new Services.DocumentRepository();
         
         const request: RecalculationInitialiser.Request = {
             contentType: DocumentContentType.Configuration,
@@ -69,7 +68,7 @@ describe('Test RecalculationInitialiserFunction', () => {
             
         // Arrange
 
-        const documentRepository = new Services.DocumentRepository(new Common.S3Client(), new Common.DynamoDBClient());
+        const documentRepository = new Services.DocumentRepository();
         
         const request: RecalculationInitialiser.Request = {
             contentType: DocumentContentType.Scenario,
@@ -96,7 +95,7 @@ describe('Test RecalculationInitialiserFunction', () => {
             
         // Arrange
 
-        const documentRepository = new Services.DocumentRepository(new Common.S3Client(), new Common.DynamoDBClient());
+        const documentRepository = new Services.DocumentRepository();
         
         const request: RecalculationInitialiser.Request = {
             contentType: DocumentContentType.Product,
@@ -120,12 +119,11 @@ describe('Test RecalculationInitialiserFunction', () => {
     });
 });
 
-function getDocumentIndex(contentType: DocumentContentType, id: string): DocumentContentIndex {
+function getDocumentIndex(contentType: DocumentContentType, id: string): DocumentIndex {
     return {
         id,
         contentType,
         s3BucketName: 's3BucketName',
         s3Key: 's3Key',
-        s3ETag: 's3ETag',
     };
 }

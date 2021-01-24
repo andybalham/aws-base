@@ -6,7 +6,6 @@ import correlationIds from '@dazn/lambda-powertools-middleware-correlation-ids';
 
 import { DocumentRepository, ProductEngine } from './services';
 import S3Client from './common/S3Client';
-import DynamoDBClient from './common/DynamoDBClient';
 import SNSClient from './common/SNSClient';
 import StepFunctionClient from './common/StepFunctionClient';
 

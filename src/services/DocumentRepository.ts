@@ -11,9 +11,12 @@ export default class DocumentRepository {
 
     // TODO 06Jan21: YAML example for a GSI https://jun711.github.io/aws/how-to-create-aws-dynamodb-secondary-indexes/
 
-    constructor(private contentClient: S3Client, private metadataClient: DynamoDBSingleTableClient) {}
+    constructor(private contentClient?: S3Client, private metadataClient?: DynamoDBSingleTableClient) {}
 
     async putContentAsync(index: {contentType: DocumentContentType; id?: string; description?: string}, content: any): Promise<string> {
+
+        if (this.contentClient === undefined) throw new Error('this.contentClient === undefined');
+        if (this.metadataClient === undefined) throw new Error('this.metadataClient === undefined');
 
         const id = index.id ?? nanoid();
         const contentS3Key = `${index.contentType}/${index.contentType}_${id}.json`;
@@ -48,6 +51,8 @@ export default class DocumentRepository {
 
     async getIndexByS3Async(s3BucketName: string, s3Key: string): Promise<DocumentIndex> {
 
+        if (this.metadataClient === undefined) throw new Error('this.metadataClient === undefined');
+
         const indexes =
             await this.metadataClient.queryByIndexAsync<DocumentIndex>(
                 'S3', 
@@ -64,6 +69,9 @@ export default class DocumentRepository {
 
     async getContentAsync<T extends object>(contentType: DocumentContentType, id: string): Promise<T> {
 
+        if (this.contentClient === undefined) throw new Error('this.contentClient === undefined');
+        if (this.metadataClient === undefined) throw new Error('this.metadataClient === undefined');
+
         const indexKey = { partitionKey: contentType, sortKey: id };
 
         const index = await this.metadataClient.getAsync<DocumentIndex>(contentType, id);
@@ -78,6 +86,7 @@ export default class DocumentRepository {
     }
 
     async putHashAsync(hash: DocumentHash): Promise<void> {
+        if (this.metadataClient === undefined) throw new Error('this.metadataClient === undefined');
         await this.metadataClient.putAsync('hash', 's3BucketName', 's3Key', hash);
     }
 
@@ -94,6 +103,7 @@ export default class DocumentRepository {
     }
 
     private async listIndexesByDocumentTypeAsync(contentType: DocumentContentType): Promise<DocumentIndex[]> {
+        if (this.metadataClient === undefined) throw new Error('this.metadataClient === undefined');
         const indexesByDocumentType = 
             await this.metadataClient.queryByPartitionKeyAsync<DocumentIndex>(contentType);
         return indexesByDocumentType;

@@ -33,6 +33,8 @@ export default class DocumentIndexUpdatePublisherFunction extends DynamoDBStream
                 const index = 
                     await this.documentRepository.getIndexByS3Async(newHash.s3BucketName, newHash.s3Key);
 
+                if (index === undefined) throw new Error('index === undefined');
+                
                 await this.documentUpdateTopic.publishMessageAsync(index, { contentType: index.contentType });
             }
         }

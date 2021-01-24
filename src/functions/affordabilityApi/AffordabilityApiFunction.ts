@@ -1,8 +1,6 @@
 import { Request, Response } from '.';
 import { DocumentRepository, ProductEngine } from '../../services';
 import { ApiGatewayFunction } from '../../common';
-import { Configuration } from '../../domain/configuration';
-import { DocumentContentType } from '../../domain/document';
 
 export default class AffordabilityApiFunction extends ApiGatewayFunction<Request, Response> {
 
@@ -16,9 +14,7 @@ export default class AffordabilityApiFunction extends ApiGatewayFunction<Request
     async handleRequest(request: Request): Promise<Response> {
 
         const clientConfiguration = 
-            await this.documentRepository.getContentAsync<Configuration>(
-                DocumentContentType.Configuration, 'client'
-            );
+            await this.documentRepository.getConfigurationAsync('client');
 
         const productSummaries = 
             this.productEngine.calculateProductSummaries(

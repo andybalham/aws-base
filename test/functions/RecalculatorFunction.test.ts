@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 import { ImportMock, MockManager } from 'ts-mock-imports';
-import * as Common from '../../src/common';
 import * as Services from '../../src/services';
 import { ProductSummary } from '../../src/domain/product';
 import { DocumentContentType } from '../../src/domain/document';
@@ -24,8 +23,10 @@ describe('Test RecalculatorFunction', () => {
             
         // Arrange
         
-        documentRepositoryMock.mock('get', {});
-        const documentRepositoryPutStub = documentRepositoryMock.mock('put');
+        documentRepositoryMock.mock('getConfigurationAsync', {});
+        documentRepositoryMock.mock('getProductAsync', {});
+        documentRepositoryMock.mock('getApplicationAsync', {});
+        const documentRepositoryPutContentStub = documentRepositoryMock.mock('putContentAsync');
 
         const expectedProductSummary: ProductSummary = 
             {
@@ -49,7 +50,7 @@ describe('Test RecalculatorFunction', () => {
 
         const sutRecalculatorFunction = 
             new Recalculator.Function(
-                new Services.DocumentRepository(new Common.S3Client(), new Common.DynamoDBClient()),
+                new Services.DocumentRepository(),
                 new Services.ProductEngine(),
             );
 
@@ -61,10 +62,10 @@ describe('Test RecalculatorFunction', () => {
 
         expect(productEngineCalculateProductSummariesStub.called).to.be.true;
 
-        expect(documentRepositoryPutStub.called).to.be.true;
+        expect(documentRepositoryPutContentStub.called).to.be.true;
 
-        const actualResultIndex = documentRepositoryPutStub.lastCall.args[0];
-        const actualResult = documentRepositoryPutStub.lastCall.args[1];
+        const actualResultIndex = documentRepositoryPutContentStub.lastCall.args[0];
+        const actualResult = documentRepositoryPutContentStub.lastCall.args[1];
 
         expect(actualResultIndex.contentType).to.equal(DocumentContentType.Result);
         expect(actualResultIndex.id).to.equal(`${request.configurationId}-${request.scenarioId}-${request.productId}`);

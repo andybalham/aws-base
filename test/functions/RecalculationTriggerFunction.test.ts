@@ -5,7 +5,7 @@ import { ImportMock, MockManager } from 'ts-mock-imports';
 import * as Common from '../../src/common';
 import * as RecalculationTrigger from '../../src/functions/recalculationTrigger';
 import * as RecalculationInitialiser from '../../src/functions/recalculationInitialiser';
-import { DocumentContentIndex, DocumentContentType } from '../../src/domain/document';
+import { DocumentIndex, DocumentContentType } from '../../src/domain/document';
 
 describe('Test RecalculationTriggerFunction', () => {
 
@@ -23,11 +23,11 @@ describe('Test RecalculationTriggerFunction', () => {
             
         // Arrange
 
-        const documentContentIndex = getDocumentIndex(DocumentContentType.Configuration, 'configurationId');
+        const DocumentIndex = getDocumentIndex(DocumentContentType.Configuration, 'configurationId');
 
-        const message: SNSMessage = getSNSMessage(documentContentIndex);
+        const message: SNSMessage = getSNSMessage(DocumentIndex);
 
-        const startExecutionStub: SinonStub = stepFunctionClientMock.mock('startExecution');
+        const startExecutionStub: SinonStub = stepFunctionClientMock.mock('startExecutionAsync');
 
         const sutRecalculationTriggerFunction = 
             new RecalculationTrigger.Function(new Common.StepFunctionClient());
@@ -43,17 +43,17 @@ describe('Test RecalculationTriggerFunction', () => {
         const actualInputObject = startExecutionStub.lastCall.args[0];
 
         const expectedInputObject: RecalculationInitialiser.Request = {
-            contentType: documentContentIndex.contentType,
-            id: documentContentIndex.id,
+            contentType: DocumentIndex.contentType,
+            id: DocumentIndex.id,
         };
         
         expect(actualInputObject).to.deep.equal(expectedInputObject);
     });
 });
 
-function getSNSMessage(DocumentContentIndex: DocumentContentIndex): SNSMessage {
+function getSNSMessage(DocumentIndex: DocumentIndex): SNSMessage {
     return {
-        Message: JSON.stringify(DocumentContentIndex),
+        Message: JSON.stringify(DocumentIndex),
         SignatureVersion: 'string',
         Timestamp: 'string',
         Signature: 'string',
@@ -67,12 +67,11 @@ function getSNSMessage(DocumentContentIndex: DocumentContentIndex): SNSMessage {
     };
 }
 
-function getDocumentIndex(contentType: DocumentContentType, id: string): DocumentContentIndex {
+function getDocumentIndex(contentType: DocumentContentType, id: string): DocumentIndex {
     return {
         id,
         contentType,
         s3BucketName: 's3BucketName',
         s3Key: 's3Key',
-        s3ETag: 's3ETag',
     };
 }

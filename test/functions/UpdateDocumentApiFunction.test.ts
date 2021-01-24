@@ -1,6 +1,5 @@
 import * as DocumentApi from '../../src/functions/documentApi';
 import * as Services from '../../src/services';
-import * as Common from '../../src/common';
 import { expect } from 'chai';
 import { DocumentContentType } from '../../src/domain/document';
 import { ImportMock, MockManager } from 'ts-mock-imports';
@@ -18,7 +17,7 @@ describe('Test UpdateDocumentApiFunction', () => {
         ImportMock.restore();
     });
     
-    it.only('passes through the request details', async () => {
+    it('passes through the request details', async () => {
        
         // Arrange
 
@@ -31,10 +30,9 @@ describe('Test UpdateDocumentApiFunction', () => {
             }
         };
 
-        const documentRepository = 
-            new Services.DocumentRepository(new Common.S3Client(), new Common.DynamoDBClient());
+        const documentRepository = new Services.DocumentRepository();
 
-        const documentRepositoryPutStub: SinonStub = documentRepositoryMock.mock('put', request.id);
+        const documentRepositoryPutStub: SinonStub = documentRepositoryMock.mock('putContentAsync', request.id);
     
         const sutDocumentUpdateApiFunction = new DocumentApi.UpdateFunction(documentRepository);
 

@@ -1,5 +1,4 @@
 import * as DocumentIndexer from '../../src/functions/documentIndexer/index';
-import * as Common from '../../src/common';
 import * as Services from '../../src/services';
 import { S3Event } from 'aws-lambda/trigger/s3';
 import { ImportMock, MockManager } from 'ts-mock-imports';
@@ -24,10 +23,7 @@ describe('Test DocumentIndexerFunction', () => {
 
         const sutDocumentIndexerFunction = 
             new DocumentIndexer.Function(
-                new Services.DocumentRepository(
-                    new Common.S3Client(), 
-                    new Common.DynamoDBSingleTableClient('TableName')
-                )
+                new Services.DocumentRepository(),
             );
 
         const putHashAsyncStub = documentRepositoryMock.mock('putHashAsync');

@@ -48,11 +48,8 @@ describe('Test DocumentUpdatePublisherFunction', () => {
 
         const sutDocumentIndexUpdatePublisherFunction = 
             new DocumentIndexUpdatePublisher.Function(
-                new Services.DocumentRepository(
-                    new Common.S3Client(), 
-                    new Common.DynamoDBSingleTableClient()
-                ), 
-                new Common.SNSClient
+                new Services.DocumentRepository(), 
+                new Common.SNSClient(),
             );
 
         await sutDocumentIndexUpdatePublisherFunction.processEventRecord('INSERT', oldImage, newImage);
@@ -68,92 +65,115 @@ describe('Test DocumentUpdatePublisherFunction', () => {
         expect(publishedAttributes).to.deep.equal({ contentType: index.contentType });
     });
 
-    it('publishes an update on MODIFY when ETag has changed', async () => {
+    it('publishes an update on MODIFY when hash has changed', async () => {
         
-        // // Arrange
+        // Arrange
 
-        // const publishMessageStub: SinonStub = snsClientMock.mock('publishMessage');
+        const oldImage = 
+            Common.DynamoDBSingleTableItem.getItem({
+                s3BucketName: 's3BucketName',
+                s3Key: 's3Key',
+                hash: 'oldHash',
+            }, 'hash', 's3BucketName', 's3Key');
 
-        // const sutDocumentIndexUpdatePublisherFunction = new DocumentIndexUpdatePublisher.Function(new Common.SNSClient);
+        const newImage = 
+            Common.DynamoDBSingleTableItem.getItem({
+                s3BucketName: 's3BucketName',
+                s3Key: 's3Key',
+                hash: 'newHash',
+            }, 'hash', 's3BucketName', 's3Key');
 
-        // const Image: DocumentIndex = {
-        //     id: 'C-documentId',
-        //     contentType:DocumentContentType.Configuration,
-        //     s3BucketName: 's3BucketName',
-        //     s3ETag: 's3ETag',
-        //     s3Key: 's3Key',
-        // };
+        const index: DocumentIndex = {
+            id: 'C-documentId',
+            contentType: DocumentContentType.Configuration,
+            s3BucketName: 's3BucketName',
+            s3Key: 's3Key',
+        };
 
-        // const newImage: DocumentIndex = {
-        //     id: 'C-documentIdNew',
-        //     contentType:DocumentContentType.Configuration,
-        //     s3BucketName: 's3BucketNameNew',
-        //     s3ETag: 's3ETagNew',
-        //     s3Key: 's3KeyNew',
-        // };
+        documentRepositoryMock.mock('getIndexByS3Async', index);
 
-        // // Act
+        const publishMessageStub: SinonStub = snsClientMock.mock('publishMessageAsync');
 
-        // await sutDocumentIndexUpdatePublisherFunction.processEventRecord('MODIFY', Image, newImage);
+        // Act
 
-        // // Assert
+        const sutDocumentIndexUpdatePublisherFunction = 
+            new DocumentIndexUpdatePublisher.Function(
+                new Services.DocumentRepository(), 
+                new Common.SNSClient(),
+            );
 
-        // expect(publishMessageStub.callCount).to.equal(1);
+        await sutDocumentIndexUpdatePublisherFunction.processEventRecord('INSERT', oldImage, newImage);
 
-        // const publishedImage = publishMessageStub.lastCall.args[0];
-        // expect(publishedImage).to.deep.equal(newImage);
+        // Assert
 
-        // const publishedAttributes = publishMessageStub.lastCall.args[1];
-        // expect(publishedAttributes).to.deep.equal({ contentType: newImage.contentType });
+        expect(publishMessageStub.callCount).to.equal(1);
+
+        const publishedImage = publishMessageStub.lastCall.args[0];
+        expect(publishedImage).to.deep.equal(index);
+
+        const publishedAttributes = publishMessageStub.lastCall.args[1];
+        expect(publishedAttributes).to.deep.equal({ contentType: index.contentType });
     });    
 
-    it('does not publish an update on MODIFY when ETag has not changed', async () => {
+    it('does not publish an update on MODIFY when hash has not changed', async () => {
         
-        // // Arrange
+        // Arrange
 
-        // const publishMessageStub: SinonStub = snsClientMock.mock('publishMessage');
+        const oldImage =
+            Common.DynamoDBSingleTableItem.getItem({
+                s3BucketName: 's3BucketName',
+                s3Key: 's3Key',
+                hash: 'hash',
+            }, 'hash', 's3BucketName', 's3Key');
 
-        // const sutDocumentIndexUpdatePublisherFunction = new DocumentIndexUpdatePublisher.Function(new Common.SNSClient);
+        const newImage = {
+            ...oldImage,
+        };
 
-        // const image: DocumentIndex = {
-        //     id: 'C-documentId',
-        //     contentType:DocumentContentType.Configuration,
-        //     s3BucketName: 's3BucketName',
-        //     s3ETag: 's3ETag',
-        //     s3Key: 's3Key',
-        // };
+        const publishMessageStub: SinonStub = snsClientMock.mock('publishMessageAsync');
 
-        // // Act
+        // Act
 
-        // await sutDocumentIndexUpdatePublisherFunction.processEventRecord('MODIFY', image, image);
+        const sutDocumentIndexUpdatePublisherFunction = 
+            new DocumentIndexUpdatePublisher.Function(
+                new Services.DocumentRepository(), 
+                new Common.SNSClient(),
+            );
 
-        // // Assert
+        await sutDocumentIndexUpdatePublisherFunction.processEventRecord('MODIFY', oldImage, newImage);
 
-        // expect(publishMessageStub.callCount).to.equal(0);
+        // Assert
+
+        expect(publishMessageStub.callCount).to.equal(0);
     });    
 
     it('does not publish an update on REMOVE', async () => {
         
-        //     // Arrange
+        // Arrange
 
-        //     const publishMessageStub: SinonStub = snsClientMock.mock('publishMessage');
+        const oldImage = 
+        Common.DynamoDBSingleTableItem.getItem({
+            s3BucketName: 's3BucketName',
+            s3Key: 's3Key',
+            hash: 'hash',
+        }, 'hash', 's3BucketName', 's3Key');
+        
+        const newImage = undefined;
 
-        //     const sutDocumentIndexUpdatePublisherFunction = new DocumentIndexUpdatePublisher.Function(new Common.SNSClient);
+        const publishMessageStub: SinonStub = snsClientMock.mock('publishMessageAsync');
 
-        //     const oldImage: DocumentIndex = {
-        //         id: 'C-documentId',
-        //         contentType:DocumentContentType.Configuration,
-        //         s3BucketName: 's3BucketName',
-        //         s3ETag: 's3ETag',
-        //         s3Key: 's3Key',
-        //     };
+        // Act
 
-        //     // Act
+        const sutDocumentIndexUpdatePublisherFunction = 
+            new DocumentIndexUpdatePublisher.Function(
+                new Services.DocumentRepository(), 
+                new Common.SNSClient(),
+            );
 
-        //     await sutDocumentIndexUpdatePublisherFunction.processEventRecord('REMOVE', oldImage, undefined);
+        await sutDocumentIndexUpdatePublisherFunction.processEventRecord('REMOVE', oldImage, newImage);
 
-        //     // Assert
+        // Assert
 
-    //     expect(publishMessageStub.callCount).to.equal(0);
+        expect(publishMessageStub.callCount).to.equal(0);
     });    
 });
