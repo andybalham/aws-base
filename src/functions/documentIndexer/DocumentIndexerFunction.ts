@@ -35,6 +35,6 @@ class S3Handler extends S3Function {
 
         await this.documentRepository.putHashAsync(hash);
 
-        Log.info('Put document hash', {hash});
+        Log.debug('Put document hash', {hash});
     }
 }

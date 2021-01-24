@@ -85,12 +85,6 @@ Resources:
           AttributeName: SK
           AttributeType: S
         - 
-          AttributeName: ITEM_TYPE
-          AttributeType: S
-        - 
-          AttributeName: id
-          AttributeType: S
-        - 
           AttributeName: s3BucketName
           AttributeType: S
         - 
@@ -104,7 +98,7 @@ Resources:
           AttributeName: SK
           KeyType: RANGE
       GlobalSecondaryIndexes:
-        - IndexName: S3
+        - IndexName: S3Key
           KeySchema:
             - AttributeName: s3BucketName
               KeyType: HASH
@@ -146,10 +140,13 @@ Resources:
       Environment:
         Variables:
           DOCUMENT_UPDATE_TOPIC: !Ref DocumentIndexUpdateTopic
+          DOCUMENT_INDEX_TABLE_NAME: !Ref DocumentIndexTable
       Policies:
         - DynamoDBStreamReadPolicy:
             TableName: !Ref DocumentIndexTable
             StreamName: "*"
+        - DynamoDBReadPolicy:
+            TableName: !Ref DocumentIndexTable
         - SNSPublishMessagePolicy:
             TopicName: !GetAtt DocumentIndexUpdateTopic.TopicName
       Events:
@@ -245,7 +242,7 @@ Resources:
           DOCUMENT_INDEX_TABLE_NAME: !Ref DocumentIndexTable
           DOCUMENT_BUCKET: !Ref DocumentBucket
       Policies:
-        - DynamoDBReadPolicy:
+        - DynamoDBCrudPolicy:
             TableName: !Ref DocumentIndexTable
         - S3CrudPolicy:
             BucketName: !Ref DocumentBucket
@@ -312,23 +309,26 @@ Resources:
       Handler: index.handleDocumentApiUpdateFunction
       Environment:
         Variables:
+          DOCUMENT_INDEX_TABLE_NAME: !Ref DocumentIndexTable
           DOCUMENT_BUCKET: !Ref DocumentBucket
       Policies:
         - S3WritePolicy:
             BucketName: !Ref DocumentBucket
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DocumentIndexTable
       Events:
         InsertEvent:
           Type: Api
           Properties:
             RestApiId: !Ref AffordabilityApi
             Method: POST
-            Path: /document/{type}
+            Path: /document/{contentType}
         UpdateEvent:
           Type: Api
           Properties:
             RestApiId: !Ref AffordabilityApi
             Method: POST
-            Path: /document/{type}/{id}
+            Path: /document/{contentType}/{id}
 
 Outputs:
 

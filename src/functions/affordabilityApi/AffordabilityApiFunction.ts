@@ -13,12 +13,18 @@ export default class AffordabilityApiFunction extends ApiGatewayFunction<Request
 
     async handleRequest(request: Request): Promise<Response> {
 
+        console.log('handleRequest 1');
+
         const clientConfiguration = 
             await this.documentRepository.getConfigurationAsync('client');
+
+        console.log('handleRequest 2');
 
         const productSummaries = 
             this.productEngine.calculateProductSummaries(
                 clientConfiguration, request.application, request.products);
+
+        console.log('handleRequest 3');
 
         const response: Response = {
             outputs: {

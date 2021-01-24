@@ -32,7 +32,7 @@ export default class DynamoDBSingleTableItem {
 
         delete entity.PK;
         delete entity.SK;
-        delete entity.TYPE;
+        delete entity.ITEM_TYPE;
 
         return entity;
     }

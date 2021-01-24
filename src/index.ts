@@ -5,9 +5,7 @@ import httpErrorHandler from '@middy/http-error-handler';
 import correlationIds from '@dazn/lambda-powertools-middleware-correlation-ids';
 
 import { DocumentRepository, ProductEngine } from './services';
-import S3Client from './common/S3Client';
-import SNSClient from './common/SNSClient';
-import StepFunctionClient from './common/StepFunctionClient';
+import { StepFunctionClient, SNSClient, S3Client, DynamoDBSingleTableClient } from './common';
 
 import * as AffordabilityApi from './functions/affordabilityApi';
 import * as DocumentIndexUpdatePublisher from './functions/documentIndexUpdatePublisher';
@@ -16,7 +14,6 @@ import * as DocumentApi from './functions/documentApi';
 import * as RecalculationTrigger from './functions/recalculationTrigger';
 import * as RecalculationInitialiser from './functions/recalculationInitialiser';
 import * as Recalculator from './functions/recalculator';
-import { DynamoDBSingleTableClient } from './common';
 
 // TODO 24Nov20: How would we initialise components that require environment variables set by middleware?
 

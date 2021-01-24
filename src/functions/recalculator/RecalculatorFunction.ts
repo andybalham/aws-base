@@ -21,7 +21,7 @@ export default class RecalculatorFunction extends TaskFunction<Request, void> {
         const productSummaries =
             this.productEngine.calculateProductSummaries(configuration, application, [product]);
 
-        this.documentRepository
+        await this.documentRepository
             .putContentAsync(
                 {
                     id: `${request.configurationId}-${request.scenarioId}-${request.productId}`,

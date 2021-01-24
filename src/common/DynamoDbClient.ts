@@ -1,4 +1,4 @@
-import { DocumentClient, PutItemInput, QueryInput } from 'aws-sdk/clients/dynamodb';
+import { DocumentClient, PutItemInput } from 'aws-sdk/clients/dynamodb';
 import https from 'https';
 
 const agent = new https.Agent({
@@ -46,7 +46,7 @@ export default class DynamoDBClient {
                 Item: item,
             };    
 
-        this.documentClient.put(putItem).promise();
+        await this.documentClient.put(putItem).promise();
     }
 
     async queryByPartitionKeyAsync<T>(keyValue: string): Promise<T[]> {
@@ -54,14 +54,17 @@ export default class DynamoDBClient {
         if (this.tableName === undefined) throw new Error('this.tableName === undefined');
         if (this.partitionKeyName === undefined) throw new Error('this.partitionKeyName === undefined');
 
-        const queryParams: QueryInput = {
+        const queryParams/*: QueryInput*/ = {
             TableName: this.tableName,
             KeyConditionExpression: `${this.partitionKeyName} = :partitionKey`,
             ExpressionAttributeValues: {
-                ':partitionKey': { S: keyValue },
+                // ':partitionKey': , This is needed to meet type QueryInput, but results in 'Condition parameter type does not match schema type'
+                ':partitionKey': keyValue,
             }
         };
 
+        console.log(`queryParams: ${JSON.stringify(queryParams)}`);
+        
         const queryOutput = await this.documentClient.query(queryParams).promise();
 
         if (!queryOutput.Items) {

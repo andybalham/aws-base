@@ -10,17 +10,17 @@ export default class DynamoDBSingleTableClient {
         public readonly tableName?: string, 
         documentClientOverride?: DocumentClient
     ) {
-        this.dynamoDBClient = 
-            new DynamoDBClient(tableName, 'partitionKey', 'sortKey', documentClientOverride);
+        this.dynamoDBClient = new DynamoDBClient(tableName, 'PK', 'SK', documentClientOverride);
     }
 
     async getAsync<T extends object>(partitionKey: string, sortKey?: string): Promise<T | undefined> {
 
-        const item = await this.dynamoDBClient
-            .getAsync<DynamoDBSingleTableItem>({
-                partitionKey,
-                sortKey
-            });
+        const item = 
+            await this.dynamoDBClient
+                .getAsync<DynamoDBSingleTableItem>({
+                    PK: partitionKey,
+                    SK: sortKey
+                });
 
         return item === undefined
             ? undefined
@@ -52,6 +52,7 @@ export default class DynamoDBSingleTableClient {
 
     async queryByIndexAsync<T extends object>(
         indexName: string, 
+        itemType: string, 
         partitionKey: {name: string; value: string},
         sortKey?: {name: string; value: string},
     ): Promise<T[]> {
@@ -62,7 +63,10 @@ export default class DynamoDBSingleTableClient {
                     indexName, partitionKey, sortKey
                 );
 
-        const entities = singleTableItems.map(i => DynamoDBSingleTableItem.getEntity<T>(i));
+        const entities = 
+            singleTableItems
+                .filter(i => i.ITEM_TYPE === itemType) // TODO 24Jan21: We should apply a filter expression
+                .map(i => DynamoDBSingleTableItem.getEntity<T>(i));
 
         return entities;
     }

@@ -11,12 +11,12 @@ export default class DocumentRepository {
 
     // TODO 06Jan21: YAML example for a GSI https://jun711.github.io/aws/how-to-create-aws-dynamodb-secondary-indexes/
 
-    constructor(private contentClient?: S3Client, private metadataClient?: DynamoDBSingleTableClient) {}
+    constructor(private contentClient?: S3Client, private indexClient?: DynamoDBSingleTableClient) {}
 
     async putContentAsync(index: {contentType: DocumentContentType; id?: string; description?: string}, content: any): Promise<string> {
 
         if (this.contentClient === undefined) throw new Error('this.contentClient === undefined');
-        if (this.metadataClient === undefined) throw new Error('this.metadataClient === undefined');
+        if (this.indexClient === undefined) throw new Error('this.metadataClient === undefined');
 
         const id = index.id ?? nanoid();
         const contentS3Key = `${index.contentType}/${index.contentType}_${id}.json`;
@@ -31,7 +31,7 @@ export default class DocumentRepository {
             description: index.description,
         };    
 
-        await this.metadataClient.putAsync(contentIndex, 'index', 'contentType', 'id');
+        await this.indexClient.putAsync(contentIndex, 'index', 'contentType', 'id');
         await this.contentClient.putObjectAsync(contentS3Key, content);
 
         return id;
@@ -51,15 +51,15 @@ export default class DocumentRepository {
 
     async getIndexByS3Async(s3BucketName: string, s3Key: string): Promise<DocumentIndex> {
 
-        if (this.metadataClient === undefined) throw new Error('this.metadataClient === undefined');
+        if (this.indexClient === undefined) throw new Error('this.metadataClient === undefined');
 
         const indexes =
-            await this.metadataClient.queryByIndexAsync<DocumentIndex>(
-                'S3', 
+            await this.indexClient.queryByIndexAsync<DocumentIndex>(
+                'S3Key', 'index',
                 {name: 's3BucketName', value: s3BucketName}, 
                 {name: 's3Key', value: s3Key}, 
             );
-
+        
         if (indexes.length !== 1) {
             throw new Error(`Found ${indexes.length} indexes when 1 was expected: ${JSON.stringify({s3BucketName, s3Key})}`);
         }
@@ -70,14 +70,12 @@ export default class DocumentRepository {
     async getContentAsync<T extends object>(contentType: DocumentContentType, id: string): Promise<T> {
 
         if (this.contentClient === undefined) throw new Error('this.contentClient === undefined');
-        if (this.metadataClient === undefined) throw new Error('this.metadataClient === undefined');
+        if (this.indexClient === undefined) throw new Error('this.metadataClient === undefined');
 
-        const indexKey = { partitionKey: contentType, sortKey: id };
-
-        const index = await this.metadataClient.getAsync<DocumentIndex>(contentType, id);
+        const index = await this.indexClient.getAsync<DocumentIndex>(contentType, id);
 
         if (index === undefined) {
-            throw new Error(`No document found for indexKey: ${JSON.stringify(indexKey)}`);
+            throw new Error(`No document found for: ${JSON.stringify({contentType, id})}`);
         }
 
         const content = await this.contentClient.getObjectAsync<T>(index.s3Key, index.s3BucketName);
@@ -86,8 +84,8 @@ export default class DocumentRepository {
     }
 
     async putHashAsync(hash: DocumentHash): Promise<void> {
-        if (this.metadataClient === undefined) throw new Error('this.metadataClient === undefined');
-        await this.metadataClient.putAsync(hash, 'hash', 's3BucketName', 's3Key');
+        if (this.indexClient === undefined) throw new Error('this.metadataClient === undefined');
+        await this.indexClient.putAsync(hash, 'hash', 's3BucketName', 's3Key');
     }
 
     async listConfigurationsAsync(): Promise<DocumentIndex[]> {
@@ -103,9 +101,9 @@ export default class DocumentRepository {
     }
 
     private async listIndexesByDocumentTypeAsync(contentType: DocumentContentType): Promise<DocumentIndex[]> {
-        if (this.metadataClient === undefined) throw new Error('this.metadataClient === undefined');
+        if (this.indexClient === undefined) throw new Error('this.metadataClient === undefined');
         const indexesByDocumentType = 
-            await this.metadataClient.queryByPartitionKeyAsync<DocumentIndex>(contentType);
+            await this.indexClient.queryByPartitionKeyAsync<DocumentIndex>(contentType);
         return indexesByDocumentType;
     }
 }
