@@ -79,13 +79,13 @@ Resources:
         StreamViewType: NEW_AND_OLD_IMAGES
       AttributeDefinitions: 
         - 
-          AttributeName: partitionKey
+          AttributeName: PK
           AttributeType: S
         - 
-          AttributeName: sortKey
+          AttributeName: SK
           AttributeType: S
         - 
-          AttributeName: itemType
+          AttributeName: ITEM_TYPE
           AttributeType: S
         - 
           AttributeName: id
@@ -98,10 +98,10 @@ Resources:
           AttributeType: S
       KeySchema: 
         - 
-          AttributeName: partitionKey
+          AttributeName: PK
           KeyType: HASH
         - 
-          AttributeName: sortKey
+          AttributeName: SK
           KeyType: RANGE
       GlobalSecondaryIndexes:
         - IndexName: S3

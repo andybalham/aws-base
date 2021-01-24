@@ -28,10 +28,10 @@ export default class DynamoDBSingleTableClient {
     }
 
     async putAsync<T extends object>(
+        entity: T,
         itemType: string,
         partitionKeyName: keyof T,
         sortKeyName: keyof T,
-        entity: T
     ): Promise<void> {
 
         const singleTableItem = 

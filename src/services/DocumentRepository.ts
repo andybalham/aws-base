@@ -31,7 +31,7 @@ export default class DocumentRepository {
             description: index.description,
         };    
 
-        await this.metadataClient.putAsync('index', 'contentType', 'id', contentIndex);
+        await this.metadataClient.putAsync(contentIndex, 'index', 'contentType', 'id');
         await this.contentClient.putObjectAsync(contentS3Key, content);
 
         return id;
@@ -87,7 +87,7 @@ export default class DocumentRepository {
 
     async putHashAsync(hash: DocumentHash): Promise<void> {
         if (this.metadataClient === undefined) throw new Error('this.metadataClient === undefined');
-        await this.metadataClient.putAsync('hash', 's3BucketName', 's3Key', hash);
+        await this.metadataClient.putAsync(hash, 'hash', 's3BucketName', 's3Key');
     }
 
     async listConfigurationsAsync(): Promise<DocumentIndex[]> {

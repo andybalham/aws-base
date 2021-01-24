@@ -19,7 +19,7 @@ export default class DocumentIndexUpdatePublisherFunction extends DynamoDBStream
         newImage?: DynamoDBSingleTableItem,
     ): Promise<void> {
         
-        if (newImage?.itemType === 'hash') {
+        if (newImage?.ITEM_TYPE === 'hash') {
 
             const oldHash = oldImage && DynamoDBSingleTableItem.getEntity<DocumentHash>(oldImage);
             const newHash = newImage && DynamoDBSingleTableItem.getEntity<DocumentHash>(newImage);

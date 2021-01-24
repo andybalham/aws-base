@@ -1,20 +1,20 @@
 export default class DynamoDBSingleTableItem {
     
-    itemType: string;
-    partitionKey: string; 
-    sortKey: string;
+    PK: string; 
+    SK: string;
+    ITEM_TYPE: string;
 
     static getItem<T extends object>(
         entity: T,
-        itemType: string, 
+        type: string, 
         partitionKeyName: keyof T, 
         sortKeyName: keyof T,
     ): DynamoDBSingleTableItem {
         
         const item: DynamoDBSingleTableItem = {
-            partitionKey: entity[partitionKeyName] as unknown as string,
-            sortKey: entity[sortKeyName] as unknown as string,
-            itemType: itemType,
+            PK: entity[partitionKeyName] as unknown as string,
+            SK: entity[sortKeyName] as unknown as string,
+            ITEM_TYPE: type,
         };
 
         Object.assign(item, entity);
@@ -30,9 +30,9 @@ export default class DynamoDBSingleTableItem {
 
         Object.assign(entity, item);
 
-        delete entity.partitionKey;
-        delete entity.sortKey;
-        delete entity.itemType;
+        delete entity.PK;
+        delete entity.SK;
+        delete entity.TYPE;
 
         return entity;
     }
