@@ -61,7 +61,7 @@ describe('Test AffordabilityApiFunction', () => {
     
         console.log(`request: ${JSON.stringify(request)}`);
     
-        const response = await sutAffordabilityApiFunction.handleRequest(request);
+        const response = await sutAffordabilityApiFunction.handleRequestAsync(request);
 
         expect(response.outputs.productSummaries).to.have.length(2);
     });

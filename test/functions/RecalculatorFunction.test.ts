@@ -56,7 +56,7 @@ describe('Test RecalculatorFunction', () => {
 
         // Act
 
-        await sutRecalculatorFunction.handleRequest(request);
+        await sutRecalculatorFunction.handleRequestAsync(request);
 
         // Assert
 

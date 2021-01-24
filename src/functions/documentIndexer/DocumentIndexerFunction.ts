@@ -14,8 +14,8 @@ export default class DocumentIndexerFunction extends SNSFunction<S3Event> {
         this.s3Handler = new S3Handler(documentRepository);
     }
 
-    async handleMessage(s3Event: S3Event): Promise<void> {
-        await this.s3Handler.handle(s3Event, this.context);
+    async handleMessageAsync(s3Event: S3Event): Promise<void> {
+        await this.s3Handler.handleAsync(s3Event, this.context);
     }
 }
 
@@ -25,7 +25,7 @@ class S3Handler extends S3Function {
         super();
     }
     
-    async handleEventRecord(eventRecord: S3EventRecord): Promise<void> {
+    async handleEventRecordAsync(eventRecord: S3EventRecord): Promise<void> {
 
         const hash: DocumentHash = {
             s3BucketName: eventRecord.s3.bucket.name, 

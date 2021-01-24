@@ -10,7 +10,7 @@ export default class UpdateDocumentApiFunction extends ApiGatewayFunction<Update
         super();
     }
 
-    async handleRequest(request: UpdateRequest): Promise<UpdateResponse> {
+    async handleRequestAsync(request: UpdateRequest): Promise<UpdateResponse> {
         
         const id = 
             await this.documentRepository.putContentAsync(

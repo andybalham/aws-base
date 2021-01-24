@@ -23,7 +23,7 @@ describe('Test ApiGatewayFunction', () => {
         class Response { pathOutput: string; queryStringOutput: string; bodyOutput: string }
 
         class TestApiGatewayFunction extends ApiGatewayFunction<Request, Response> {
-            async handleRequest(request: Request): Promise<Response> {
+            async handleRequestAsync(request: Request): Promise<Response> {
                 return { 
                     pathOutput: request.pathParameter,
                     queryStringOutput: request.queryStringParameter,
@@ -45,7 +45,7 @@ describe('Test ApiGatewayFunction', () => {
 
         // Act
 
-        const actualResult = await sutTestApiGatewayFunction.handle(event);
+        const actualResult = await sutTestApiGatewayFunction.handleAsync(event);
 
         // Assert
 

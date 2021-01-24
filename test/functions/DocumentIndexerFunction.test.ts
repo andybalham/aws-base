@@ -38,7 +38,7 @@ describe('Test DocumentIndexerFunction', () => {
             ]
         };
 
-        await sutDocumentIndexerFunction.handleMessage(s3Event as unknown as S3Event);
+        await sutDocumentIndexerFunction.handleMessageAsync(s3Event as unknown as S3Event);
 
         // Assert
 

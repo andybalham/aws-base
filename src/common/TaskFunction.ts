@@ -5,7 +5,7 @@ export default abstract class TaskFunction<TReq, TRes> {
     
     context: Context;
 
-    async handle(event: any, context: Context): Promise<any> {
+    async handleAsync(event: any, context: Context): Promise<any> {
 
         Log.debug('TaskFunction.handle', {event});
 
@@ -13,12 +13,12 @@ export default abstract class TaskFunction<TReq, TRes> {
 
         this.context = context;
 
-        const response = await this.handleRequest(event);
+        const response = await this.handleRequestAsync(event);
 
         Log.debug('TaskFunction.handle', {response});
 
         return response;
     }
 
-    abstract handleRequest(request: TReq): Promise<TRes>;
+    abstract handleRequestAsync(request: TReq): Promise<TRes>;
 }

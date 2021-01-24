@@ -12,7 +12,7 @@ export default class RecalculatorFunction extends TaskFunction<Request, void> {
         super();        
     }
 
-    async handleRequest(request: Request): Promise<void> {
+    async handleRequestAsync(request: Request): Promise<void> {
 
         const configuration = await this.documentRepository.getConfigurationAsync(request.configurationId);
         const application = await this.documentRepository.getApplicationAsync(request.scenarioId);

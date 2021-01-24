@@ -52,7 +52,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
                 new Common.SNSClient(),
             );
 
-        await sutDocumentIndexUpdatePublisherFunction.processEventRecord('INSERT', oldImage, newImage);
+        await sutDocumentIndexUpdatePublisherFunction.processEventRecordAsync('INSERT', oldImage, newImage);
 
         // Assert
 
@@ -102,7 +102,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
                 new Common.SNSClient(),
             );
 
-        await sutDocumentIndexUpdatePublisherFunction.processEventRecord('INSERT', oldImage, newImage);
+        await sutDocumentIndexUpdatePublisherFunction.processEventRecordAsync('INSERT', oldImage, newImage);
 
         // Assert
 
@@ -140,7 +140,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
                 new Common.SNSClient(),
             );
 
-        await sutDocumentIndexUpdatePublisherFunction.processEventRecord('MODIFY', oldImage, newImage);
+        await sutDocumentIndexUpdatePublisherFunction.processEventRecordAsync('MODIFY', oldImage, newImage);
 
         // Assert
 
@@ -170,7 +170,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
                 new Common.SNSClient(),
             );
 
-        await sutDocumentIndexUpdatePublisherFunction.processEventRecord('REMOVE', oldImage, newImage);
+        await sutDocumentIndexUpdatePublisherFunction.processEventRecordAsync('REMOVE', oldImage, newImage);
 
         // Assert
 

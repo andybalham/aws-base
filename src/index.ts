@@ -35,7 +35,7 @@ const affordabilityApiFunction = new AffordabilityApi.Function(documentRepositor
 
 export const handleAffordabilityApiFunction = 
     middy(async (event: any, context: Context): Promise<any> => {
-        return await affordabilityApiFunction.handle(event, context);
+        return await affordabilityApiFunction.handleAsync(event, context);
     })
         .use(correlationIds({ sampleDebugLogRate: 0.01 }))
         .use(httpErrorHandler()); // handles common http errors and returns proper responses
@@ -45,7 +45,7 @@ const documentApiUpdateFunction = new DocumentApi.UpdateFunction(documentReposit
 
 export const handleDocumentApiUpdateFunction = 
     middy(async (event: any, context: Context): Promise<any> => {
-        return await documentApiUpdateFunction.handle(event, context);
+        return await documentApiUpdateFunction.handleAsync(event, context);
     })
         .use(correlationIds({ sampleDebugLogRate: 0.01 }))
         .use(httpErrorHandler()); // handles common http errors and returns proper responses
@@ -55,7 +55,7 @@ const documentIndexerFunction = new DocumentIndexer.Function(documentRepository)
 
 export const handleDocumentIndexerFunction = 
     middy(async (event: any, context: Context): Promise<any> => {
-        await documentIndexerFunction.handle(event, context);
+        await documentIndexerFunction.handleAsync(event, context);
     })
         .use(correlationIds({ sampleDebugLogRate: 0.01 }));
             
@@ -65,7 +65,7 @@ const documentIndexUpdatePublisherFunction =
 
 export const handleDocumentIndexUpdatePublisherFunction = 
     middy(async (event: any, context: Context): Promise<any> => {
-        await documentIndexUpdatePublisherFunction.handle(event, context);
+        await documentIndexUpdatePublisherFunction.handleAsync(event, context);
     })
         .use(correlationIds({ sampleDebugLogRate: 0.01 }));
 
@@ -74,7 +74,7 @@ const recalculationTriggerFunction = new RecalculationTrigger.Function(recalcula
     
 export const handleRecalculationTriggerFunction =
     middy(async (event: any, context: Context): Promise<any> => {
-        await recalculationTriggerFunction.handle(event, context);
+        await recalculationTriggerFunction.handleAsync(event, context);
     })
         .use(correlationIds({ sampleDebugLogRate: 0.01 }));
     
@@ -83,7 +83,7 @@ const recalculationInitialiserFunction = new RecalculationInitialiser.Function(d
 
 export const handleRecalculationInitialiserFunction =
     middy(async (event: any, context: Context): Promise<any> => {
-        return await recalculationInitialiserFunction.handle(event, context);
+        return await recalculationInitialiserFunction.handleAsync(event, context);
     })
         .use(correlationIds({ sampleDebugLogRate: 0.01 }));
     
@@ -92,7 +92,7 @@ const recalculatorFunction = new Recalculator.Function(documentRepository, produ
 
 export const handleRecalculatorFunction =
     middy(async (event: any, context: Context): Promise<any> => {
-        return await recalculatorFunction.handle(event, context);
+        return await recalculatorFunction.handleAsync(event, context);
     })
         .use(correlationIds({ sampleDebugLogRate: 0.01 }));
         

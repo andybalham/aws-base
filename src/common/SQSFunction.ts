@@ -7,7 +7,7 @@ export default abstract class SQSFunction<T> {
     event: SQSEvent;
     context: Context;
 
-    async handle(event: SQSEvent, context: Context): Promise<void> {
+    async handleAsync(event: SQSEvent, context: Context): Promise<void> {
             
         context.callbackWaitsForEmptyEventLoop = false;
 
@@ -27,10 +27,10 @@ export default abstract class SQSFunction<T> {
                 break;
             }
 
-            await this.handleMessage(message);
+            await this.handleMessageAsync(message);
         }
     }
 
-    abstract handleMessage(message: T): Promise<void>;
+    abstract handleMessageAsync(message: T): Promise<void>;
 }
 

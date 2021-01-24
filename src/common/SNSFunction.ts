@@ -7,7 +7,7 @@ export default abstract class SNSFunction<T> {
     event: SNSEvent;
     context: Context;
 
-    async handle(event: SNSEvent, context: Context): Promise<void> {
+    async handleAsync(event: SNSEvent, context: Context): Promise<void> {
             
         Log.debug('SNSEvent', {event});
 
@@ -27,10 +27,10 @@ export default abstract class SNSFunction<T> {
                 break;
             }
 
-            await this.handleMessage(message);
+            await this.handleMessageAsync(message);
         }
     }
 
-    abstract handleMessage(message: T): Promise<void>;
+    abstract handleMessageAsync(message: T): Promise<void>;
 }
 

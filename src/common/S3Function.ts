@@ -7,7 +7,7 @@ export default abstract class S3Function {
     event: S3Event;
     context: Context;
 
-    async handle(event: S3Event, context: Context): Promise<void> {
+    async handleAsync(event: S3Event, context: Context): Promise<void> {
             
         Log.debug('S3Event', {event});
 
@@ -22,9 +22,9 @@ export default abstract class S3Function {
 
             // TODO 25Nov20: Is there a test event from S3?
 
-            await this.handleEventRecord(eventRecord);
+            await this.handleEventRecordAsync(eventRecord);
         }
     }
 
-    abstract handleEventRecord(eventRecord: S3EventRecord): Promise<void>;
+    abstract handleEventRecordAsync(eventRecord: S3EventRecord): Promise<void>;
 }

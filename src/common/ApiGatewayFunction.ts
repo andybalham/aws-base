@@ -17,7 +17,7 @@ export default abstract class ApiGatewayFunction<TReq, TRes> {
     requestId: string;
     correlationId: string;
     
-    async handle(event: APIGatewayProxyEvent, context?: Context): Promise<APIGatewayProxyResult>  {
+    async handleAsync(event: APIGatewayProxyEvent, context?: Context): Promise<APIGatewayProxyResult>  {
             
         Log.debug('APIGatewayProxyEvent', {event});
 
@@ -36,7 +36,7 @@ export default abstract class ApiGatewayFunction<TReq, TRes> {
 
         try {
 
-            const response = await this.handleRequest(request);
+            const response = await this.handleRequestAsync(request);
 
             if (this.includeCorrelationAndRequestIds && (response !== undefined)) {
                 (response as any).correlationId = this.correlationId;
@@ -79,6 +79,6 @@ export default abstract class ApiGatewayFunction<TReq, TRes> {
         return request;
     }
 
-    abstract handleRequest(request: TReq): Promise<TRes>;
+    abstract handleRequestAsync(request: TReq): Promise<TRes>;
 }
 

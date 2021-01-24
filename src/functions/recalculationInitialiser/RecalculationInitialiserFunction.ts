@@ -9,7 +9,7 @@ export default class RecalculationInitialiserFunction extends TaskFunction<Reque
         super();
     }
 
-    async handleRequest(request: Request): Promise<Response> {
+    async handleRequestAsync(request: Request): Promise<Response> {
         
         let response: Response;
 

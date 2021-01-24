@@ -9,7 +9,7 @@ export default class RecalculationTriggerFunction extends SQSFunction<SNSMessage
         super();
     }
 
-    async handleMessage(message: SNSMessage): Promise<void> {
+    async handleMessageAsync(message: SNSMessage): Promise<void> {
         
         const index: DocumentIndex = JSON.parse(message.Message);
 

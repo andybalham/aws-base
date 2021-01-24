@@ -8,7 +8,7 @@ export default abstract class DynamoDBStreamFunction<T> {
     event: DynamoDBStreamEvent;
     context: Context;
 
-    async handle(event: DynamoDBStreamEvent, context: Context): Promise<void> {
+    async handleAsync(event: DynamoDBStreamEvent, context: Context): Promise<void> {
             
         Log.debug('DynamoDBStreamEvent', {event});
 
@@ -33,11 +33,11 @@ export default abstract class DynamoDBStreamFunction<T> {
                     ? undefined
                     : DynamoDB.Converter.unmarshall(eventRecord.dynamodb.NewImage) as T;
 
-            await this.processEventRecord(eventName, oldImage, newImage);
+            await this.processEventRecordAsync(eventName, oldImage, newImage);
         }
     }
 
-    abstract processEventRecord(
+    abstract processEventRecordAsync(
         eventType?: DynamoDBEventTypes, oldImage?: T, newImage?: T): Promise<void>
 }
 

@@ -38,7 +38,7 @@ describe('Test UpdateDocumentApiFunction', () => {
 
         // Act
 
-        const response = await sutDocumentUpdateApiFunction.handleRequest(request);
+        const response = await sutDocumentUpdateApiFunction.handleRequestAsync(request);
 
         // Assert
 

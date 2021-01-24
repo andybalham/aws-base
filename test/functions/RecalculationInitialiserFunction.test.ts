@@ -50,7 +50,7 @@ describe('Test RecalculationInitialiserFunction', () => {
 
         // Act
 
-        const actualResponse = await sutRecalculationInitialiserFunction.handleRequest(request);
+        const actualResponse = await sutRecalculationInitialiserFunction.handleRequestAsync(request);
 
         // Assert
 
@@ -79,7 +79,7 @@ describe('Test RecalculationInitialiserFunction', () => {
 
         // Act
 
-        const actualResponse = await sutRecalculationInitialiserFunction.handleRequest(request);
+        const actualResponse = await sutRecalculationInitialiserFunction.handleRequestAsync(request);
 
         // Assert
 
@@ -106,7 +106,7 @@ describe('Test RecalculationInitialiserFunction', () => {
 
         // Act
 
-        const actualResponse = await sutRecalculationInitialiserFunction.handleRequest(request);
+        const actualResponse = await sutRecalculationInitialiserFunction.handleRequestAsync(request);
 
         // Assert
 

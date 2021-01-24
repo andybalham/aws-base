@@ -34,7 +34,7 @@ describe('Test RecalculationTriggerFunction', () => {
 
         // Act
 
-        await sutRecalculationTriggerFunction.handleMessage(message);
+        await sutRecalculationTriggerFunction.handleMessageAsync(message);
 
         // Assert
 

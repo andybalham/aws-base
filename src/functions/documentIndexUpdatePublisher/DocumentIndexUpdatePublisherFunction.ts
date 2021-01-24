@@ -13,7 +13,7 @@ export default class DocumentIndexUpdatePublisherFunction extends DynamoDBStream
         super();
     }
 
-    async processEventRecord(
+    async processEventRecordAsync(
         eventType: DynamoDBEventTypes,
         oldImage?: DynamoDBSingleTableItem, 
         newImage?: DynamoDBSingleTableItem,

@@ -11,7 +11,7 @@ export default class AffordabilityApiFunction extends ApiGatewayFunction<Request
         super();
     }
 
-    async handleRequest(request: Request): Promise<Response> {
+    async handleRequestAsync(request: Request): Promise<Response> {
 
         console.log('handleRequest 1');
 
