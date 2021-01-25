@@ -13,7 +13,7 @@ export default class DocumentRepository {
 
     constructor(private contentClient?: S3Client, private indexClient?: DynamoDBSingleTableClient) {}
 
-    async putContentAsync(index: {contentType: DocumentContentType; id?: string; description?: string}, content: any): Promise<string> {
+    async putContentAsync(index: {contentType: DocumentContentType; id?: string; description: string}, content: any): Promise<string> {
 
         if (this.contentClient === undefined) throw new Error('this.contentClient === undefined');
         if (this.indexClient === undefined) throw new Error('this.metadataClient === undefined');
@@ -70,17 +70,26 @@ export default class DocumentRepository {
     async getContentAsync<T extends object>(contentType: DocumentContentType, id: string): Promise<T> {
 
         if (this.contentClient === undefined) throw new Error('this.contentClient === undefined');
-        if (this.indexClient === undefined) throw new Error('this.metadataClient === undefined');
-
-        const index = await this.indexClient.getAsync<DocumentIndex>(contentType, id);
-
-        if (index === undefined) {
-            throw new Error(`No document found for: ${JSON.stringify({contentType, id})}`);
-        }
+        
+        const index = await this.getIndexAsync(contentType, id);
 
         const content = await this.contentClient.getObjectAsync<T>(index.s3Key, index.s3BucketName);
 
         return content;
+    }
+
+    async getIndexAsync(contentType: DocumentContentType, id: string): Promise<DocumentIndex> {
+
+        if (this.indexClient === undefined)
+            throw new Error('this.metadataClient === undefined');
+
+        const index = await this.indexClient.getAsync<DocumentIndex>(contentType, id);
+
+        if (index === undefined) {
+            throw new Error(`No index found for: ${JSON.stringify({ contentType, id })}`);
+        }
+
+        return index;
     }
 
     async putHashAsync(hash: DocumentHash): Promise<void> {

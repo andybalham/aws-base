@@ -73,5 +73,6 @@ function getDocumentIndex(contentType: DocumentContentType, id: string): Documen
         contentType,
         s3BucketName: 's3BucketName',
         s3Key: 's3Key',
+        description: 'description',
     };
 }

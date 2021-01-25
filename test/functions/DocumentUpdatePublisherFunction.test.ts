@@ -38,6 +38,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
             contentType: DocumentContentType.Configuration,
             s3BucketName: 's3BucketName',
             s3Key: 's3Key',
+            description: 'description',
         };
 
         documentRepositoryMock.mock('getIndexByS3Async', index);
@@ -88,6 +89,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
             contentType: DocumentContentType.Configuration,
             s3BucketName: 's3BucketName',
             s3Key: 's3Key',
+            description: 'description',
         };
 
         documentRepositoryMock.mock('getIndexByS3Async', index);

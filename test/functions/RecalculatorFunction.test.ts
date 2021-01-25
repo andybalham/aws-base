@@ -26,6 +26,9 @@ describe('Test RecalculatorFunction', () => {
         documentRepositoryMock.mock('getConfigurationAsync', {});
         documentRepositoryMock.mock('getProductAsync', {});
         documentRepositoryMock.mock('getApplicationAsync', {});
+
+        documentRepositoryMock.mock('getIndexAsync', { description: 'test'});
+
         const documentRepositoryPutContentStub = documentRepositoryMock.mock('putContentAsync');
 
         const expectedProductSummary: ProductSummary = 
@@ -68,7 +71,7 @@ describe('Test RecalculatorFunction', () => {
         const actualResult = documentRepositoryPutContentStub.lastCall.args[1];
 
         expect(actualResultIndex.contentType).to.equal(DocumentContentType.Result);
-        expect(actualResultIndex.id).to.equal(`${request.configurationId}-${request.scenarioId}-${request.productId}`);
+        expect(actualResultIndex.id).to.equal(`${request.scenarioId}-${request.productId}-${request.configurationId}`);
 
         expect(actualResult).to.deep.equal(expectedProductSummary);
     });

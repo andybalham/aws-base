@@ -15,19 +15,25 @@ export default class RecalculatorFunction extends TaskFunction<Request, void> {
     async handleRequestAsync(request: Request): Promise<void> {
 
         const configuration = await this.documentRepository.getConfigurationAsync(request.configurationId);
-        const application = await this.documentRepository.getApplicationAsync(request.scenarioId);
+        const scenario = await this.documentRepository.getApplicationAsync(request.scenarioId);
         const product = await this.documentRepository.getProductAsync(request.productId);
 
+        const configurationIndex = 
+            await this.documentRepository.getIndexAsync(DocumentContentType.Configuration, request.configurationId);
+        const scenarioIndex = 
+            await this.documentRepository.getIndexAsync(DocumentContentType.Scenario, request.scenarioId);
+        const productIndex = 
+            await this.documentRepository.getIndexAsync(DocumentContentType.Product, request.productId);
+
         const productSummaries =
-            this.productEngine.calculateProductSummaries(configuration, application, [product]);
+            this.productEngine.calculateProductSummaries(configuration, scenario, [product]);
 
         await this.documentRepository
             .putContentAsync(
                 {
-                    id: `${request.configurationId}-${request.scenarioId}-${request.productId}`,
+                    id: `${request.scenarioId}-${request.productId}-${request.configurationId}`,
                     contentType: DocumentContentType.Result,
-                    // TODO 13Jan21: We really need the description here
-                    description: `Result for configuration ${request.configurationId}, scenario ${request.scenarioId}, product ${request.productId}`
+                    description: `Result for '${scenarioIndex.description}' & '${productIndex.description}' with '${configurationIndex.description}' configuration`
                 },
                 productSummaries[0] // TODO 13Jan21: We should store a Scenario object here, with a description
             );

@@ -252,8 +252,7 @@ Resources:
     Properties:
       Name: !Sub ${AppPrefix}-recalculation-state-machine
       # TODO: For express state machines we need to add logging: https://www.davehall.com.au/blog/dave/2020/07/10/logging-step-functions-cloudwatch
-      # Type: EXPRESS
-      Type: STANDARD
+      Type: EXPRESS
       DefinitionUri:
         Bucket: !Sub ${SourceBucket}
         Key: !Sub ${StackName}/statemachine-${AssetVersion}/recalculation.asl.json

@@ -29,6 +29,7 @@ describe('Test RecalculationInitialiserFunction', () => {
             getDocumentIndex(DocumentContentType.Product, 'productIdX'),
             getDocumentIndex(DocumentContentType.Product, 'productIdY'),
         ]);
+        
     });
     
     afterEach('restore dependencies', function () {
@@ -125,5 +126,6 @@ function getDocumentIndex(contentType: DocumentContentType, id: string): Documen
         contentType,
         s3BucketName: 's3BucketName',
         s3Key: 's3Key',
+        description: 'description',
     };
 }
