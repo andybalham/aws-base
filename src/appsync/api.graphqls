@@ -1,0 +1,8 @@
+type Query {
+	listResultsByScenario(scenarioId: ID!): [Result]
+}
+
+type Result {
+	id: ID!
+	description: String!
+}

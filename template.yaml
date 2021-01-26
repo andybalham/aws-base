@@ -329,6 +329,73 @@ Resources:
             Method: POST
             Path: /document/{contentType}/{id}
 
+  # AppSync-Example.yaml
+  # https://gist.github.com/adrianhall/50e9fdf08e7a7e52d3ab0f01467b72f7
+
+  DocumentIndexApiRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - appsync.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: !Sub ${AppPrefix}-appsync-document-index-policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - dynamodb:GetItem
+                  - dynamodb:Scan
+                  - dynamodb:Query
+                  - dynamodb:BatchGetItem
+                  - dynamodb:DescribeTable
+                Resource: !GetAtt DocumentIndexTable.Arn
+
+  DocumentIndexApi:
+    Type: AWS::AppSync::GraphQLApi
+    Properties:
+      Name: !Sub ${AppPrefix}-document-index-api
+      AuthenticationType: API_KEY
+                
+  DocumentIndexApiKey:
+    Type: AWS::AppSync::ApiKey
+    Properties: 
+      ApiId: !GetAtt DocumentIndexApi.ApiId
+
+  DocumentIndexTableDataSource:
+    Type: AWS::AppSync::DataSource
+    Properties:
+      ApiId: !GetAtt DocumentIndexApi.ApiId
+      Name: !Sub ${AppPrefix}_document_index_data_source
+      Type: AMAZON_DYNAMODB
+      ServiceRoleArn: !GetAtt DocumentIndexApiRole.Arn
+      DynamoDBConfig:
+        AwsRegion: !Sub ${AWS::Region}
+        TableName: !Ref DocumentIndexTable
+
+  DocumentIndexSchema:
+    Type: AWS::AppSync::GraphQLSchema
+    Properties:
+      ApiId: !GetAtt DocumentIndexApi.ApiId
+      DefinitionS3Location: !Sub s3://${SourceBucket}/${StackName}/api-${AssetVersion}/api.graphqls
+
+  ListResultsByScenarioQueryResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !GetAtt DocumentIndexApi.ApiId
+      TypeName: Query
+      FieldName: listResultsByScenario
+      DataSourceName: !GetAtt DocumentIndexTableDataSource.Name
+      RequestMappingTemplateS3Location: !Sub s3://${SourceBucket}/${StackName}/api-${AssetVersion}/listResultsByScenarioRequest.vtl
+      ResponseMappingTemplateS3Location : !Sub s3://${SourceBucket}/${StackName}/api-${AssetVersion}/listResultsByScenarioResponse.vtl
+
 Outputs:
 
   AffordabilityApi:

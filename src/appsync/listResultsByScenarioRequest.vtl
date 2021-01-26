@@ -1,0 +1,11 @@
+{
+    "version" : "2017-02-28",
+    "operation" : "Query",
+    "query" : {
+        "expression": "PK = :PK AND begins_with(SK, :scenarioId)",
+        "expressionValues" : {
+            ":PK" : $util.dynamodb.toDynamoDBJson("result"),
+            ":scenarioId" : $util.dynamodb.toDynamoDBJson($ctx.args.scenarioId)
+        }
+    }
+}
