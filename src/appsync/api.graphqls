@@ -1,8 +1,14 @@
 type Query {
+	listScenarios(dummy: String): [Scenario] # Why do we need this dummy value to avoid 'No field named listScenarios found on type Query' error on deployment
 	listResultsByScenario(scenarioId: ID!): [Result]
 }
 
 type Result {
+	id: ID!
+	description: String!
+}
+
+type Scenario {
 	id: ID!
 	description: String!
 }

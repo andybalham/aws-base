@@ -396,6 +396,16 @@ Resources:
       RequestMappingTemplateS3Location: !Sub s3://${SourceBucket}/${StackName}/api-${AssetVersion}/listResultsByScenarioRequest.vtl
       ResponseMappingTemplateS3Location : !Sub s3://${SourceBucket}/${StackName}/api-${AssetVersion}/listResultsByScenarioResponse.vtl
 
+  ListScenariosQueryResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !GetAtt DocumentIndexApi.ApiId
+      TypeName: Query
+      FieldName: listScenarios
+      DataSourceName: !GetAtt DocumentIndexTableDataSource.Name
+      RequestMappingTemplateS3Location: !Sub s3://${SourceBucket}/${StackName}/api-${AssetVersion}/listScenariosRequest.vtl
+      ResponseMappingTemplateS3Location : !Sub s3://${SourceBucket}/${StackName}/api-${AssetVersion}/listScenariosResponse.vtl
+
 Outputs:
 
   AffordabilityApi:
@@ -405,5 +415,11 @@ Outputs:
   AffordabilityApiFunctionARN:
     Description: "Affordability API Function ARN"
     Value: !GetAtt AffordabilityApiFunction.Arn
-    
+  
+  DocumentIndexApiUrl:
+    Description: Document Index API URL
+    Value: !GetAtt DocumentIndexApi.GraphQLUrl
 
+  DocumentIndexApiKey:
+    Description: Document Index API Key
+    Value: !GetAtt DocumentIndexApiKey.ApiKey
