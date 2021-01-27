@@ -357,6 +357,10 @@ Resources:
                   - dynamodb:BatchGetItem
                   - dynamodb:DescribeTable
                 Resource: !GetAtt DocumentIndexTable.Arn
+              - Effect: Allow
+                Action: 
+                  - lambda:InvokeFunction
+                Resource: !GetAtt DocumentContentResolverFunction.Arn
 
   DocumentIndexApi:
     Type: AWS::AppSync::GraphQLApi
@@ -373,7 +377,7 @@ Resources:
     Type: AWS::AppSync::DataSource
     Properties:
       ApiId: !GetAtt DocumentIndexApi.ApiId
-      Name: !Sub ${AppPrefix}_document_index_data_source
+      Name: !Sub ${AppPrefix}_document_index_table_data_source
       Type: AMAZON_DYNAMODB
       ServiceRoleArn: !GetAtt DocumentIndexApiRole.Arn
       DynamoDBConfig:
@@ -394,7 +398,7 @@ Resources:
       FieldName: listResultsByScenario
       DataSourceName: !GetAtt DocumentIndexTableDataSource.Name
       RequestMappingTemplateS3Location: !Sub s3://${SourceBucket}/${StackName}/api-${AssetVersion}/listResultsByScenarioRequest.vtl
-      ResponseMappingTemplateS3Location : !Sub s3://${SourceBucket}/${StackName}/api-${AssetVersion}/listResultsByScenarioResponse.vtl
+      ResponseMappingTemplateS3Location : !Sub s3://${SourceBucket}/${StackName}/api-${AssetVersion}/contextResultItemsResponse.vtl
 
   ListScenariosQueryResolver:
     Type: AWS::AppSync::Resolver
@@ -404,7 +408,36 @@ Resources:
       FieldName: listScenarios
       DataSourceName: !GetAtt DocumentIndexTableDataSource.Name
       RequestMappingTemplateS3Location: !Sub s3://${SourceBucket}/${StackName}/api-${AssetVersion}/listScenariosRequest.vtl
-      ResponseMappingTemplateS3Location : !Sub s3://${SourceBucket}/${StackName}/api-${AssetVersion}/listScenariosResponse.vtl
+      ResponseMappingTemplateS3Location : !Sub s3://${SourceBucket}/${StackName}/api-${AssetVersion}/contextResultItemsResponse.vtl
+
+  ResultProductSummaryResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !GetAtt DocumentIndexApi.ApiId
+      TypeName: Result
+      FieldName: productSummary
+      DataSourceName: !GetAtt DocumentContentDataSource.Name
+      RequestMappingTemplateS3Location: !Sub s3://${SourceBucket}/${StackName}/api-${AssetVersion}/resultProductSummaryRequest.vtl
+      ResponseMappingTemplateS3Location : !Sub s3://${SourceBucket}/${StackName}/api-${AssetVersion}/contextResultResponse.vtl
+
+  DocumentContentResolverFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AppPrefix}-document-content-resolver-function
+      Handler: index.handleDocumentContentResolverFunction
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Ref DocumentBucket
+
+  DocumentContentDataSource:
+    Type: AWS::AppSync::DataSource
+    Properties:
+      ApiId: !GetAtt DocumentIndexApi.ApiId
+      Name: !Sub ${AppPrefix}_document_content_data_source
+      Type: AWS_LAMBDA
+      ServiceRoleArn: !GetAtt DocumentIndexApiRole.Arn
+      LambdaConfig:
+        LambdaFunctionArn: !GetAtt DocumentContentResolverFunction.Arn
 
 Outputs:
 

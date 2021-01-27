@@ -14,11 +14,13 @@ import * as DocumentApi from './functions/documentApi';
 import * as RecalculationTrigger from './functions/recalculationTrigger';
 import * as RecalculationInitialiser from './functions/recalculationInitialiser';
 import * as Recalculator from './functions/recalculator';
+import * as DocumentContentResolver from './functions/documentContentResolver';
 
 // TODO 24Nov20: How would we initialise components that require environment variables set by middleware?
 
 // AWS clients
 
+const s3Client = new S3Client();
 const documentS3Client = new S3Client(process.env.DOCUMENT_BUCKET);
 const documentMetadataDynamoDbClient = new DynamoDBSingleTableClient(process.env.DOCUMENT_INDEX_TABLE_NAME);
 const documentUpdateSNSClient = new SNSClient(process.env.DOCUMENT_UPDATE_TOPIC);
@@ -93,6 +95,15 @@ const recalculatorFunction = new Recalculator.Function(documentRepository, produ
 export const handleRecalculatorFunction =
     middy(async (event: any, context: Context): Promise<any> => {
         return await recalculatorFunction.handleAsync(event, context);
+    })
+        .use(correlationIds({ sampleDebugLogRate: 0.01 }));
+    
+
+const documentContentResolverFunction = new DocumentContentResolver.Function(s3Client);
+
+export const handleDocumentContentResolverFunction =
+    middy(async (event: any, context: Context): Promise<any> => {
+        return await documentContentResolverFunction.handleAsync(event, context);
     })
         .use(correlationIds({ sampleDebugLogRate: 0.01 }));
         

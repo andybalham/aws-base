@@ -9,10 +9,12 @@ import SQSFunction from './SQSFunction';
 import StepFunctionClient from './StepFunctionClient';
 import DynamoDBSingleTableItem from './DynamoDBSingleTableItem';
 import DynamoDBSingleTableClient from './DynamoDBSingleTableClient';
+import AppSyncResolverFunction from './AppSyncResolverFunction';
 
 export {
     TaskFunction,
     ApiGatewayFunction,
+    AppSyncResolverFunction,
     SNSFunction,
     SQSFunction,
     DynamoDBStreamFunction,
