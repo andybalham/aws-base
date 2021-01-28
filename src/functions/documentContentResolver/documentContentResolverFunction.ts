@@ -1,14 +1,18 @@
-import { AppSyncResolverFunction, S3Client } from '../../common';
+import { AppSyncBatchResolverFunction, S3Client } from '../../common';
+import { DocumentIndex } from '../../domain/document';
 import { ProductSummary } from '../../domain/output';
 
 export default class DocumentContentResolverFunction 
-    extends AppSyncResolverFunction<{s3Key: string; s3BucketName: string}, ProductSummary> {
+    extends AppSyncBatchResolverFunction<DocumentIndex, ProductSummary> {
 
     constructor(private s3Client: S3Client) {
         super();
     }
 
-    async resolveRequestAsync({s3Key, s3BucketName}): Promise<ProductSummary> {
-        return await this.s3Client.getObjectAsync<ProductSummary>(s3Key, s3BucketName);
+    async resolveSourceAsync(documentIndex: DocumentIndex): Promise<ProductSummary> {
+        // if (documentIndex.id.match('92onBhBN917U')) {
+        //     throw new Error('I don\'t like the look of 92onBhBN917U');
+        // }        
+        return await this.s3Client.getObjectAsync<ProductSummary>(documentIndex.s3Key, documentIndex.s3BucketName);
     }
 }

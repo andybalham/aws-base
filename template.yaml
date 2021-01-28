@@ -417,8 +417,8 @@ Resources:
       TypeName: Result
       FieldName: productSummary
       DataSourceName: !GetAtt DocumentContentDataSource.Name
-      RequestMappingTemplateS3Location: !Sub s3://${SourceBucket}/${StackName}/api-${AssetVersion}/resultProductSummaryRequest.vtl
-      ResponseMappingTemplateS3Location : !Sub s3://${SourceBucket}/${StackName}/api-${AssetVersion}/contextResultResponse.vtl
+      RequestMappingTemplateS3Location: !Sub s3://${SourceBucket}/${StackName}/api-${AssetVersion}/batchInvokeRequest.vtl
+      ResponseMappingTemplateS3Location : !Sub s3://${SourceBucket}/${StackName}/api-${AssetVersion}/batchInvokeResponse.vtl
 
   DocumentContentResolverFunction:
     Type: AWS::Serverless::Function
