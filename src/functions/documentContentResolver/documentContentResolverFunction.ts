@@ -1,4 +1,5 @@
-import { AppSyncBatchResolverFunction, S3Client } from '../../common';
+import { AppSyncBatchResolverFunction } from '../../common';
+import { S3Client } from '@andybalham/agb-aws-clients';
 import { DocumentIndex } from '../../domain/document';
 import { ProductSummary } from '../../domain/output';
 

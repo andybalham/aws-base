@@ -1,5 +1,6 @@
 import { SNSMessage } from 'aws-lambda';
-import { SQSFunction, StepFunctionClient } from '../../common';
+import { SQSFunction } from '../../common';
+import { StepFunctionClient } from '@andybalham/agb-aws-clients';
 import { DocumentIndex} from '../../domain/document';
 import RecalculationInitialiserRequest from '../recalculationInitialiser/RecalculationInitialiserRequest';
 

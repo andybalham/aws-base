@@ -1,6 +1,6 @@
+import { SNSClient } from '@andybalham/agb-aws-clients';
 import { DynamoDBSingleTableItem } from '../../common';
 import DynamoDBStreamFunction, { DynamoDBEventTypes } from '../../common/DynamoDBStreamFunction';
-import SNSClient from '../../common/SNSClient';
 import { DocumentHash } from '../../domain/document';
 import { DocumentRepository } from '../../services';
 

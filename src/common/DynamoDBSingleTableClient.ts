@@ -1,7 +1,8 @@
+import { DynamoDBClient } from '@andybalham/agb-aws-clients';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { DynamoDBSingleTableItem } from '.';
-import DynamoDBClient from './DynamoDBClient';
 
+// TODO 28Feb21: Should we move this into the clients package?
 export default class DynamoDBSingleTableClient {
 
     private dynamoDBClient: DynamoDBClient;

@@ -2,17 +2,17 @@ import { SNSMessage } from 'aws-lambda';
 import { expect } from 'chai';
 import { SinonStub } from 'sinon';
 import { ImportMock, MockManager } from 'ts-mock-imports';
-import * as Common from '../../src/common';
+import * as AwsClients from '@andybalham/agb-aws-clients';
 import * as RecalculationTrigger from '../../src/functions/recalculationTrigger';
 import * as RecalculationInitialiser from '../../src/functions/recalculationInitialiser';
 import { DocumentIndex, DocumentContentType } from '../../src/domain/document';
 
 describe('Test RecalculationTriggerFunction', () => {
 
-    let stepFunctionClientMock: MockManager<Common.StepFunctionClient>;
+    let stepFunctionClientMock: MockManager<AwsClients.StepFunctionClient>;
 
     beforeEach('mock out dependencies', function () {
-        stepFunctionClientMock = ImportMock.mockClass<Common.StepFunctionClient>(Common, 'StepFunctionClient');
+        stepFunctionClientMock = ImportMock.mockClass<AwsClients.StepFunctionClient>(AwsClients, 'StepFunctionClient');
     });
     
     afterEach('restore dependencies', function () {
@@ -30,7 +30,7 @@ describe('Test RecalculationTriggerFunction', () => {
         const startExecutionStub: SinonStub = stepFunctionClientMock.mock('startExecutionAsync');
 
         const sutRecalculationTriggerFunction = 
-            new RecalculationTrigger.Function(new Common.StepFunctionClient());
+            new RecalculationTrigger.Function(new AwsClients.StepFunctionClient());
 
         // Act
 

@@ -3,9 +3,11 @@ import { Context } from 'aws-lambda/handler';
 import middy from '@middy/core';
 import httpErrorHandler from '@middy/http-error-handler';
 import correlationIds from '@dazn/lambda-powertools-middleware-correlation-ids';
+import Log from '@dazn/lambda-powertools-logger';
+import { StepFunctionClient, S3Client, SNSClient } from '@andybalham/agb-aws-clients';
 
 import { DocumentRepository, ProductEngine } from './services';
-import { StepFunctionClient, SNSClient, S3Client, DynamoDBSingleTableClient } from './common';
+import { DynamoDBSingleTableClient } from './common';
 
 import * as AffordabilityApi from './functions/affordabilityApi';
 import * as DocumentIndexUpdatePublisher from './functions/documentIndexUpdatePublisher';
@@ -21,6 +23,15 @@ import * as DocumentContentResolver from './functions/documentContentResolver';
 const correlationIdParams = { sampleDebugLogRate: 0.01 };
 
 // AWS clients
+
+const log = {
+    debug: Log.debug,
+    info: Log.info,
+    warn: Log.warn,
+    error: Log.error
+};
+SNSClient.Log = log;
+StepFunctionClient.Log = log;
 
 const s3Client = new S3Client();
 const documentS3Client = new S3Client(process.env.DOCUMENT_BUCKET);

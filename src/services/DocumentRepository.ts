@@ -1,9 +1,10 @@
-import { DynamoDBSingleTableClient, S3Client } from '../common';
+import { DynamoDBSingleTableClient } from '../common';
 import { DocumentContentType, DocumentHash, DocumentIndex } from '../domain/document';
 import { customAlphabet } from 'nanoid';
 import { Configuration } from '../domain/configuration';
 import { Product } from '../domain/product';
 import { Application } from '../domain/input';
+import { S3Client } from '@andybalham/agb-aws-clients';
 
 const nanoid = customAlphabet('1234567890abcdef0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 12);
 

@@ -2,8 +2,9 @@
   "name": "lambda-base",
   "version": "1.0.0",
   "description": "Base folder structure for Lambda projects",
-  "main": "lambda.js",
+  "main": "index.js",
   "dependencies": {
+    "@andybalham/agb-aws-clients": "^1.0.3",
     "@dazn/lambda-powertools-correlation-ids": "^1.24.1",
     "@dazn/lambda-powertools-logger": "^1.24.1",
     "@dazn/lambda-powertools-middleware-correlation-ids": "^1.27.0",

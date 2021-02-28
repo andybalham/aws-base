@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { SinonStub } from 'sinon';
 import { ImportMock, MockManager } from 'ts-mock-imports';
 import * as Common from '../../src/common';
+import * as AwsClients from '@andybalham/agb-aws-clients';
 import * as Services from '../../src/services';
 import { DocumentIndex, DocumentContentType } from '../../src/domain/document';
 import * as DocumentIndexUpdatePublisher from '../../src/functions/documentIndexUpdatePublisher';
@@ -9,11 +10,11 @@ import * as DocumentIndexUpdatePublisher from '../../src/functions/documentIndex
 describe('Test DocumentUpdatePublisherFunction', () => {
 
     let documentRepositoryMock: MockManager<Services.DocumentRepository>;
-    let snsClientMock: MockManager<Common.SNSClient>;
+    let snsClientMock: MockManager<AwsClients.SNSClient>;
 
     beforeEach('mock out dependencies', function () {
         documentRepositoryMock = ImportMock.mockClass<Services.DocumentRepository>(Services, 'DocumentRepository');
-        snsClientMock = ImportMock.mockClass<Common.SNSClient>(Common, 'SNSClient');
+        snsClientMock = ImportMock.mockClass<AwsClients.SNSClient>(AwsClients, 'SNSClient');
     });
     
     afterEach('restore dependencies', function () {
@@ -50,7 +51,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
         const sutDocumentIndexUpdatePublisherFunction = 
             new DocumentIndexUpdatePublisher.Function(
                 new Services.DocumentRepository(), 
-                new Common.SNSClient(),
+                new AwsClients.SNSClient(),
             );
 
         await sutDocumentIndexUpdatePublisherFunction.processEventRecordAsync('INSERT', oldImage, newImage);
@@ -101,7 +102,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
         const sutDocumentIndexUpdatePublisherFunction = 
             new DocumentIndexUpdatePublisher.Function(
                 new Services.DocumentRepository(), 
-                new Common.SNSClient(),
+                new AwsClients.SNSClient(),
             );
 
         await sutDocumentIndexUpdatePublisherFunction.processEventRecordAsync('INSERT', oldImage, newImage);
@@ -139,7 +140,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
         const sutDocumentIndexUpdatePublisherFunction = 
             new DocumentIndexUpdatePublisher.Function(
                 new Services.DocumentRepository(), 
-                new Common.SNSClient(),
+                new AwsClients.SNSClient(),
             );
 
         await sutDocumentIndexUpdatePublisherFunction.processEventRecordAsync('MODIFY', oldImage, newImage);
@@ -169,7 +170,7 @@ describe('Test DocumentUpdatePublisherFunction', () => {
         const sutDocumentIndexUpdatePublisherFunction = 
             new DocumentIndexUpdatePublisher.Function(
                 new Services.DocumentRepository(), 
-                new Common.SNSClient(),
+                new AwsClients.SNSClient(),
             );
 
         await sutDocumentIndexUpdatePublisherFunction.processEventRecordAsync('REMOVE', oldImage, newImage);
