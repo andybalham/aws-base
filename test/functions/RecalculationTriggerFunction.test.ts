@@ -9,10 +9,10 @@ import { DocumentIndex, DocumentContentType } from '../../src/domain/document';
 
 describe('Test RecalculationTriggerFunction', () => {
 
-    let stepFunctionClientMock: MockManager<AwsClients.StepFunctionClient>;
+    let StepFunctionsClientMock: MockManager<AwsClients.StepFunctionsClient>;
 
     beforeEach('mock out dependencies', function () {
-        stepFunctionClientMock = ImportMock.mockClass<AwsClients.StepFunctionClient>(AwsClients, 'StepFunctionClient');
+        StepFunctionsClientMock = ImportMock.mockClass<AwsClients.StepFunctionsClient>(AwsClients, 'StepFunctionsClient');
     });
     
     afterEach('restore dependencies', function () {
@@ -27,10 +27,10 @@ describe('Test RecalculationTriggerFunction', () => {
 
         const message: SNSMessage = getSNSMessage(DocumentIndex);
 
-        const startExecutionStub: SinonStub = stepFunctionClientMock.mock('startExecutionAsync');
+        const startExecutionStub: SinonStub = StepFunctionsClientMock.mock('startExecutionAsync');
 
         const sutRecalculationTriggerFunction = 
-            new RecalculationTrigger.Function(new AwsClients.StepFunctionClient());
+            new RecalculationTrigger.Function(new AwsClients.StepFunctionsClient());
 
         // Act
 
