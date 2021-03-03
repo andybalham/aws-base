@@ -1,12 +1,12 @@
 import { SNSMessage } from 'aws-lambda';
 import { SQSFunction } from '../../common';
-import { StepFunctionClient } from '@andybalham/agb-aws-clients';
+import { StepFunctionsClient } from '@andybalham/agb-aws-clients';
 import { DocumentIndex} from '../../domain/document';
 import RecalculationInitialiserRequest from '../recalculationInitialiser/RecalculationInitialiserRequest';
 
 export default class RecalculationTriggerFunction extends SQSFunction<SNSMessage> {
 
-    constructor(private recalculationStepFunctionClient: StepFunctionClient) {
+    constructor(private recalculationStepFunctionsClient: StepFunctionsClient) {
         super();
     }
 
@@ -19,6 +19,6 @@ export default class RecalculationTriggerFunction extends SQSFunction<SNSMessage
             id: index.id,
         };
         
-        await this.recalculationStepFunctionClient.startExecutionAsync(recalculationInitialiserRequest);
+        await this.recalculationStepFunctionsClient.startExecutionAsync(recalculationInitialiserRequest);
     }
 }

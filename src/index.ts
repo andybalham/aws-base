@@ -4,7 +4,7 @@ import middy from '@middy/core';
 import httpErrorHandler from '@middy/http-error-handler';
 import correlationIds from '@dazn/lambda-powertools-middleware-correlation-ids';
 import Log from '@dazn/lambda-powertools-logger';
-import { StepFunctionClient, S3Client, SNSClient } from '@andybalham/agb-aws-clients';
+import { StepFunctionsClient, S3Client, SNSClient } from '@andybalham/agb-aws-clients';
 
 import { DocumentRepository, ProductEngine } from './services';
 import { DynamoDBSingleTableClient } from './common';
@@ -31,13 +31,13 @@ const log = {
     error: Log.error
 };
 SNSClient.Log = log;
-StepFunctionClient.Log = log;
+StepFunctionsClient.Log = log;
 
 const s3Client = new S3Client();
 const documentS3Client = new S3Client(process.env.DOCUMENT_BUCKET);
 const documentIndexDynamoDbClient = new DynamoDBSingleTableClient(process.env.DOCUMENT_INDEX_TABLE_NAME);
 const documentUpdateSNSClient = new SNSClient(process.env.DOCUMENT_UPDATE_TOPIC);
-const recalculationStepFunctionClient = new StepFunctionClient(process.env.RECALCULATION_STATE_MACHINE_ARN);
+const recalculationStepFunctionsClient = new StepFunctionsClient(process.env.RECALCULATION_STATE_MACHINE_ARN);
 
 // Domain services
 
@@ -85,7 +85,7 @@ export const handleDocumentIndexUpdatePublisherFunction =
         .use(correlationIds(correlationIdParams));
 
 
-const recalculationTriggerFunction = new RecalculationTrigger.Function(recalculationStepFunctionClient);
+const recalculationTriggerFunction = new RecalculationTrigger.Function(recalculationStepFunctionsClient);
     
 export const handleRecalculationTriggerFunction =
     middy(async (event: any, context: Context): Promise<any> => {
