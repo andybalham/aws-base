@@ -1,4 +1,4 @@
 export default class Configuration {
-    basicSalaryUsed: number;
-    overtimeUsed: number;
+  basicSalaryUsed: number;
+  overtimeUsed: number;
 }

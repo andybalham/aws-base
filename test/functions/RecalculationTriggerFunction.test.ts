@@ -8,71 +8,73 @@ import * as RecalculationInitialiser from '../../src/functions/recalculationInit
 import { DocumentIndex, DocumentContentType } from '../../src/domain/document';
 
 describe('Test RecalculationTriggerFunction', () => {
+  let StepFunctionsClientMock: MockManager<AwsClients.StepFunctionsClient>;
 
-    let StepFunctionsClientMock: MockManager<AwsClients.StepFunctionsClient>;
+  beforeEach('mock out dependencies', function () {
+    StepFunctionsClientMock = ImportMock.mockClass<AwsClients.StepFunctionsClient>(
+      AwsClients,
+      'StepFunctionsClient'
+    );
+  });
 
-    beforeEach('mock out dependencies', function () {
-        StepFunctionsClientMock = ImportMock.mockClass<AwsClients.StepFunctionsClient>(AwsClients, 'StepFunctionsClient');
-    });
-    
-    afterEach('restore dependencies', function () {
-        ImportMock.restore();
-    });
+  afterEach('restore dependencies', function () {
+    ImportMock.restore();
+  });
 
-    it('starts execution for a change of configuration', async () => {
-            
-        // Arrange
+  it('starts execution for a change of configuration', async () => {
+    // Arrange
 
-        const DocumentIndex = getDocumentIndex(DocumentContentType.Configuration, 'configurationId');
+    const DocumentIndex = getDocumentIndex(DocumentContentType.Configuration, 'configurationId');
 
-        const message: SNSMessage = getSNSMessage(DocumentIndex);
+    const message: SNSMessage = getSNSMessage(DocumentIndex);
 
-        const startExecutionStub: SinonStub = StepFunctionsClientMock.mock('startExecutionAsync');
+    const startExecutionStub: SinonStub = StepFunctionsClientMock.mock('startExecutionAsync');
 
-        const sutRecalculationTriggerFunction = 
-            new RecalculationTrigger.Function(new AwsClients.StepFunctionsClient());
+    const sutRecalculationTriggerFunction = new RecalculationTrigger.Function(
+      new AwsClients.StepFunctionsClient()
+    );
 
-        // Act
+    // Act
 
-        await sutRecalculationTriggerFunction.handleMessageAsync(message);
+    await sutRecalculationTriggerFunction.handleMessageAsync(message);
 
-        // Assert
+    // Assert
 
-        expect(startExecutionStub.callCount).to.equal(1);
+    expect(startExecutionStub.callCount).to.equal(1);
 
-        const actualInputObject = startExecutionStub.lastCall.args[0];
+    const actualInputObject = startExecutionStub.lastCall.args[0];
 
-        const expectedInputObject: RecalculationInitialiser.Request = {
-            contentType: DocumentIndex.contentType,
-            id: DocumentIndex.id,
-        };
-        
-        expect(actualInputObject).to.deep.equal(expectedInputObject);
-    });
+    const expectedInputObject: RecalculationInitialiser.Request = {
+      contentType: DocumentIndex.contentType,
+      id: DocumentIndex.id,
+    };
+
+    expect(actualInputObject).to.deep.equal(expectedInputObject);
+  });
 });
 
 function getSNSMessage(DocumentIndex: DocumentIndex): SNSMessage {
-    return {
-        Message: JSON.stringify(DocumentIndex),
-        SignatureVersion: 'string',
-        Timestamp: 'string',
-        Signature: 'string',
-        SigningCertUrl: 'string',
-        MessageId: 'string',
-        MessageAttributes: {},
-        Type: 'string',
-        UnsubscribeUrl: 'string',
-        TopicArn: 'string',
-        Subject: 'string',
-    };
+  return {
+    Message: JSON.stringify(DocumentIndex),
+    SignatureVersion: 'string',
+    Timestamp: 'string',
+    Signature: 'string',
+    SigningCertUrl: 'string',
+    MessageId: 'string',
+    MessageAttributes: {},
+    Type: 'string',
+    UnsubscribeUrl: 'string',
+    TopicArn: 'string',
+    Subject: 'string',
+  };
 }
 
 function getDocumentIndex(contentType: DocumentContentType, id: string): DocumentIndex {
-    return {
-        id,
-        contentType,
-        s3BucketName: 's3BucketName',
-        s3Key: 's3Key',
-        description: 'description',
-    };
+  return {
+    id,
+    contentType,
+    s3BucketName: 's3BucketName',
+    s3Key: 's3Key',
+    description: 'description',
+  };
 }

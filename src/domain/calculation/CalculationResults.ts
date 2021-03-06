@@ -1,5 +1,3 @@
 export default class CalculationResults {
-    constructor(
-        public applicableIncome: number
-    ) {}
+  constructor(public applicableIncome: number) {}
 }

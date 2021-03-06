@@ -9,123 +9,125 @@ import * as RecalculationInitialiser from '../../src/functions/recalculationInit
 chai.use(deepEqualInAnyOrder);
 
 describe('Test RecalculationInitialiserFunction', () => {
+  let documentRepositoryMock: MockManager<Services.DocumentRepository>;
 
-    let documentRepositoryMock: MockManager<Services.DocumentRepository>;
+  beforeEach('mock out dependencies', function () {
+    documentRepositoryMock = ImportMock.mockClass<Services.DocumentRepository>(
+      Services,
+      'DocumentRepository'
+    );
+    documentRepositoryMock.mock('listConfigurationsAsync', [
+      getDocumentIndex(DocumentContentType.Configuration, 'configurationId'),
+    ]);
 
-    beforeEach('mock out dependencies', function () {
+    documentRepositoryMock.mock('listScenariosAsync', [
+      getDocumentIndex(DocumentContentType.Scenario, 'scenarioIdX'),
+      getDocumentIndex(DocumentContentType.Scenario, 'scenarioIdY'),
+    ]);
 
-        documentRepositoryMock = ImportMock.mockClass<Services.DocumentRepository>(Services, 'DocumentRepository');
+    documentRepositoryMock.mock('listProductsAsync', [
+      getDocumentIndex(DocumentContentType.Product, 'productIdX'),
+      getDocumentIndex(DocumentContentType.Product, 'productIdY'),
+    ]);
+  });
 
-        documentRepositoryMock.mock('listConfigurationsAsync', [
-            getDocumentIndex(DocumentContentType.Configuration, 'configurationId'),
-        ]);
+  afterEach('restore dependencies', function () {
+    ImportMock.restore();
+  });
 
-        documentRepositoryMock.mock('listScenariosAsync', [
-            getDocumentIndex(DocumentContentType.Scenario, 'scenarioIdX'),
-            getDocumentIndex(DocumentContentType.Scenario, 'scenarioIdY'),
-        ]);
+  it('starts execution for a change of configuration', async () => {
+    // Arrange
 
-        documentRepositoryMock.mock('listProductsAsync', [
-            getDocumentIndex(DocumentContentType.Product, 'productIdX'),
-            getDocumentIndex(DocumentContentType.Product, 'productIdY'),
-        ]);
-        
-    });
-    
-    afterEach('restore dependencies', function () {
-        ImportMock.restore();
-    });
+    const documentRepository = new Services.DocumentRepository();
 
-    it('starts execution for a change of configuration', async () => {
-            
-        // Arrange
+    const request: RecalculationInitialiser.Request = {
+      contentType: DocumentContentType.Configuration,
+      id: 'configurationId',
+    };
 
-        const documentRepository = new Services.DocumentRepository();
-        
-        const request: RecalculationInitialiser.Request = {
-            contentType: DocumentContentType.Configuration,
-            id: 'configurationId',
-        };
+    const sutRecalculationInitialiserFunction = new RecalculationInitialiser.Function(
+      documentRepository
+    );
 
-        const sutRecalculationInitialiserFunction = new RecalculationInitialiser.Function(documentRepository);
+    // Act
 
-        // Act
+    const actualResponse = await sutRecalculationInitialiserFunction.handleRequestAsync(request);
 
-        const actualResponse = await sutRecalculationInitialiserFunction.handleRequestAsync(request);
+    // Assert
 
-        // Assert
+    const expectedResponse: RecalculationInitialiser.Response = [
+      { configurationId: 'configurationId', scenarioId: 'scenarioIdX', productId: 'productIdX' },
+      { configurationId: 'configurationId', scenarioId: 'scenarioIdX', productId: 'productIdY' },
+      { configurationId: 'configurationId', scenarioId: 'scenarioIdY', productId: 'productIdX' },
+      { configurationId: 'configurationId', scenarioId: 'scenarioIdY', productId: 'productIdY' },
+    ];
 
-        const expectedResponse: RecalculationInitialiser.Response = [
-            { configurationId: 'configurationId', scenarioId: 'scenarioIdX', productId: 'productIdX' },
-            { configurationId: 'configurationId', scenarioId: 'scenarioIdX', productId: 'productIdY' },
-            { configurationId: 'configurationId', scenarioId: 'scenarioIdY', productId: 'productIdX' },
-            { configurationId: 'configurationId', scenarioId: 'scenarioIdY', productId: 'productIdY' },
-        ];
-        
-        expect(actualResponse).to.deep.equalInAnyOrder(expectedResponse);
-    });
+    expect(actualResponse).to.deep.equalInAnyOrder(expectedResponse);
+  });
 
-    it('starts execution for a change of scenario', async () => {
-            
-        // Arrange
+  it('starts execution for a change of scenario', async () => {
+    // Arrange
 
-        const documentRepository = new Services.DocumentRepository();
-        
-        const request: RecalculationInitialiser.Request = {
-            contentType: DocumentContentType.Scenario,
-            id: 'scenarioId',
-        };
+    const documentRepository = new Services.DocumentRepository();
 
-        const sutRecalculationInitialiserFunction = new RecalculationInitialiser.Function(documentRepository);
+    const request: RecalculationInitialiser.Request = {
+      contentType: DocumentContentType.Scenario,
+      id: 'scenarioId',
+    };
 
-        // Act
+    const sutRecalculationInitialiserFunction = new RecalculationInitialiser.Function(
+      documentRepository
+    );
 
-        const actualResponse = await sutRecalculationInitialiserFunction.handleRequestAsync(request);
+    // Act
 
-        // Assert
+    const actualResponse = await sutRecalculationInitialiserFunction.handleRequestAsync(request);
 
-        const expectedResponse: RecalculationInitialiser.Response = [
-            { configurationId: 'configurationId', scenarioId: 'scenarioId', productId: 'productIdX' },
-            { configurationId: 'configurationId', scenarioId: 'scenarioId', productId: 'productIdY' },
-        ];
-        
-        expect(actualResponse).to.deep.equalInAnyOrder(expectedResponse);
-    });
+    // Assert
 
-    it('starts execution for a change of product', async () => {
-            
-        // Arrange
+    const expectedResponse: RecalculationInitialiser.Response = [
+      { configurationId: 'configurationId', scenarioId: 'scenarioId', productId: 'productIdX' },
+      { configurationId: 'configurationId', scenarioId: 'scenarioId', productId: 'productIdY' },
+    ];
 
-        const documentRepository = new Services.DocumentRepository();
-        
-        const request: RecalculationInitialiser.Request = {
-            contentType: DocumentContentType.Product,
-            id: 'productId',
-        };
+    expect(actualResponse).to.deep.equalInAnyOrder(expectedResponse);
+  });
 
-        const sutRecalculationInitialiserFunction = new RecalculationInitialiser.Function(documentRepository);
+  it('starts execution for a change of product', async () => {
+    // Arrange
 
-        // Act
+    const documentRepository = new Services.DocumentRepository();
 
-        const actualResponse = await sutRecalculationInitialiserFunction.handleRequestAsync(request);
+    const request: RecalculationInitialiser.Request = {
+      contentType: DocumentContentType.Product,
+      id: 'productId',
+    };
 
-        // Assert
+    const sutRecalculationInitialiserFunction = new RecalculationInitialiser.Function(
+      documentRepository
+    );
 
-        const expectedResponse: RecalculationInitialiser.Response = [
-            { configurationId: 'configurationId', scenarioId: 'scenarioIdX', productId: 'productId' },
-            { configurationId: 'configurationId', scenarioId: 'scenarioIdY', productId: 'productId' },
-        ];
-        
-        expect(actualResponse).to.deep.equalInAnyOrder(expectedResponse);
-    });
+    // Act
+
+    const actualResponse = await sutRecalculationInitialiserFunction.handleRequestAsync(request);
+
+    // Assert
+
+    const expectedResponse: RecalculationInitialiser.Response = [
+      { configurationId: 'configurationId', scenarioId: 'scenarioIdX', productId: 'productId' },
+      { configurationId: 'configurationId', scenarioId: 'scenarioIdY', productId: 'productId' },
+    ];
+
+    expect(actualResponse).to.deep.equalInAnyOrder(expectedResponse);
+  });
 });
 
 function getDocumentIndex(contentType: DocumentContentType, id: string): DocumentIndex {
-    return {
-        id,
-        contentType,
-        s3BucketName: 's3BucketName',
-        s3Key: 's3Key',
-        description: 'description',
-    };
+  return {
+    id,
+    contentType,
+    s3BucketName: 's3BucketName',
+    s3Key: 's3Key',
+    description: 'description',
+  };
 }

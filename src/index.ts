@@ -25,19 +25,23 @@ const correlationIdParams = { sampleDebugLogRate: 0.01 };
 // AWS clients
 
 const log = {
-    debug: Log.debug,
-    info: Log.info,
-    warn: Log.warn,
-    error: Log.error
+  debug: Log.debug,
+  info: Log.info,
+  warn: Log.warn,
+  error: Log.error,
 };
 SNSClient.Log = log;
 StepFunctionsClient.Log = log;
 
 const s3Client = new S3Client();
 const documentS3Client = new S3Client(process.env.DOCUMENT_BUCKET);
-const documentIndexDynamoDbClient = new DynamoDBSingleTableClient(process.env.DOCUMENT_INDEX_TABLE_NAME);
+const documentIndexDynamoDbClient = new DynamoDBSingleTableClient(
+  process.env.DOCUMENT_INDEX_TABLE_NAME
+);
 const documentUpdateSNSClient = new SNSClient(process.env.DOCUMENT_UPDATE_TOPIC);
-const recalculationStepFunctionsClient = new StepFunctionsClient(process.env.RECALCULATION_STATE_MACHINE_ARN);
+const recalculationStepFunctionsClient = new StepFunctionsClient(
+  process.env.RECALCULATION_STATE_MACHINE_ARN
+);
 
 // Domain services
 
@@ -48,75 +52,73 @@ const productEngine = new ProductEngine();
 
 const affordabilityApiFunction = new AffordabilityApi.Function(documentRepository, productEngine);
 
-export const handleAffordabilityApiFunction = 
-    middy(async (event: any, context: Context): Promise<any> => {
-        return await affordabilityApiFunction.handleAsync(event, context);
-    })
-        .use(correlationIds(correlationIdParams))
-        .use(httpErrorHandler()); // handles common http errors and returns proper responses
-
+export const handleAffordabilityApiFunction = middy(
+  async (event: any, context: Context): Promise<any> => {
+    return await affordabilityApiFunction.handleAsync(event, context);
+  }
+)
+  .use(correlationIds(correlationIdParams))
+  .use(httpErrorHandler()); // handles common http errors and returns proper responses
 
 const documentApiUpdateFunction = new DocumentApi.UpdateFunction(documentRepository);
 
-export const handleDocumentApiUpdateFunction = 
-    middy(async (event: any, context: Context): Promise<any> => {
-        return await documentApiUpdateFunction.handleAsync(event, context);
-    })
-        .use(correlationIds(correlationIdParams))
-        .use(httpErrorHandler()); // handles common http errors and returns proper responses
-
+export const handleDocumentApiUpdateFunction = middy(
+  async (event: any, context: Context): Promise<any> => {
+    return await documentApiUpdateFunction.handleAsync(event, context);
+  }
+)
+  .use(correlationIds(correlationIdParams))
+  .use(httpErrorHandler()); // handles common http errors and returns proper responses
 
 const documentIndexerFunction = new DocumentIndexer.Function(documentRepository);
 
-export const handleDocumentIndexerFunction = 
-    middy(async (event: any, context: Context): Promise<any> => {
-        await documentIndexerFunction.handleAsync(event, context);
-    })
-        .use(correlationIds(correlationIdParams));
-            
+export const handleDocumentIndexerFunction = middy(
+  async (event: any, context: Context): Promise<any> => {
+    await documentIndexerFunction.handleAsync(event, context);
+  }
+).use(correlationIds(correlationIdParams));
 
-const documentIndexUpdatePublisherFunction = 
-    new DocumentIndexUpdatePublisher.Function(documentRepository, documentUpdateSNSClient);
+const documentIndexUpdatePublisherFunction = new DocumentIndexUpdatePublisher.Function(
+  documentRepository,
+  documentUpdateSNSClient
+);
 
-export const handleDocumentIndexUpdatePublisherFunction = 
-    middy(async (event: any, context: Context): Promise<any> => {
-        await documentIndexUpdatePublisherFunction.handleAsync(event, context);
-    })
-        .use(correlationIds(correlationIdParams));
+export const handleDocumentIndexUpdatePublisherFunction = middy(
+  async (event: any, context: Context): Promise<any> => {
+    await documentIndexUpdatePublisherFunction.handleAsync(event, context);
+  }
+).use(correlationIds(correlationIdParams));
 
+const recalculationTriggerFunction = new RecalculationTrigger.Function(
+  recalculationStepFunctionsClient
+);
 
-const recalculationTriggerFunction = new RecalculationTrigger.Function(recalculationStepFunctionsClient);
-    
-export const handleRecalculationTriggerFunction =
-    middy(async (event: any, context: Context): Promise<any> => {
-        await recalculationTriggerFunction.handleAsync(event, context);
-    })
-        .use(correlationIds(correlationIdParams));
-    
+export const handleRecalculationTriggerFunction = middy(
+  async (event: any, context: Context): Promise<any> => {
+    await recalculationTriggerFunction.handleAsync(event, context);
+  }
+).use(correlationIds(correlationIdParams));
 
 const recalculationInitialiserFunction = new RecalculationInitialiser.Function(documentRepository);
 
-export const handleRecalculationInitialiserFunction =
-    middy(async (event: any, context: Context): Promise<any> => {
-        return await recalculationInitialiserFunction.handleAsync(event, context);
-    })
-        .use(correlationIds(correlationIdParams));
-    
+export const handleRecalculationInitialiserFunction = middy(
+  async (event: any, context: Context): Promise<any> => {
+    return await recalculationInitialiserFunction.handleAsync(event, context);
+  }
+).use(correlationIds(correlationIdParams));
 
 const recalculatorFunction = new Recalculator.Function(documentRepository, productEngine);
 
-export const handleRecalculatorFunction =
-    middy(async (event: any, context: Context): Promise<any> => {
-        return await recalculatorFunction.handleAsync(event, context);
-    })
-        .use(correlationIds(correlationIdParams));
-    
+export const handleRecalculatorFunction = middy(
+  async (event: any, context: Context): Promise<any> => {
+    return await recalculatorFunction.handleAsync(event, context);
+  }
+).use(correlationIds(correlationIdParams));
 
 const documentContentResolverFunction = new DocumentContentResolver.Function(s3Client);
 
-export const handleDocumentContentResolverFunction =
-    middy(async (event: any, context: Context): Promise<any> => {
-        return await documentContentResolverFunction.handleAsync(event, context);
-    })
-        .use(correlationIds(correlationIdParams));
-        
+export const handleDocumentContentResolverFunction = middy(
+  async (event: any, context: Context): Promise<any> => {
+    return await documentContentResolverFunction.handleAsync(event, context);
+  }
+).use(correlationIds(correlationIdParams));

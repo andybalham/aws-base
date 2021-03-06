@@ -1,5 +1,3 @@
 import DocumentIndexerFunction from './DocumentIndexerFunction';
 
-export {
-    DocumentIndexerFunction as Function
-};
+export { DocumentIndexerFunction as Function };

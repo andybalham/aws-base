@@ -1,5 +1,3 @@
 import DocumentIndexUpdatePublisherFunction from './DocumentIndexUpdatePublisherFunction';
 
-export {
-    DocumentIndexUpdatePublisherFunction as Function
-};
+export { DocumentIndexUpdatePublisherFunction as Function };

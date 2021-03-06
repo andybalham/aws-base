@@ -3,29 +3,28 @@ import { DocumentRepository, ProductEngine } from '../../services';
 import { ApiGatewayFunction } from '../../common';
 
 export default class AffordabilityApiFunction extends ApiGatewayFunction<Request, Response> {
+  constructor(
+    private documentRepository: DocumentRepository,
+    private productEngine: ProductEngine
+  ) {
+    super();
+  }
 
-    constructor(
-        private documentRepository: DocumentRepository,
-        private productEngine: ProductEngine,
-    ) {
-        super();
-    }
+  async handleRequestAsync(request: Request): Promise<Response> {
+    const clientConfiguration = await this.documentRepository.getConfigurationAsync('client');
 
-    async handleRequestAsync(request: Request): Promise<Response> {
+    const productSummaries = this.productEngine.calculateProductSummaries(
+      clientConfiguration,
+      request.application,
+      request.products
+    );
 
-        const clientConfiguration = 
-            await this.documentRepository.getConfigurationAsync('client');
+    const response: Response = {
+      outputs: {
+        productSummaries,
+      },
+    };
 
-        const productSummaries = 
-            this.productEngine.calculateProductSummaries(
-                clientConfiguration, request.application, request.products);
-
-        const response: Response = {
-            outputs: {
-                productSummaries
-            }
-        };
-
-        return response;
-    }
+    return response;
+  }
 }

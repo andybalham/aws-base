@@ -2,23 +2,21 @@ import { Context } from 'aws-lambda/handler';
 import Log from '@dazn/lambda-powertools-logger';
 
 export default abstract class TaskFunction<TReq, TRes> {
-    
-    context: Context;
+  context: Context;
 
-    async handleAsync(event: any, context: Context): Promise<any> {
+  async handleAsync(event: any, context: Context): Promise<any> {
+    Log.debug('TaskFunction.handle', { event });
 
-        Log.debug('TaskFunction.handle', {event});
+    context.callbackWaitsForEmptyEventLoop = false;
 
-        context.callbackWaitsForEmptyEventLoop = false;
+    this.context = context;
 
-        this.context = context;
+    const response = await this.handleRequestAsync(event);
 
-        const response = await this.handleRequestAsync(event);
+    Log.debug('TaskFunction.handle', { response });
 
-        Log.debug('TaskFunction.handle', {response});
+    return response;
+  }
 
-        return response;
-    }
-
-    abstract handleRequestAsync(request: TReq): Promise<TRes>;
+  abstract handleRequestAsync(request: TReq): Promise<TRes>;
 }

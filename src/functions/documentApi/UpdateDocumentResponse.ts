@@ -1,3 +1,3 @@
 export default class UpdateDocumentResponse {
-    id: string;
+  id: string;
 }

@@ -1,5 +1,3 @@
 import DocumentContentResolverFunction from './documentContentResolverFunction';
 
-export {
-    DocumentContentResolverFunction as Function
-};
+export { DocumentContentResolverFunction as Function };

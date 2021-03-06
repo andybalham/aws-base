@@ -1,5 +1,5 @@
 export default class RecalculatorRequest {
-    configurationId: string
-    scenarioId: string
-    productId: string
+  configurationId: string;
+  scenarioId: string;
+  productId: string;
 }

@@ -6,49 +6,49 @@ import { expect } from 'chai';
 import { DocumentHash } from '../../src/domain/document';
 
 describe('Test DocumentIndexerFunction', () => {
-    
-    let documentRepositoryMock: MockManager<Services.DocumentRepository>;
+  let documentRepositoryMock: MockManager<Services.DocumentRepository>;
 
-    beforeEach('mock out dependencies', function () {
-        documentRepositoryMock = ImportMock.mockClass<Services.DocumentRepository>(Services, 'DocumentRepository');
-    });
-    
-    afterEach('restore dependencies', function () {
-        ImportMock.restore();
-    });
+  beforeEach('mock out dependencies', function () {
+    documentRepositoryMock = ImportMock.mockClass<Services.DocumentRepository>(
+      Services,
+      'DocumentRepository'
+    );
+  });
 
-    it('handles request', async () => {
+  afterEach('restore dependencies', function () {
+    ImportMock.restore();
+  });
 
-        // Arrange
+  it('handles request', async () => {
+    // Arrange
 
-        const sutDocumentIndexerFunction = 
-            new DocumentIndexer.Function(
-                new Services.DocumentRepository(),
-            );
+    const sutDocumentIndexerFunction = new DocumentIndexer.Function(
+      new Services.DocumentRepository()
+    );
 
-        const putHashAsyncStub = documentRepositoryMock.mock('putHashAsync');
+    const putHashAsyncStub = documentRepositoryMock.mock('putHashAsync');
 
-        // Act
+    // Act
 
-        const s3Event = {
-            Records: [
-                {
-                    s3: { object: { key: 'objectKey', eTag: 'eTag' }, bucket: { name: 'bucketName' }}
-                }
-            ]
-        };
+    const s3Event = {
+      Records: [
+        {
+          s3: { object: { key: 'objectKey', eTag: 'eTag' }, bucket: { name: 'bucketName' } },
+        },
+      ],
+    };
 
-        await sutDocumentIndexerFunction.handleMessageAsync(s3Event as unknown as S3Event);
+    await sutDocumentIndexerFunction.handleMessageAsync((s3Event as unknown) as S3Event);
 
-        // Assert
+    // Assert
 
-        const expectedHash: DocumentHash = {
-            s3BucketName: s3Event.Records[0].s3.bucket.name,
-            s3Key: s3Event.Records[0].s3.object.key,
-            hash: s3Event.Records[0].s3.object.eTag,
-        };
+    const expectedHash: DocumentHash = {
+      s3BucketName: s3Event.Records[0].s3.bucket.name,
+      s3Key: s3Event.Records[0].s3.object.key,
+      hash: s3Event.Records[0].s3.object.eTag,
+    };
 
-        expect(putHashAsyncStub.called).is.true;
-        expect(putHashAsyncStub.lastCall.args[0]).to.deep.equal(expectedHash);
-    });
+    expect(putHashAsyncStub.called).is.true;
+    expect(putHashAsyncStub.lastCall.args[0]).to.deep.equal(expectedHash);
+  });
 });

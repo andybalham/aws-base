@@ -1,5 +1,3 @@
 import Configuration from './Configuration';
 
-export {
-    Configuration
-};
+export { Configuration };

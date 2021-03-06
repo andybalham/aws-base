@@ -4,71 +4,61 @@ import { DynamoDBSingleTableItem } from '.';
 
 // TODO 28Feb21: Should we move this into the clients package?
 export default class DynamoDBSingleTableClient {
+  private dynamoDBClient: DynamoDBClient;
 
-    private dynamoDBClient: DynamoDBClient;
+  constructor(public readonly tableName?: string, documentClientOverride?: DocumentClient) {
+    this.dynamoDBClient = new DynamoDBClient(tableName, 'PK', 'SK', documentClientOverride);
+  }
 
-    constructor(
-        public readonly tableName?: string, 
-        documentClientOverride?: DocumentClient
-    ) {
-        this.dynamoDBClient = new DynamoDBClient(tableName, 'PK', 'SK', documentClientOverride);
-    }
+  async getAsync<T extends object>(partitionKey: string, sortKey?: string): Promise<T | undefined> {
+    const item = await this.dynamoDBClient.getAsync<DynamoDBSingleTableItem>({
+      PK: partitionKey,
+      SK: sortKey,
+    });
 
-    async getAsync<T extends object>(partitionKey: string, sortKey?: string): Promise<T | undefined> {
+    return item === undefined ? undefined : DynamoDBSingleTableItem.getEntity<T>(item);
+  }
 
-        const item = 
-            await this.dynamoDBClient
-                .getAsync<DynamoDBSingleTableItem>({
-                    PK: partitionKey,
-                    SK: sortKey
-                });
+  async putAsync<T extends object>(
+    entity: T,
+    itemType: string,
+    partitionKeyName: keyof T,
+    sortKeyName: keyof T
+  ): Promise<void> {
+    const singleTableItem = DynamoDBSingleTableItem.getItem(
+      entity,
+      itemType,
+      partitionKeyName,
+      sortKeyName
+    );
+    await this.dynamoDBClient.putAsync(singleTableItem);
+  }
 
-        return item === undefined
-            ? undefined
-            : DynamoDBSingleTableItem.getEntity<T>(item);
-    }
+  async queryByPartitionKeyAsync<T extends object>(keyValue: string): Promise<T[]> {
+    const singleTableItems = await this.dynamoDBClient.queryByPartitionKeyAsync<DynamoDBSingleTableItem>(
+      keyValue
+    );
+    const entities = singleTableItems.map((i) => DynamoDBSingleTableItem.getEntity<T>(i));
 
-    async putAsync<T extends object>(
-        entity: T,
-        itemType: string,
-        partitionKeyName: keyof T,
-        sortKeyName: keyof T,
-    ): Promise<void> {
+    return entities;
+  }
 
-        const singleTableItem = 
-            DynamoDBSingleTableItem.getItem(entity, itemType, partitionKeyName, sortKeyName);
+  async queryByIndexAsync<T extends object>(
+    indexName: string,
+    itemType: string,
+    partitionKey: { name: string; value: string },
+    sortKey?: { name: string; value: string }
+  ): Promise<T[]> {
+    const singleTableItems = await this.dynamoDBClient.queryByIndexAsync<DynamoDBSingleTableItem>(
+      indexName,
+      partitionKey,
+      sortKey
+    );
 
-        await this.dynamoDBClient.putAsync(singleTableItem);
-    }
+    const entities = singleTableItems
+      .filter((i) => i.ITEM_TYPE === itemType) // TODO 24Jan21: We should apply a filter expression
+      .map((i) => DynamoDBSingleTableItem.getEntity<T>(i));
 
-    async queryByPartitionKeyAsync<T extends object>(keyValue: string): Promise<T[]> {
-
-        const singleTableItems = 
-            await this.dynamoDBClient.queryByPartitionKeyAsync<DynamoDBSingleTableItem>(keyValue);
-
-        const entities = singleTableItems.map(i => DynamoDBSingleTableItem.getEntity<T>(i));
-
-        return entities;
-    }
-
-    async queryByIndexAsync<T extends object>(
-        indexName: string, 
-        itemType: string, 
-        partitionKey: {name: string; value: string},
-        sortKey?: {name: string; value: string},
-    ): Promise<T[]> {
-
-        const singleTableItems = 
-            await this.dynamoDBClient
-                .queryByIndexAsync<DynamoDBSingleTableItem>(
-                    indexName, partitionKey, sortKey
-                );
-
-        const entities = 
-            singleTableItems
-                .filter(i => i.ITEM_TYPE === itemType) // TODO 24Jan21: We should apply a filter expression
-                .map(i => DynamoDBSingleTableItem.getEntity<T>(i));
-
-        return entities;
-    }
+    return entities;
+  }
 }

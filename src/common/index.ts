@@ -9,13 +9,13 @@ import AppSyncResolverFunction from './AppSyncResolverFunction';
 import AppSyncBatchResolverFunction from './AppSyncBatchResolverFunction';
 
 export {
-    TaskFunction,
-    ApiGatewayFunction,
-    AppSyncResolverFunction,
-    AppSyncBatchResolverFunction,
-    SNSFunction,
-    SQSFunction,
-    DynamoDBStreamFunction,
-    DynamoDBSingleTableItem,
-    DynamoDBSingleTableClient,
+  TaskFunction,
+  ApiGatewayFunction,
+  AppSyncResolverFunction,
+  AppSyncBatchResolverFunction,
+  SNSFunction,
+  SQSFunction,
+  DynamoDBStreamFunction,
+  DynamoDBSingleTableItem,
+  DynamoDBSingleTableClient,
 };

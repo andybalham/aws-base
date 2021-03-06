@@ -6,73 +6,76 @@ import { DocumentContentType } from '../../src/domain/document';
 import * as Recalculator from '../../src/functions/recalculator';
 
 describe('Test RecalculatorFunction', () => {
+  let documentRepositoryMock: MockManager<Services.DocumentRepository>;
+  let productEngineMock: MockManager<Services.ProductEngine>;
 
-    let documentRepositoryMock: MockManager<Services.DocumentRepository>;
-    let productEngineMock: MockManager<Services.ProductEngine>;
+  beforeEach('mock out dependencies', function () {
+    documentRepositoryMock = ImportMock.mockClass<Services.DocumentRepository>(
+      Services,
+      'DocumentRepository'
+    );
+    productEngineMock = ImportMock.mockClass<Services.ProductEngine>(Services, 'ProductEngine');
+  });
 
-    beforeEach('mock out dependencies', function () {
-        documentRepositoryMock = ImportMock.mockClass<Services.DocumentRepository>(Services, 'DocumentRepository');
-        productEngineMock = ImportMock.mockClass<Services.ProductEngine>(Services, 'ProductEngine');
-    });
-    
-    afterEach('restore dependencies', function () {
-        ImportMock.restore();
-    });
+  afterEach('restore dependencies', function () {
+    ImportMock.restore();
+  });
 
-    it('starts execution for a change of configuration', async () => {
-            
-        // Arrange
-        
-        documentRepositoryMock.mock('getConfigurationAsync', {});
-        documentRepositoryMock.mock('getProductAsync', {});
-        documentRepositoryMock.mock('getApplicationAsync', {});
+  it('starts execution for a change of configuration', async () => {
+    // Arrange
 
-        documentRepositoryMock.mock('getIndexAsync', { description: 'test'});
+    documentRepositoryMock.mock('getConfigurationAsync', {});
+    documentRepositoryMock.mock('getProductAsync', {});
+    documentRepositoryMock.mock('getApplicationAsync', {});
 
-        const documentRepositoryPutContentStub = documentRepositoryMock.mock('putContentAsync');
+    documentRepositoryMock.mock('getIndexAsync', { description: 'test' });
 
-        const expectedProductSummary: ProductSummary = 
-            {
-                maximumLoanAmount: 666,
-                product: {
-                    incomeMultiplier: 0,
-                    interestRate: 0,
-                    productDescription: '',
-                    productIdentifier: '',
-                }
-            };
+    const documentRepositoryPutContentStub = documentRepositoryMock.mock('putContentAsync');
 
-        const productEngineCalculateProductSummariesStub = 
-            productEngineMock.mock('calculateProductSummaries', [expectedProductSummary]);
+    const expectedProductSummary: ProductSummary = {
+      maximumLoanAmount: 666,
+      product: {
+        incomeMultiplier: 0,
+        interestRate: 0,
+        productDescription: '',
+        productIdentifier: '',
+      },
+    };
 
-        const request: Recalculator.Request = {
-            configurationId: 'configurationId',
-            scenarioId: 'scenarioId',
-            productId: 'productId',
-        };
+    const productEngineCalculateProductSummariesStub = productEngineMock.mock(
+      'calculateProductSummaries',
+      [expectedProductSummary]
+    );
 
-        const sutRecalculatorFunction = 
-            new Recalculator.Function(
-                new Services.DocumentRepository(),
-                new Services.ProductEngine(),
-            );
+    const request: Recalculator.Request = {
+      configurationId: 'configurationId',
+      scenarioId: 'scenarioId',
+      productId: 'productId',
+    };
 
-        // Act
+    const sutRecalculatorFunction = new Recalculator.Function(
+      new Services.DocumentRepository(),
+      new Services.ProductEngine()
+    );
 
-        await sutRecalculatorFunction.handleRequestAsync(request);
+    // Act
 
-        // Assert
+    await sutRecalculatorFunction.handleRequestAsync(request);
 
-        expect(productEngineCalculateProductSummariesStub.called).to.be.true;
+    // Assert
 
-        expect(documentRepositoryPutContentStub.called).to.be.true;
+    expect(productEngineCalculateProductSummariesStub.called).to.be.true;
 
-        const actualResultIndex = documentRepositoryPutContentStub.lastCall.args[0];
-        const actualResult = documentRepositoryPutContentStub.lastCall.args[1];
+    expect(documentRepositoryPutContentStub.called).to.be.true;
 
-        expect(actualResultIndex.contentType).to.equal(DocumentContentType.Result);
-        expect(actualResultIndex.id).to.equal(`${request.scenarioId}-${request.productId}-${request.configurationId}`);
+    const actualResultIndex = documentRepositoryPutContentStub.lastCall.args[0];
+    const actualResult = documentRepositoryPutContentStub.lastCall.args[1];
 
-        expect(actualResult).to.deep.equal(expectedProductSummary);
-    });
+    expect(actualResultIndex.contentType).to.equal(DocumentContentType.Result);
+    expect(actualResultIndex.id).to.equal(
+      `${request.scenarioId}-${request.productId}-${request.configurationId}`
+    );
+
+    expect(actualResult).to.deep.equal(expectedProductSummary);
+  });
 });

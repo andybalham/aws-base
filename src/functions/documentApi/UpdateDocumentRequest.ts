@@ -4,8 +4,8 @@ import { Application } from '../../domain/input';
 import { Product } from '../../domain/product';
 
 export default class UpdateDocumentRequest {
-    id?: string
-    contentType: DocumentContentType
-    description: string
-    content: Application | Configuration | Product
+  id?: string;
+  contentType: DocumentContentType;
+  description: string;
+  content: Application | Configuration | Product;
 }

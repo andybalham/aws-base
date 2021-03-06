@@ -1,3 +1,1 @@
-describe('Investigations', () => {
-
-});
+describe('Investigations', () => {});

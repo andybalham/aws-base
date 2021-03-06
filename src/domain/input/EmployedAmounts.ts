@@ -1,4 +1,4 @@
 export class EmployedAmounts {
-    basicSalary: number;
-    overtime?: number;
+  basicSalary: number;
+  overtime?: number;
 }
