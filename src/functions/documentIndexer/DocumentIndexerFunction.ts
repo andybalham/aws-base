@@ -1,9 +1,8 @@
 import { S3Event, S3EventRecord } from 'aws-lambda/trigger/s3';
-import SNSFunction from '../../common/SNSFunction';
-import S3Function from '../../common/S3Function';
 import Log from '@dazn/lambda-powertools-logger';
 import { DocumentRepository } from '../../services';
 import { DocumentHash } from '../../domain/document';
+import { SNSFunction, S3Function } from '@andybalham/agb-aws-functions';
 
 export default class DocumentIndexerFunction extends SNSFunction<S3Event> {
   private readonly s3Handler: S3Handler;

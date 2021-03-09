@@ -1,10 +1,11 @@
 import { SNSClient } from '@andybalham/agb-aws-clients';
+import { DynamoDBStreamFunction, DynamoDBEventTypes } from '@andybalham/agb-aws-functions';
 import { DynamoDBSingleTableItem } from '../../common';
-import DynamoDBStreamFunction, { DynamoDBEventTypes } from '../../common/DynamoDBStreamFunction';
 import { DocumentHash } from '../../domain/document';
 import { DocumentRepository } from '../../services';
 
 export default class DocumentIndexUpdatePublisherFunction extends DynamoDBStreamFunction<DynamoDBSingleTableItem> {
+  //
   constructor(
     private documentRepository: DocumentRepository,
     private documentUpdateTopic: SNSClient
@@ -19,6 +20,7 @@ export default class DocumentIndexUpdatePublisherFunction extends DynamoDBStream
   ): Promise<void> {
     //
     if (newImage?.ITEM_TYPE === 'hash') {
+      //
       const oldHash = oldImage && DynamoDBSingleTableItem.getEntity<DocumentHash>(oldImage);
       const newHash = newImage && DynamoDBSingleTableItem.getEntity<DocumentHash>(newImage);
 
@@ -26,6 +28,7 @@ export default class DocumentIndexUpdatePublisherFunction extends DynamoDBStream
         eventType === 'INSERT' || (eventType === 'MODIFY' && newHash?.hash !== oldHash?.hash);
 
       if (isHashUpdate && newImage) {
+        //
         const index = await this.documentRepository.getIndexByS3Async(
           newHash.s3BucketName,
           newHash.s3Key

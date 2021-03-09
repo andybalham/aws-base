@@ -1,8 +1,9 @@
+import { ApiGatewayFunction } from '@andybalham/agb-aws-functions';
 import { Request, Response } from '.';
 import { DocumentRepository, ProductEngine } from '../../services';
-import { ApiGatewayFunction } from '../../common';
 
 export default class AffordabilityApiFunction extends ApiGatewayFunction<Request, Response> {
+  //
   constructor(
     private documentRepository: DocumentRepository,
     private productEngine: ProductEngine

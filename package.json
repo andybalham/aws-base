@@ -5,6 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "@andybalham/agb-aws-clients": "^1.0.5",
+    "@andybalham/agb-aws-functions": "^1.0.3",
     "@dazn/lambda-powertools-correlation-ids": "^1.24.1",
     "@dazn/lambda-powertools-logger": "^1.24.1",
     "@dazn/lambda-powertools-middleware-correlation-ids": "^1.27.0",

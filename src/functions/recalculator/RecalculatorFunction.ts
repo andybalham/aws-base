@@ -1,9 +1,10 @@
-import { TaskFunction } from '../../common';
 import { Request } from '.';
 import { DocumentRepository, ProductEngine } from '../../services';
 import { DocumentContentType } from '../../domain/document';
+import { TaskFunction } from '@andybalham/agb-aws-functions';
 
 export default class RecalculatorFunction extends TaskFunction<Request, void> {
+  //
   constructor(
     private documentRepository: DocumentRepository,
     private productEngine: ProductEngine

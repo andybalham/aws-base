@@ -1,6 +1,6 @@
 import { DocumentRepository } from '../../services';
 import { UpdateRequest, UpdateResponse } from '.';
-import { ApiGatewayFunction } from '../../common';
+import { ApiGatewayFunction } from '@andybalham/agb-aws-functions';
 
 export default class UpdateDocumentApiFunction extends ApiGatewayFunction<
   UpdateRequest,

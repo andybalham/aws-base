@@ -1,10 +1,10 @@
 import { APIGatewayProxyEvent } from 'aws-lambda/trigger/api-gateway-proxy';
-import { ApiGatewayFunction } from '../../src/common';
 import fs from 'fs';
 import path from 'path';
 import { expect } from 'chai';
 import { ImportMock } from 'ts-mock-imports';
 import CorrelationIds from '@dazn/lambda-powertools-correlation-ids';
+import { ApiGatewayFunction } from '@andybalham/agb-aws-functions';
 
 describe('Test ApiGatewayFunction', () => {
   beforeEach('mock out dependencies', function () {});
@@ -48,6 +48,8 @@ describe('Test ApiGatewayFunction', () => {
       'x-correlation-id': 'correlationId',
     });
 
+    ApiGatewayFunction.getCorrelationIds = CorrelationIds.get;
+
     const sutTestApiGatewayFunction = new TestApiGatewayFunction();
 
     // Act
@@ -74,6 +76,7 @@ describe('Test ApiGatewayFunction', () => {
     pathParameters: { [name: string]: string } | null = null,
     queryStringParameters: { [name: string]: string } | null = null
   ): APIGatewayProxyEvent {
+    //
     const event = getAPIGatewayProxyEvent(pathParameters, queryStringParameters);
 
     event.httpMethod = 'POST';

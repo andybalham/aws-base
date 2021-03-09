@@ -2,7 +2,8 @@ import { Context } from 'aws-lambda/handler';
 
 import middy from '@middy/core';
 import httpErrorHandler from '@middy/http-error-handler';
-import correlationIds from '@dazn/lambda-powertools-middleware-correlation-ids';
+import CorrelationIds from '@dazn/lambda-powertools-correlation-ids';
+import middyCorrelationIds from '@dazn/lambda-powertools-middleware-correlation-ids';
 import Log from '@dazn/lambda-powertools-logger';
 import { StepFunctionsClient, S3Client, SNSClient } from '@andybalham/agb-aws-clients';
 
@@ -17,21 +18,30 @@ import * as RecalculationTrigger from './functions/recalculationTrigger';
 import * as RecalculationInitialiser from './functions/recalculationInitialiser';
 import * as Recalculator from './functions/recalculator';
 import * as DocumentContentResolver from './functions/documentContentResolver';
+import {
+  ApiGatewayFunction,
+  DynamoDBStreamFunction,
+  S3Function,
+  SNSFunction,
+  SQSFunction,
+} from '@andybalham/agb-aws-functions';
 
 // TODO 24Nov20: How would we initialise components that require environment variables set by middleware?
 
 const correlationIdParams = { sampleDebugLogRate: 0.01 };
 
-// AWS clients
+// Configure static aspects of base classes
 
-const log = {
-  debug: Log.debug,
-  info: Log.info,
-  warn: Log.warn,
-  error: Log.error,
-};
-SNSClient.Log = log;
-StepFunctionsClient.Log = log;
+SNSClient.Log = Log;
+StepFunctionsClient.Log = Log;
+ApiGatewayFunction.Log = Log;
+ApiGatewayFunction.getCorrelationIds = CorrelationIds.get;
+S3Function.Log = Log;
+SNSFunction.Log = Log;
+SQSFunction.Log = Log;
+DynamoDBStreamFunction.Log = Log;
+
+// AWS clients
 
 const s3Client = new S3Client();
 const documentS3Client = new S3Client(process.env.DOCUMENT_BUCKET);
@@ -57,8 +67,10 @@ export const handleAffordabilityApiFunction = middy(
     return await affordabilityApiFunction.handleAsync(event, context);
   }
 )
-  .use(correlationIds(correlationIdParams))
+  .use(middyCorrelationIds(correlationIdParams))
   .use(httpErrorHandler()); // handles common http errors and returns proper responses
+
+// ---
 
 const documentApiUpdateFunction = new DocumentApi.UpdateFunction(documentRepository);
 
@@ -67,8 +79,10 @@ export const handleDocumentApiUpdateFunction = middy(
     return await documentApiUpdateFunction.handleAsync(event, context);
   }
 )
-  .use(correlationIds(correlationIdParams))
+  .use(middyCorrelationIds(correlationIdParams))
   .use(httpErrorHandler()); // handles common http errors and returns proper responses
+
+// ---
 
 const documentIndexerFunction = new DocumentIndexer.Function(documentRepository);
 
@@ -76,7 +90,9 @@ export const handleDocumentIndexerFunction = middy(
   async (event: any, context: Context): Promise<any> => {
     await documentIndexerFunction.handleAsync(event, context);
   }
-).use(correlationIds(correlationIdParams));
+).use(middyCorrelationIds(correlationIdParams));
+
+// ---
 
 const documentIndexUpdatePublisherFunction = new DocumentIndexUpdatePublisher.Function(
   documentRepository,
@@ -87,7 +103,9 @@ export const handleDocumentIndexUpdatePublisherFunction = middy(
   async (event: any, context: Context): Promise<any> => {
     await documentIndexUpdatePublisherFunction.handleAsync(event, context);
   }
-).use(correlationIds(correlationIdParams));
+).use(middyCorrelationIds(correlationIdParams));
+
+// ---
 
 const recalculationTriggerFunction = new RecalculationTrigger.Function(
   recalculationStepFunctionsClient
@@ -97,7 +115,9 @@ export const handleRecalculationTriggerFunction = middy(
   async (event: any, context: Context): Promise<any> => {
     await recalculationTriggerFunction.handleAsync(event, context);
   }
-).use(correlationIds(correlationIdParams));
+).use(middyCorrelationIds(correlationIdParams));
+
+// ---
 
 const recalculationInitialiserFunction = new RecalculationInitialiser.Function(documentRepository);
 
@@ -105,7 +125,9 @@ export const handleRecalculationInitialiserFunction = middy(
   async (event: any, context: Context): Promise<any> => {
     return await recalculationInitialiserFunction.handleAsync(event, context);
   }
-).use(correlationIds(correlationIdParams));
+).use(middyCorrelationIds(correlationIdParams));
+
+// ---
 
 const recalculatorFunction = new Recalculator.Function(documentRepository, productEngine);
 
@@ -113,7 +135,9 @@ export const handleRecalculatorFunction = middy(
   async (event: any, context: Context): Promise<any> => {
     return await recalculatorFunction.handleAsync(event, context);
   }
-).use(correlationIds(correlationIdParams));
+).use(middyCorrelationIds(correlationIdParams));
+
+// ---
 
 const documentContentResolverFunction = new DocumentContentResolver.Function(s3Client);
 
@@ -121,4 +145,4 @@ export const handleDocumentContentResolverFunction = middy(
   async (event: any, context: Context): Promise<any> => {
     return await documentContentResolverFunction.handleAsync(event, context);
   }
-).use(correlationIds(correlationIdParams));
+).use(middyCorrelationIds(correlationIdParams));
