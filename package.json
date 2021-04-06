@@ -4,8 +4,8 @@
   "description": "Base folder structure for Lambda projects",
   "main": "index.js",
   "dependencies": {
-    "@andybalham/agb-aws-clients": "^1.0.5",
-    "@andybalham/agb-aws-functions": "^1.0.3",
+    "@andybalham/agb-aws-clients": "^1.0.6",
+    "@andybalham/agb-aws-functions": "^1.0.7",
     "@dazn/lambda-powertools-correlation-ids": "^1.24.1",
     "@dazn/lambda-powertools-logger": "^1.24.1",
     "@dazn/lambda-powertools-middleware-correlation-ids": "^1.27.0",

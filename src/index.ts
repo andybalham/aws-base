@@ -4,7 +4,7 @@ import middy from '@middy/core';
 import httpErrorHandler from '@middy/http-error-handler';
 import CorrelationIds from '@dazn/lambda-powertools-correlation-ids';
 import middyCorrelationIds from '@dazn/lambda-powertools-middleware-correlation-ids';
-import Log from '@dazn/lambda-powertools-logger';
+import log from '@dazn/lambda-powertools-logger';
 import { StepFunctionsClient, S3Client, SNSClient } from '@andybalham/agb-aws-clients';
 
 import { DocumentRepository, ProductEngine } from './services';
@@ -18,13 +18,7 @@ import * as RecalculationTrigger from './functions/recalculationTrigger';
 import * as RecalculationInitialiser from './functions/recalculationInitialiser';
 import * as Recalculator from './functions/recalculator';
 import * as DocumentContentResolver from './functions/documentContentResolver';
-import {
-  ApiGatewayFunction,
-  DynamoDBStreamFunction,
-  S3Function,
-  SNSFunction,
-  SQSFunction,
-} from '@andybalham/agb-aws-functions';
+import { AppSyncBatchResolverFunction, TaskFunction } from '@andybalham/agb-aws-functions';
 
 // TODO 24Nov20: How would we initialise components that require environment variables set by middleware?
 
@@ -32,14 +26,11 @@ const correlationIdParams = { sampleDebugLogRate: 0.01 };
 
 // Configure static aspects of base classes
 
-SNSClient.Log = Log;
-StepFunctionsClient.Log = Log;
-ApiGatewayFunction.Log = Log;
-ApiGatewayFunction.getCorrelationIds = CorrelationIds.get;
-S3Function.Log = Log;
-SNSFunction.Log = Log;
-SQSFunction.Log = Log;
-DynamoDBStreamFunction.Log = Log;
+// TODO 06Apr21: Replace the following static properties
+SNSClient.Log = log;
+StepFunctionsClient.Log = log;
+TaskFunction.Log = log;
+AppSyncBatchResolverFunction.Log = log;
 
 // AWS clients
 
@@ -60,7 +51,10 @@ const productEngine = new ProductEngine();
 
 // Functions
 
-const affordabilityApiFunction = new AffordabilityApi.Function(documentRepository, productEngine);
+const affordabilityApiFunction = new AffordabilityApi.Function(documentRepository, productEngine, {
+  log,
+  getCorrelationIds: CorrelationIds.get,
+});
 
 export const handleAffordabilityApiFunction = middy(
   async (event: any, context: Context): Promise<any> => {
@@ -72,7 +66,10 @@ export const handleAffordabilityApiFunction = middy(
 
 // ---
 
-const documentApiUpdateFunction = new DocumentApi.UpdateFunction(documentRepository);
+const documentApiUpdateFunction = new DocumentApi.UpdateFunction(documentRepository, {
+  log,
+  getCorrelationIds: CorrelationIds.get,
+});
 
 export const handleDocumentApiUpdateFunction = middy(
   async (event: any, context: Context): Promise<any> => {
@@ -84,7 +81,7 @@ export const handleDocumentApiUpdateFunction = middy(
 
 // ---
 
-const documentIndexerFunction = new DocumentIndexer.Function(documentRepository);
+const documentIndexerFunction = new DocumentIndexer.Function(documentRepository, { log });
 
 export const handleDocumentIndexerFunction = middy(
   async (event: any, context: Context): Promise<any> => {
@@ -96,7 +93,8 @@ export const handleDocumentIndexerFunction = middy(
 
 const documentIndexUpdatePublisherFunction = new DocumentIndexUpdatePublisher.Function(
   documentRepository,
-  documentUpdateSNSClient
+  documentUpdateSNSClient,
+  { log }
 );
 
 export const handleDocumentIndexUpdatePublisherFunction = middy(
@@ -108,7 +106,8 @@ export const handleDocumentIndexUpdatePublisherFunction = middy(
 // ---
 
 const recalculationTriggerFunction = new RecalculationTrigger.Function(
-  recalculationStepFunctionsClient
+  recalculationStepFunctionsClient,
+  { log }
 );
 
 export const handleRecalculationTriggerFunction = middy(

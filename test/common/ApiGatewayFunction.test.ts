@@ -48,9 +48,9 @@ describe('Test ApiGatewayFunction', () => {
       'x-correlation-id': 'correlationId',
     });
 
-    ApiGatewayFunction.getCorrelationIds = CorrelationIds.get;
-
-    const sutTestApiGatewayFunction = new TestApiGatewayFunction();
+    const sutTestApiGatewayFunction = new TestApiGatewayFunction({
+      getCorrelationIds: CorrelationIds.get,
+    });
 
     // Act
 

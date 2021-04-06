@@ -3,12 +3,13 @@ import Log from '@dazn/lambda-powertools-logger';
 import { DocumentRepository } from '../../services';
 import { DocumentHash } from '../../domain/document';
 import { SNSFunction, S3Function } from '@andybalham/agb-aws-functions';
+import { SNSFunctionProps } from '@andybalham/agb-aws-functions/SNSFunction';
 
 export default class DocumentIndexerFunction extends SNSFunction<S3Event> {
   private readonly s3Handler: S3Handler;
 
-  constructor(documentRepository: DocumentRepository) {
-    super();
+  constructor(documentRepository: DocumentRepository, props?: SNSFunctionProps) {
+    super(props);
     this.s3Handler = new S3Handler(documentRepository);
   }
 

@@ -1,4 +1,5 @@
 import { ApiGatewayFunction } from '@andybalham/agb-aws-functions';
+import { ApiGatewayFunctionProps } from '@andybalham/agb-aws-functions/ApiGatewayFunction';
 import { Request, Response } from '.';
 import { DocumentRepository, ProductEngine } from '../../services';
 
@@ -6,9 +7,10 @@ export default class AffordabilityApiFunction extends ApiGatewayFunction<Request
   //
   constructor(
     private documentRepository: DocumentRepository,
-    private productEngine: ProductEngine
+    private productEngine: ProductEngine,
+    props?: ApiGatewayFunctionProps
   ) {
-    super();
+    super(props);
   }
 
   async handleRequestAsync(request: Request): Promise<Response> {

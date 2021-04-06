@@ -1,5 +1,6 @@
 import { SNSClient } from '@andybalham/agb-aws-clients';
 import { DynamoDBStreamFunction, DynamoDBEventTypes } from '@andybalham/agb-aws-functions';
+import { DynamoDBStreamFunctionProps } from '@andybalham/agb-aws-functions/DynamoDBStreamFunction';
 import { DynamoDBSingleTableItem } from '../../common';
 import { DocumentHash } from '../../domain/document';
 import { DocumentRepository } from '../../services';
@@ -8,9 +9,10 @@ export default class DocumentIndexUpdatePublisherFunction extends DynamoDBStream
   //
   constructor(
     private documentRepository: DocumentRepository,
-    private documentUpdateTopic: SNSClient
+    private documentUpdateTopic: SNSClient,
+    props?: DynamoDBStreamFunctionProps
   ) {
-    super();
+    super(props);
   }
 
   async processEventRecordAsync(
