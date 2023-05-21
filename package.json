@@ -24,7 +24,7 @@
     "@types/sinon": "^9.0.9",
     "@typescript-eslint/eslint-plugin": "^2.27.0",
     "@typescript-eslint/parser": "^2.27.0",
-    "aws-sdk": "^2.814.0",
+    "aws-sdk": "^2.1381.0",
     "chai": "^4.2.0",
     "deep-equal-in-any-order": "^1.0.28",
     "eslint": "^7.20.0",
